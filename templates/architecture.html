@@ -1309,6 +1309,8 @@ body {
 .crs-quiz-q { padding:10px 14px; border-radius:6px; background:rgba(168,85,247,0.06); border:1px solid rgba(168,85,247,0.18); margin-bottom:8px; }
 .crs-quiz-q .q-text { font-family:'Share Tech Mono',monospace; font-size:11px; color:rgba(255,255,255,0.85); margin-bottom:6px; }
 .crs-quiz-q .q-ans  { font-family:'Share Tech Mono',monospace; font-size:10.5px; color:#2ECC71; }
+.crs-topic-link { cursor:pointer; color:#C8A8F8; transition:color 0.15s; }
+.crs-topic-link:hover { color:#E0C8FF; text-decoration:underline; }
 
 /* ══════════════════════════════════════════════════════════════════
    AUTHENTICATION SYSTEM
@@ -4964,6 +4966,298 @@ DROP PLUGGABLE DATABASE pdb1 INCLUDING DATAFILES;</div>
       </div>
     </div>
 
+    <!-- SQL*Plus Settings & Scripting -->
+    <div class="ref-section-title" style="border-left-color:#00D4FF;margin-top:8px">
+      <span style="color:#00D4FF">&#9670;</span> SQL*PLUS — SETTINGS, SCRIPTING &amp; FORMATTING
+    </div>
+    <div class="ref-grid">
+      <div class="ref-card" style="border-color:rgba(0,212,255,0.25);background:rgba(0,212,255,0.03)">
+        <div class="ref-card-title" style="color:#00D4FF">ESSENTIAL SQL*PLUS SETTINGS</div>
+        <div class="ref-code">SET LINESIZE 200          <span class="c-yel">-- wider output (default 80 is too narrow)</span>
+SET PAGESIZE 50           <span class="c-yel">-- rows per page before header repeats</span>
+SET PAGESIZE 0            <span class="c-yel">-- suppress all headers/page breaks</span>
+SET WRAP OFF              <span class="c-yel">-- truncate long lines instead of wrapping</span>
+SET TRIMSPOOL ON          <span class="c-yel">-- remove trailing spaces in spool files</span>
+SET FEEDBACK OFF          <span class="c-yel">-- suppress "X rows selected"</span>
+SET HEADING OFF           <span class="c-yel">-- suppress column headers</span>
+SET ECHO ON               <span class="c-yel">-- show commands as they execute (scripts)</span>
+SET TIMING ON             <span class="c-yel">-- show elapsed time for each statement</span>
+SET SERVEROUTPUT ON       <span class="c-yel">-- required for DBMS_OUTPUT.PUT_LINE</span>
+SET SERVEROUTPUT ON SIZE UNLIMITED
+SET DEFINE OFF            <span class="c-yel">-- disable &amp; substitution (useful for data with &amp;)</span>
+SET NUMFORMAT 999,999,999 <span class="c-yel">-- format number columns</span>
+SET NULL '(null)'         <span class="c-yel">-- display NULL as text instead of blank</span>
+COLUMN col_name FORMAT A30 HEADING "My Header"  <span class="c-yel">-- format a column</span>
+COLUMN salary   FORMAT 999,999.00</div>
+      </div>
+      <div class="ref-card" style="border-color:rgba(0,212,255,0.25);background:rgba(0,212,255,0.03)">
+        <div class="ref-card-title" style="color:#00D4FF">SCRIPTING, SPOOL &amp; VARIABLES</div>
+        <div class="ref-code"><span class="c-yel">-- Spool output to file</span>
+SPOOL /tmp/output.txt
+SELECT * FROM dba_users;
+SPOOL OFF
+
+<span class="c-yel">-- Run a SQL script</span>
+@/home/oracle/scripts/fix_stats.sql
+START /home/oracle/scripts/fix_stats.sql
+
+<span class="c-yel">-- Substitution variables (&amp; = prompt once, &amp;&amp; = define for session)</span>
+SELECT * FROM &amp;table_name;
+DEFINE myvar = 'EMPLOYEES'
+SELECT * FROM &amp;myvar;
+UNDEFINE myvar
+
+<span class="c-yel">-- Bind variables (no re-parse)</span>
+VARIABLE x NUMBER
+EXEC :x := 100;
+SELECT * FROM employees WHERE employee_id = :x;
+
+<span class="c-yel">-- Run OS command from SQL*Plus</span>
+HOST ls -la /u01/app/oracle/
+! ls -la /u01/app/oracle/   <span class="c-yel">-- shorthand</span></div>
+      </div>
+      <div class="ref-card" style="border-color:rgba(0,212,255,0.25);background:rgba(0,212,255,0.03)">
+        <div class="ref-card-title" style="color:#00D4FF">GLOGIN.SQL &amp; LOGIN.SQL (AUTO-CONFIG)</div>
+        <div class="ref-code"><span class="c-yel">-- $ORACLE_HOME/sqlplus/admin/glogin.sql — applies to ALL users</span>
+<span class="c-yel">-- ~/login.sql — applies to current OS user</span>
+<span class="c-yel">-- Both run automatically on every sqlplus connect</span>
+
+<span class="c-yel">-- Recommended contents:</span>
+SET LINESIZE 200
+SET PAGESIZE 50
+SET TIMING ON
+SET SERVEROUTPUT ON SIZE UNLIMITED
+SET TRIMSPOOL ON
+SET SQLPROMPT "&amp;_USER@&amp;_CONNECT_IDENTIFIER &gt; "
+
+<span class="c-yel">-- Show current user, DB and time in prompt:</span>
+<span class="c-yel">-- PROD@ORCL &gt;   (immediate visual safety check!)</span>
+
+<span class="c-yel">-- Useful diagnostic always-on:</span>
+ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS';
+ALTER SESSION SET TRACEFILE_IDENTIFIER = 'MYSESSION';</div>
+      </div>
+    </div>
+
+    <!-- Scheduler & Jobs -->
+    <div class="ref-section-title" style="border-left-color:#F59E0B;margin-top:8px">
+      <span style="color:#F59E0B">&#9670;</span> DBMS_SCHEDULER — JOB SCHEDULING
+    </div>
+    <div class="ref-grid-wide">
+      <div class="ref-card" style="border-color:rgba(245,158,11,0.25);background:rgba(245,158,11,0.03)">
+        <div class="ref-card-title" style="color:#F59E0B">CREATE &amp; MANAGE JOBS</div>
+        <div class="ref-code"><span class="c-yel">-- Create a simple PL/SQL job</span>
+BEGIN
+  DBMS_SCHEDULER.CREATE_JOB(
+    job_name        => 'PURGE_OLD_LOGS',
+    job_type        => 'PLSQL_BLOCK',
+    job_action      => 'BEGIN purge_logs_pkg.run; END;',
+    start_date      => SYSTIMESTAMP,
+    repeat_interval => 'FREQ=DAILY; BYHOUR=2; BYMINUTE=0',
+    enabled         => TRUE,
+    comments        => 'Purge audit logs older than 90 days'
+  );
+END;
+/
+
+<span class="c-yel">-- Create a stored procedure job</span>
+BEGIN
+  DBMS_SCHEDULER.CREATE_JOB(
+    job_name        => 'GATHER_STATS',
+    job_type        => 'STORED_PROCEDURE',
+    job_action      => 'DBMS_STATS.GATHER_DATABASE_STATS',
+    repeat_interval => 'FREQ=WEEKLY; BYDAY=SAT; BYHOUR=22',
+    enabled         => TRUE
+  );
+END;
+/
+
+<span class="c-yel">-- Create an OS executable job</span>
+BEGIN
+  DBMS_SCHEDULER.CREATE_JOB(
+    job_name   => 'RUN_BACKUP_SCRIPT',
+    job_type   => 'EXECUTABLE',
+    job_action => '/home/oracle/scripts/rman_backup.sh',
+    repeat_interval => 'FREQ=DAILY; BYHOUR=1',
+    enabled    => TRUE
+  );
+END;
+/</div>
+      </div>
+      <div class="ref-card" style="border-color:rgba(245,158,11,0.25);background:rgba(245,158,11,0.03)">
+        <div class="ref-card-title" style="color:#F59E0B">MONITOR &amp; CONTROL JOBS</div>
+        <div class="ref-code"><span class="c-yel">-- Run a job immediately</span>
+EXEC DBMS_SCHEDULER.RUN_JOB('PURGE_OLD_LOGS');
+
+<span class="c-yel">-- Enable / disable</span>
+EXEC DBMS_SCHEDULER.ENABLE('PURGE_OLD_LOGS');
+EXEC DBMS_SCHEDULER.DISABLE('PURGE_OLD_LOGS');
+
+<span class="c-yel">-- Drop a job</span>
+EXEC DBMS_SCHEDULER.DROP_JOB('PURGE_OLD_LOGS');
+
+<span class="c-yel">-- Stop a running job</span>
+EXEC DBMS_SCHEDULER.STOP_JOB('PURGE_OLD_LOGS', force=>TRUE);
+
+<span class="c-yel">-- Check job status and last run</span>
+SELECT job_name, state, last_start_date, last_run_duration,
+       next_run_date, failure_count
+  FROM dba_scheduler_jobs
+ WHERE owner = 'SYS'
+ ORDER BY next_run_date;
+
+<span class="c-yel">-- View job run history</span>
+SELECT job_name, status, actual_start_date,
+       run_duration, additional_info
+  FROM dba_scheduler_job_run_details
+ WHERE job_name = 'PURGE_OLD_LOGS'
+ ORDER BY actual_start_date DESC;
+
+<span class="c-yel">-- View currently running jobs</span>
+SELECT job_name, session_id, running_instance, elapsed_time
+  FROM dba_scheduler_running_jobs;</div>
+      </div>
+    </div>
+
+    <!-- Database Links & Synonyms -->
+    <div class="ref-section-title" style="border-left-color:#38BDF8;margin-top:8px">
+      <span style="color:#38BDF8">&#9670;</span> DATABASE LINKS, SYNONYMS &amp; DIRECTORIES
+    </div>
+    <div class="ref-grid">
+      <div class="ref-card" style="border-color:rgba(56,189,248,0.25)">
+        <div class="ref-card-title" style="color:#38BDF8">DATABASE LINKS</div>
+        <div class="ref-code"><span class="c-yel">-- Create public DB link (all users)</span>
+CREATE PUBLIC DATABASE LINK remote_db
+  CONNECT TO scott IDENTIFIED BY tiger
+  USING 'REMOTEDB';
+
+<span class="c-yel">-- Create private DB link (current user only)</span>
+CREATE DATABASE LINK remote_db
+  CONNECT TO scott IDENTIFIED BY tiger
+  USING '(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)
+   (HOST=remotehost)(PORT=1521))
+   (CONNECT_DATA=(SERVICE_NAME=ORCL)))';
+
+<span class="c-yel">-- Use the link</span>
+SELECT * FROM employees@remote_db;
+INSERT INTO archive_orders SELECT * FROM orders@remote_db;
+
+<span class="c-yel">-- Test / drop</span>
+SELECT * FROM dual@remote_db;    -- test connectivity
+DROP DATABASE LINK remote_db;
+DROP PUBLIC DATABASE LINK remote_db;
+
+<span class="c-yel">-- View all DB links</span>
+SELECT db_link, username, host FROM dba_db_links;</div>
+      </div>
+      <div class="ref-card" style="border-color:rgba(56,189,248,0.25)">
+        <div class="ref-card-title" style="color:#38BDF8">SYNONYMS</div>
+        <div class="ref-code"><span class="c-yel">-- Public synonym — visible to all users (no schema prefix)</span>
+CREATE PUBLIC SYNONYM employees FOR hr.employees;
+CREATE PUBLIC SYNONYM emp_seq  FOR hr.emp_sequence;
+DROP PUBLIC SYNONYM employees;
+
+<span class="c-yel">-- Private synonym — current schema only</span>
+CREATE SYNONYM dept FOR hr.departments;
+DROP SYNONYM dept;
+
+<span class="c-yel">-- Synonym pointing to remote DB</span>
+CREATE PUBLIC SYNONYM remote_emp
+  FOR employees@remote_db;
+
+<span class="c-yel">-- View synonyms</span>
+SELECT synonym_name, table_owner, table_name, db_link
+  FROM dba_synonyms WHERE table_owner = 'HR';
+
+<span class="c-yel">-- Invalid synonyms (target object dropped)</span>
+SELECT owner, synonym_name, table_name
+  FROM dba_synonyms s
+ WHERE NOT EXISTS (
+   SELECT 1 FROM dba_objects o
+    WHERE o.owner = s.table_owner
+      AND o.object_name = s.table_name);</div>
+      </div>
+      <div class="ref-card" style="border-color:rgba(56,189,248,0.25)">
+        <div class="ref-card-title" style="color:#38BDF8">DIRECTORY OBJECTS (Data Pump / UTL_FILE)</div>
+        <div class="ref-code"><span class="c-yel">-- Create directory object (maps OS path to DB name)</span>
+CREATE OR REPLACE DIRECTORY dpump_dir AS '/u01/dpump';
+CREATE OR REPLACE DIRECTORY logfiles  AS '/u01/logs';
+
+<span class="c-yel">-- Grant access to users</span>
+GRANT READ, WRITE ON DIRECTORY dpump_dir TO hr;
+GRANT READ ON DIRECTORY logfiles TO scott;
+
+<span class="c-yel">-- View directories</span>
+SELECT directory_name, directory_path FROM dba_directories;
+
+<span class="c-yel">-- Use in Data Pump</span>
+expdp hr/pass DIRECTORY=dpump_dir DUMPFILE=hr.dmp LOGFILE=hr.log
+
+<span class="c-yel">-- Use in PL/SQL (UTL_FILE)</span>
+DECLARE
+  fh UTL_FILE.FILE_TYPE;
+BEGIN
+  fh := UTL_FILE.FOPEN('LOGFILES','output.txt','W');
+  UTL_FILE.PUT_LINE(fh, 'Hello from Oracle');
+  UTL_FILE.FCLOSE(fh);
+END;
+/</div>
+      </div>
+    </div>
+
+    <!-- Error Handling & Diagnostics -->
+    <div class="ref-section-title" style="border-left-color:#EF4444;margin-top:8px">
+      <span style="color:#EF4444">&#9670;</span> DIAGNOSTICS — ALERT LOG, TRACE FILES &amp; ORA- ERRORS
+    </div>
+    <div class="ref-grid-wide">
+      <div class="ref-card" style="border-color:rgba(239,68,68,0.25)">
+        <div class="ref-card-title" style="color:#EF4444">ALERT LOG &amp; TRACE FILES</div>
+        <div class="ref-code"><span class="c-yel">-- Find alert log location (ADR — Automatic Diagnostic Repository)</span>
+SELECT value FROM v$diag_info WHERE name = 'Diag Trace';
+SELECT value FROM v$diag_info WHERE name = 'Default Trace File';
+
+<span class="c-yel">-- ADR structure (19c default):</span>
+<span class="c-yel">-- $ORACLE_BASE/diag/rdbms/&lt;dbname&gt;/&lt;SID&gt;/trace/alert_&lt;SID&gt;.log</span>
+
+<span class="c-yel">-- Tail alert log in real time</span>
+tail -f $ORACLE_BASE/diag/rdbms/orcl/ORCL/trace/alert_ORCL.log
+
+<span class="c-yel">-- Find ORA- errors in alert log</span>
+grep "ORA-" alert_ORCL.log | tail -50
+
+<span class="c-yel">-- Query alert log via V$ (12c+)</span>
+SELECT originating_timestamp, message_text
+  FROM v$diag_alert_ext
+ WHERE message_text LIKE '%ORA-%'
+ ORDER BY originating_timestamp DESC
+ FETCH FIRST 20 ROWS ONLY;
+
+<span class="c-yel">-- Generate a trace file for current session</span>
+ALTER SESSION SET SQL_TRACE = TRUE;
+ALTER SESSION SET EVENTS '10046 trace name context forever, level 12';
+<span class="c-yel">-- ... run your SQL ...</span>
+ALTER SESSION SET SQL_TRACE = FALSE;
+
+<span class="c-yel">-- Format trace file with TKPROF</span>
+tkprof /path/to/trace.trc output.txt sys=no sort=exeela</div>
+      </div>
+      <div class="ref-card" style="border-color:rgba(239,68,68,0.25)">
+        <div class="ref-card-title" style="color:#EF4444">COMMON ORA- ERRORS &amp; QUICK FIXES</div>
+        <div class="ref-row"><span class="ref-cmd c-red">ORA-00942</span><span class="ref-desc">Table or view does not exist — check schema prefix, synonyms, and SELECT ANY TABLE privilege</span></div>
+        <div class="ref-row"><span class="ref-cmd c-red">ORA-01555</span><span class="ref-desc">Snapshot too old — UNDO_RETENTION too low for long queries; increase undo tablespace or UNDO_RETENTION</span></div>
+        <div class="ref-row"><span class="ref-cmd c-red">ORA-01722</span><span class="ref-desc">Invalid number — implicit conversion failed; check WHERE clause comparing VARCHAR to NUMBER</span></div>
+        <div class="ref-row"><span class="ref-cmd c-red">ORA-04031</span><span class="ref-desc">Unable to allocate shared memory — Shared Pool exhausted; flush or increase SHARED_POOL_SIZE</span></div>
+        <div class="ref-row"><span class="ref-cmd c-red">ORA-00060</span><span class="ref-desc">Deadlock detected — Oracle automatically kills one session; check trace file for involved objects</span></div>
+        <div class="ref-row"><span class="ref-cmd c-red">ORA-12541</span><span class="ref-desc">TNS no listener — listener is down; run: lsnrctl start; check listener.ora</span></div>
+        <div class="ref-row"><span class="ref-cmd c-red">ORA-00257</span><span class="ref-desc">Archiver error — archive log destination full; free space or add new destination</span></div>
+        <div class="ref-row"><span class="ref-cmd c-red">ORA-01034</span><span class="ref-desc">Oracle not available — instance is down; run: STARTUP in sqlplus as sysdba</span></div>
+        <div class="ref-row"><span class="ref-cmd c-red">ORA-00054</span><span class="ref-desc">Resource busy — DDL blocked by active DML; find blocking session with V$LOCK + kill or wait</span></div>
+        <div class="ref-row"><span class="ref-cmd c-red">ORA-01631</span><span class="ref-desc">Max extents reached — add datafiles or set UNLIMITED EXTENTS on tablespace</span></div>
+        <div class="ref-row"><span class="ref-cmd c-red">ORA-00604</span><span class="ref-desc">Error in recursive SQL — usually a trigger or DDL restriction; check alert log for nested error</span></div>
+        <div class="ref-row"><span class="ref-cmd c-red">ORA-01502</span><span class="ref-desc">Index is in unusable state — occurs after MOVE TABLE; rebuild: ALTER INDEX idx REBUILD</span></div>
+      </div>
+    </div>
+
   </div><!-- /ref-commands -->
 
   <!-- ════════════════════════════════════════════════════════════════ -->
@@ -5133,6 +5427,106 @@ DROP PLUGGABLE DATABASE pdb1 INCLUDING DATAFILES;</div>
           <tr><td class="c-org">IDENTITY column</td><td class="c-grn">SEQUENCE + DEFAULT / GENERATED AS IDENTITY (12c+)</td><td>12c+ supports GENERATED ALWAYS AS IDENTITY; earlier used sequence.NEXTVAL</td></tr>
           <tr><td class="c-org">TOP N / LIMIT</td><td class="c-grn">ROWNUM (legacy) / FETCH FIRST N ROWS ONLY (12c+)</td><td>FETCH FIRST syntax is standard SQL; ROWNUM applies before ORDER BY in subqueries</td></tr>
         </table>
+      </div>
+    </div>
+
+    <!-- V$ Views Quick Reference -->
+    <div class="ref-section-title" style="border-left-color:#A855F7;margin-top:8px">
+      <span style="color:#A855F7">&#9670;</span> ESSENTIAL V$ DYNAMIC VIEWS — QUICK REFERENCE
+    </div>
+    <div class="ref-grid">
+      <div class="ref-card" style="border-color:rgba(168,85,247,0.25)">
+        <div class="ref-card-title" style="color:#A855F7">INSTANCE &amp; DATABASE STATE</div>
+        <div class="ref-row"><span class="ref-cmd">V$INSTANCE</span><span class="ref-desc">Instance name, status (OPEN/MOUNTED), startup time, host, version</span></div>
+        <div class="ref-row"><span class="ref-cmd">V$DATABASE</span><span class="ref-desc">DB name, DBID, creation date, open_mode, log_mode, role (PRIMARY/STANDBY)</span></div>
+        <div class="ref-row"><span class="ref-cmd">V$VERSION</span><span class="ref-desc">Detailed Oracle version string for all components</span></div>
+        <div class="ref-row"><span class="ref-cmd">V$PARAMETER</span><span class="ref-desc">All init parameters: name, value, description, is_modified flag</span></div>
+        <div class="ref-row"><span class="ref-cmd">V$SPPARAMETER</span><span class="ref-desc">Parameters as stored in SPFILE (vs in-memory from V$PARAMETER)</span></div>
+        <div class="ref-row"><span class="ref-cmd">V$NLS_PARAMETERS</span><span class="ref-desc">NLS character set, date format, language settings</span></div>
+        <div class="ref-row"><span class="ref-cmd">GV$INSTANCE</span><span class="ref-desc">RAC: all instances (G prefix = global across all nodes)</span></div>
+      </div>
+      <div class="ref-card" style="border-color:rgba(168,85,247,0.25)">
+        <div class="ref-card-title" style="color:#A855F7">SESSIONS &amp; SQL</div>
+        <div class="ref-row"><span class="ref-cmd">V$SESSION</span><span class="ref-desc">All active/inactive sessions: SID, SERIAL#, USERNAME, STATUS, SQL_ID, WAIT_CLASS</span></div>
+        <div class="ref-row"><span class="ref-cmd">V$SQL</span><span class="ref-desc">Cached SQL: text, executions, elapsed_time, buffer_gets, disk_reads, plan_hash_value</span></div>
+        <div class="ref-row"><span class="ref-cmd">V$SQLTEXT</span><span class="ref-desc">Full SQL text (piece by piece) when V$SQL truncates</span></div>
+        <div class="ref-row"><span class="ref-cmd">V$SQL_PLAN</span><span class="ref-desc">Execution plans of cached cursors (use DBMS_XPLAN to format)</span></div>
+        <div class="ref-row"><span class="ref-cmd">V$SESSION_WAIT</span><span class="ref-desc">Current wait event for each session (superseded by V$SESSION in 10g+)</span></div>
+        <div class="ref-row"><span class="ref-cmd">V$ACTIVE_SESSION_HISTORY</span><span class="ref-desc">ASH: sampled every second — use for forensic analysis of past performance</span></div>
+        <div class="ref-row"><span class="ref-cmd">V$LOCK</span><span class="ref-desc">All locks held and requested — join with V$SESSION to identify blocking chains</span></div>
+      </div>
+      <div class="ref-card" style="border-color:rgba(168,85,247,0.25)">
+        <div class="ref-card-title" style="color:#A855F7">STORAGE &amp; I/O</div>
+        <div class="ref-row"><span class="ref-cmd">V$DATAFILE</span><span class="ref-desc">Datafiles: name, status, size, tablespace, creation time</span></div>
+        <div class="ref-row"><span class="ref-cmd">V$TEMPFILE</span><span class="ref-desc">Temporary files used for sort/hash spill operations</span></div>
+        <div class="ref-row"><span class="ref-cmd">V$LOG</span><span class="ref-desc">Redo log groups: group#, status (CURRENT/ACTIVE/INACTIVE), size, archived flag</span></div>
+        <div class="ref-row"><span class="ref-cmd">V$LOGFILE</span><span class="ref-desc">Physical redo log members: group#, file path, status</span></div>
+        <div class="ref-row"><span class="ref-cmd">V$TABLESPACE</span><span class="ref-desc">All tablespaces: TS#, name, status, bigfile flag, included_in_database_backup</span></div>
+        <div class="ref-row"><span class="ref-cmd">V$FILESTAT</span><span class="ref-desc">I/O statistics per datafile: phyrds, phywrts, readtim, writetim</span></div>
+        <div class="ref-row"><span class="ref-cmd">V$SEGMENT_STATISTICS</span><span class="ref-desc">I/O stats per segment (table/index): logical reads, physical reads, row lock waits</span></div>
+      </div>
+    </div>
+
+    <!-- DBA_ Static Dictionary Views -->
+    <div class="ref-section-title" style="border-left-color:#10B981;margin-top:8px">
+      <span style="color:#10B981">&#9670;</span> DBA_ / ALL_ / USER_ DATA DICTIONARY — WHAT TO QUERY
+    </div>
+    <div class="ref-grid-wide">
+      <div class="ref-card" style="border-color:rgba(16,185,129,0.25)">
+        <div class="ref-card-title" style="color:#10B981">SCOPE: DBA_ vs ALL_ vs USER_</div>
+        <div class="ref-row"><span class="ref-cmd c-grn">DBA_*</span><span class="ref-desc">ALL objects in the database. Requires DBA or SELECT_CATALOG_ROLE privilege. Use in admin/monitoring queries</span></div>
+        <div class="ref-row"><span class="ref-cmd c-cyn">ALL_*</span><span class="ref-desc">Objects accessible to current user (owned + granted SELECT). No special privilege needed</span></div>
+        <div class="ref-row"><span class="ref-cmd c-yel">USER_*</span><span class="ref-desc">Objects owned by current user only. Fastest — no OWNER column needed</span></div>
+        <div style="margin:8px 0 4px;font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:1px">KEY VIEWS TO KNOW</div>
+        <div class="ref-row"><span class="ref-cmd">DBA_OBJECTS</span><span class="ref-desc">All objects: OWNER, OBJECT_NAME, OBJECT_TYPE, STATUS, LAST_DDL_TIME</span></div>
+        <div class="ref-row"><span class="ref-cmd">DBA_TABLES</span><span class="ref-desc">Table metadata: rows, blocks, avg_row_len, last_analyzed, compression</span></div>
+        <div class="ref-row"><span class="ref-cmd">DBA_INDEXES</span><span class="ref-desc">Index details: type, uniqueness, status, visibility, compression</span></div>
+        <div class="ref-row"><span class="ref-cmd">DBA_CONSTRAINTS</span><span class="ref-desc">All constraints: PK, FK, UK, CHECK — with status (ENABLED/DISABLED/VALIDATED)</span></div>
+        <div class="ref-row"><span class="ref-cmd">DBA_TAB_COLUMNS</span><span class="ref-desc">Column definitions: data_type, nullable, data_default, num_distinct, histogram</span></div>
+        <div class="ref-row"><span class="ref-cmd">DBA_DEPENDENCIES</span><span class="ref-desc">Object dependencies — what breaks when you drop/alter an object</span></div>
+        <div class="ref-row"><span class="ref-cmd">DBA_SOURCE</span><span class="ref-desc">Source code of all stored procedures, functions, packages, triggers</span></div>
+        <div class="ref-row"><span class="ref-cmd">DBA_ERRORS</span><span class="ref-desc">Compilation errors — check after CREATE OR REPLACE fails</span></div>
+        <div class="ref-row"><span class="ref-cmd">DBA_USERS</span><span class="ref-desc">User accounts: account_status, lock_date, expiry_date, default_tablespace, profile</span></div>
+        <div class="ref-row"><span class="ref-cmd">DBA_SYS_PRIVS</span><span class="ref-desc">System privileges granted to users/roles (CONNECT, CREATE TABLE, DBA, etc.)</span></div>
+        <div class="ref-row"><span class="ref-cmd">DBA_TAB_PRIVS</span><span class="ref-desc">Object-level grants: who has SELECT/INSERT/UPDATE/DELETE on specific tables</span></div>
+        <div class="ref-row"><span class="ref-cmd">DBA_SEGMENTS</span><span class="ref-desc">Physical storage: segment type, tablespace, bytes, blocks, extents used</span></div>
+        <div class="ref-row"><span class="ref-cmd">DBA_FREE_SPACE</span><span class="ref-desc">Free extents per tablespace — use to monitor space</span></div>
+      </div>
+      <div class="ref-card" style="border-color:rgba(16,185,129,0.25)">
+        <div class="ref-card-title" style="color:#10B981">USEFUL DIAGNOSTIC QUERIES</div>
+        <div class="ref-code"><span class="c-yel">-- Find all invalid objects</span>
+SELECT owner, object_type, object_name, status
+  FROM dba_objects
+ WHERE status = 'INVALID'
+ ORDER BY owner, object_type;
+
+<span class="c-yel">-- Find biggest tables by segment size</span>
+SELECT owner, segment_name, ROUND(bytes/1024/1024/1024,2) size_gb
+  FROM dba_segments
+ WHERE segment_type = 'TABLE'
+ ORDER BY bytes DESC FETCH FIRST 10 ROWS ONLY;
+
+<span class="c-yel">-- Tables not analyzed in 30 days</span>
+SELECT owner, table_name, last_analyzed, num_rows
+  FROM dba_tables
+ WHERE last_analyzed &lt; SYSDATE - 30
+   OR last_analyzed IS NULL
+ ORDER BY last_analyzed NULLS FIRST;
+
+<span class="c-yel">-- Find objects owned by a user</span>
+SELECT object_type, COUNT(*) cnt
+  FROM dba_objects WHERE owner = 'HR'
+ GROUP BY object_type ORDER BY cnt DESC;
+
+<span class="c-yel">-- Check tablespace usage</span>
+SELECT t.tablespace_name,
+  ROUND(t.bytes/1024/1024/1024,2) total_gb,
+  ROUND(f.bytes/1024/1024/1024,2) free_gb,
+  ROUND((1 - f.bytes/t.bytes)*100,1) pct_used
+FROM (SELECT tablespace_name, SUM(bytes) bytes FROM dba_data_files GROUP BY tablespace_name) t
+JOIN (SELECT tablespace_name, SUM(bytes) bytes FROM dba_free_space  GROUP BY tablespace_name) f
+  ON t.tablespace_name = f.tablespace_name
+ORDER BY pct_used DESC;</div>
       </div>
     </div>
 
@@ -5434,6 +5828,77 @@ SELECT owner, index_name, status
 SELECT name, HEIGHT, LF_ROWS, LF_BLKS,
        BR_ROWS, BR_BLKS, DEL_LF_ROWS
   FROM index_stats;   -- populated by ANALYZE INDEX ... VALIDATE</div>
+      </div>
+    </div>
+
+    <!-- Index Usage Tips & Query Optimization -->
+    <div class="ref-section-title" style="border-left-color:#F1C40F;margin-top:8px">
+      <span style="color:#F1C40F">&#9651;</span> INDEX DESIGN DECISIONS &amp; OPTIMIZER HINTS
+    </div>
+    <div class="ref-grid">
+      <div class="ref-card" style="border-color:rgba(241,196,15,0.25)">
+        <div class="ref-card-title" style="color:#F1C40F">WHEN THE OPTIMIZER IGNORES YOUR INDEX</div>
+        <div class="ref-row"><span class="ref-cmd">Function on column</span><span class="ref-desc">WHERE UPPER(last_name)='SMITH' bypasses index on last_name. Fix: create function-based index on UPPER(last_name)</span></div>
+        <div class="ref-row"><span class="ref-cmd">Implicit conversion</span><span class="ref-desc">WHERE emp_id = '100' (string literal on NUMBER column) causes implicit CAST — index skipped</span></div>
+        <div class="ref-row"><span class="ref-cmd">Leading column skipped</span><span class="ref-desc">Composite index (a,b,c): WHERE b=1 AND c=2 skips index. Always include leading column in WHERE</span></div>
+        <div class="ref-row"><span class="ref-cmd">IS NULL predicate</span><span class="ref-desc">B-tree doesn't index NULLs. WHERE col IS NULL always does full scan (use function-based: NVL(col,0)=0)</span></div>
+        <div class="ref-row"><span class="ref-cmd">LIKE with leading %</span><span class="ref-desc">WHERE name LIKE '%SMITH' cannot use index (no prefix). LIKE 'SMITH%' CAN use index</span></div>
+        <div class="ref-row"><span class="ref-cmd">NOT / !=</span><span class="ref-desc">Negative predicates often force full scan. Rewrite as positive range where possible</span></div>
+        <div class="ref-row"><span class="ref-cmd">Low cardinality</span><span class="ref-desc">Optimizer may prefer full scan if &gt;5% of rows match. Use hints or bitmap index for status columns</span></div>
+        <div class="ref-row"><span class="ref-cmd">Stale statistics</span><span class="ref-desc">Wrong row estimates lead to wrong plan. Run: EXEC DBMS_STATS.GATHER_TABLE_STATS('HR','EMPLOYEES')</span></div>
+      </div>
+      <div class="ref-card" style="border-color:rgba(241,196,15,0.25)">
+        <div class="ref-card-title" style="color:#F1C40F">OPTIMIZER HINTS FOR INDEX CONTROL</div>
+        <div class="ref-code"><span class="c-yel">-- Force use of a specific index</span>
+SELECT /*+ INDEX(e idx_emp_lname) */ *
+  FROM employees e WHERE last_name = 'Smith';
+
+<span class="c-yel">-- Force index fast full scan (like FTS but uses index)</span>
+SELECT /*+ INDEX_FFS(e idx_emp_dept) */ department_id
+  FROM employees e;
+
+<span class="c-yel">-- Force range scan (not skip scan)</span>
+SELECT /*+ INDEX_RS_ASC(e idx_emp_dept_job) */ *
+  FROM employees e WHERE department_id = 50;
+
+<span class="c-yel">-- Skip index — force full table scan</span>
+SELECT /*+ FULL(e) */ * FROM employees e
+ WHERE last_name = 'Smith';
+
+<span class="c-yel">-- No index hint (suppress specific index)</span>
+SELECT /*+ NO_INDEX(e idx_emp_lname) */ *
+  FROM employees e WHERE last_name = 'Smith';
+
+<span class="c-yel">-- Parallel full scan (large table with no good index)</span>
+SELECT /*+ PARALLEL(e, 4) FULL(e) */ *
+  FROM employees e WHERE salary &gt; 50000;</div>
+      </div>
+      <div class="ref-card" style="border-color:rgba(241,196,15,0.25)">
+        <div class="ref-card-title" style="color:#F1C40F">EXPLAIN PLAN &amp; EXECUTION PLAN READING</div>
+        <div class="ref-code"><span class="c-yel">-- Simplest: EXPLAIN PLAN + display</span>
+EXPLAIN PLAN FOR
+  SELECT * FROM employees WHERE department_id = 50;
+
+SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
+
+<span class="c-yel">-- With actual runtime stats (run query first)</span>
+SELECT /*+ GATHER_PLAN_STATISTICS */ *
+  FROM employees WHERE department_id = 50;
+
+SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY_CURSOR(
+  sql_id      => NULL,   -- NULL = last statement
+  child_number => 0,
+  format      => 'ALLSTATS LAST'));
+
+<span class="c-yel">-- Key plan operations to understand:</span>
+<span class="c-yel">-- TABLE ACCESS FULL         = full table scan</span>
+<span class="c-yel">-- INDEX RANGE SCAN          = best for range/equality on B-tree</span>
+<span class="c-yel">-- INDEX UNIQUE SCAN         = single row lookup (PK/unique)</span>
+<span class="c-yel">-- INDEX FAST FULL SCAN      = read all index blocks (no table)</span>
+<span class="c-yel">-- INDEX SKIP SCAN           = composite index, leading col skipped</span>
+<span class="c-yel">-- NESTED LOOPS              = good for small driving rows</span>
+<span class="c-yel">-- HASH JOIN                 = good for large sets, no index</span>
+<span class="c-yel">-- MERGE JOIN                = sorted inputs, good for sorted data</span></div>
       </div>
     </div>
 
@@ -5818,6 +6283,146 @@ SELECT partition_name, stale_stats, last_analyzed
           <tr><td class="c-yel">RANGE-LIST</td><td>Time + discrete dimension</td><td>Range prune + list sub-prune</td></tr>
           <tr><td class="c-teal">REFERENCE</td><td>Parent-child FK tables</td><td>Inherits parent's pruning</td></tr>
         </table>
+      </div>
+    </div>
+
+    <!-- Partition Maintenance Operations -->
+    <div class="ref-section-title" style="border-left-color:#FB923C;margin-top:8px">
+      <span style="color:#FB923C">&#9632;</span> PARTITION MAINTENANCE — DDL OPERATIONS
+    </div>
+    <div class="ref-grid-wide">
+      <div class="ref-card" style="border-color:rgba(251,146,60,0.25)">
+        <div class="ref-card-title" style="color:#FB923C">ADD, DROP, TRUNCATE &amp; SPLIT</div>
+        <div class="ref-code"><span class="c-yel">-- ADD a new partition (range)</span>
+ALTER TABLE sales ADD PARTITION p_2025
+  VALUES LESS THAN (DATE '2026-01-01')
+  TABLESPACE ts_2025;
+
+<span class="c-yel">-- ADD a list partition</span>
+ALTER TABLE orders ADD PARTITION p_eu
+  VALUES ('DE','FR','UK','IT','ES');
+
+<span class="c-yel">-- DROP a partition (data gone immediately, no undo possible)</span>
+ALTER TABLE sales DROP PARTITION p_2018;
+ALTER TABLE sales DROP PARTITION p_2018 UPDATE GLOBAL INDEXES;
+
+<span class="c-yel">-- TRUNCATE a partition (fast, no undo needed — better than DELETE)</span>
+ALTER TABLE sales TRUNCATE PARTITION p_2018;
+ALTER TABLE sales TRUNCATE PARTITION p_2018 UPDATE GLOBAL INDEXES;
+
+<span class="c-yel">-- SPLIT a partition into two (divides data at boundary)</span>
+ALTER TABLE sales SPLIT PARTITION p_q4
+  AT (DATE '2024-11-01')
+  INTO (PARTITION p_oct, PARTITION p_novdec);
+
+<span class="c-yel">-- MERGE two adjacent partitions into one</span>
+ALTER TABLE sales MERGE PARTITIONS p_oct, p_novdec
+  INTO PARTITION p_q4_merged;</div>
+      </div>
+      <div class="ref-card" style="border-color:rgba(251,146,60,0.25)">
+        <div class="ref-card-title" style="color:#FB923C">EXCHANGE PARTITION (ETL SUPERPOWER)</div>
+        <div class="ref-code"><span class="c-yel">-- EXCHANGE swaps a heap table with a partition — near-instant DDL!</span>
+<span class="c-yel">-- Great for staging → production loads with zero downtime</span>
+
+<span class="c-yel">-- Step 1: Create staging table with same structure (no partitioning)</span>
+CREATE TABLE sales_stage AS
+  SELECT * FROM sales WHERE 1=0;
+
+<span class="c-yel">-- Step 2: Load data into staging table</span>
+INSERT /*+ APPEND */ INTO sales_stage
+  SELECT * FROM external_feed WHERE sale_year = 2025;
+COMMIT;
+
+<span class="c-yel">-- Step 3: Exchange — instantly swaps staging into the partition</span>
+ALTER TABLE sales EXCHANGE PARTITION p_2025
+  WITH TABLE sales_stage
+  INCLUDING INDEXES
+  WITHOUT VALIDATION;  -- skip row validation for speed
+
+<span class="c-yel">-- Result: sales partition p_2025 = loaded data</span>
+<span class="c-yel">--         sales_stage          = previously had (now empty)</span>
+
+<span class="c-yel">-- Monitor partition sizes</span>
+SELECT partition_name, num_rows, blocks,
+       ROUND(blocks*8/1024,1) size_mb
+  FROM dba_tab_partitions
+ WHERE table_name = 'SALES'
+   AND table_owner = 'SH'
+ ORDER BY partition_position;</div>
+      </div>
+    </div>
+
+    <!-- Partition Pruning -->
+    <div class="ref-section-title" style="border-left-color:#2ECC71;margin-top:8px">
+      <span style="color:#2ECC71">&#9632;</span> PARTITION PRUNING &amp; MONITORING QUERIES
+    </div>
+    <div class="ref-grid">
+      <div class="ref-card" style="border-color:rgba(46,204,113,0.25)">
+        <div class="ref-card-title" style="color:#2ECC71">VERIFY PRUNING IS HAPPENING</div>
+        <div class="ref-code"><span class="c-yel">-- Static pruning (literal value) — 1 partition accessed</span>
+EXPLAIN PLAN FOR
+  SELECT * FROM sales WHERE sale_date = DATE '2024-03-15';
+SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
+<span class="c-yel">-- Look for: Pstart=3 Pstop=3 (partition 3 only)</span>
+
+<span class="c-yel">-- Dynamic pruning (bind variable) — decided at runtime</span>
+VARIABLE dt VARCHAR2(20)
+EXEC :dt := '2024-03-15';
+EXPLAIN PLAN FOR
+  SELECT * FROM sales WHERE sale_date = TO_DATE(:dt,'YYYY-MM-DD');
+<span class="c-yel">-- Look for: Pstart=KEY Pstop=KEY (runtime evaluation)</span>
+
+<span class="c-yel">-- No pruning (no partition key in WHERE) — all partitions</span>
+EXPLAIN PLAN FOR
+  SELECT * FROM sales WHERE amount &gt; 1000;
+<span class="c-yel">-- Look for: Pstart=1 Pstop=1048575 (FULL = all partitions)</span></div>
+      </div>
+      <div class="ref-card" style="border-color:rgba(46,204,113,0.25)">
+        <div class="ref-card-title" style="color:#2ECC71">MONITORING PARTITION QUERIES</div>
+        <div class="ref-code"><span class="c-yel">-- List all partitions with row counts and size</span>
+SELECT partition_name, partition_position,
+       num_rows, blocks,
+       ROUND(blocks*8/1024,2) size_mb,
+       high_value
+  FROM dba_tab_partitions
+ WHERE table_name = 'SALES'
+ ORDER BY partition_position;
+
+<span class="c-yel">-- Find partitioned tables and their strategy</span>
+SELECT owner, table_name, partitioning_type,
+       subpartitioning_type, partition_count,
+       interval
+  FROM dba_part_tables
+ WHERE owner = 'SH';
+
+<span class="c-yel">-- Interval partitioning: check auto-created partitions</span>
+SELECT partition_name, high_value,
+       interval, num_rows
+  FROM dba_tab_partitions
+ WHERE table_name = 'SALES'
+ ORDER BY partition_position DESC
+ FETCH FIRST 5 ROWS ONLY;
+
+<span class="c-yel">-- Subpartition details</span>
+SELECT partition_name, subpartition_name,
+       num_rows, blocks
+  FROM dba_tab_subpartitions
+ WHERE table_name = 'SALES'
+ ORDER BY partition_name, subpartition_name;</div>
+      </div>
+      <div class="ref-card" style="border-color:rgba(46,204,113,0.25)">
+        <div class="ref-card-title" style="color:#2ECC71">PARTITION-WISE OPERATIONS &amp; ILM</div>
+        <div class="ref-row"><span class="ref-cmd">Partition-wise JOIN</span><span class="ref-desc">When both tables partitioned identically on join column, Oracle joins matching partition pairs in parallel — massive speedup</span></div>
+        <div class="ref-row"><span class="ref-cmd">Partition-wise AGG</span><span class="ref-desc">GROUP BY on partition key allows parallel aggregation per partition before final merge</span></div>
+        <div class="ref-row"><span class="ref-cmd">ILM — move to cold</span><span class="ref-desc">ALTER TABLE sales MOVE PARTITION p_2020 TABLESPACE ts_cold COMPRESS FOR ARCHIVE HIGH</span></div>
+        <div class="ref-row"><span class="ref-cmd">ILM — read-only old</span><span class="ref-desc">ALTER TABLE sales MODIFY PARTITION p_2018 READ ONLY — prevents accidental DML on archived data</span></div>
+        <div class="ref-row"><span class="ref-cmd">Parallel DML on part</span><span class="ref-desc">INSERT /*+ PARALLEL APPEND */ INTO partitioned_table — each partition written in parallel</span></div>
+        <div class="ref-code"><span class="c-yel">-- Compress a cold partition in place:</span>
+ALTER TABLE sales
+  MOVE PARTITION p_2019
+  TABLESPACE ts_archive
+  COMPRESS FOR OLTP
+  ONLINE;  <span class="c-yel">-- 12c+: no DML blocking</span></div>
       </div>
     </div>
 
@@ -6588,6 +7193,216 @@ su oracle      # Non-login:   .bash_profile NOT loaded → ORACLE_SID unset ✗
       </div>
     </div>
 
+    <!-- Cron & Automation -->
+    <div class="ref-section-title" style="border-left-color:#10B981;margin-top:20px">
+      <span style="color:#10B981">&#9670;</span> CRON JOBS &amp; SCHEDULING — ORACLE DBA AUTOMATION
+    </div>
+    <div class="ref-grid-wide">
+      <div class="ref-card" style="border-color:rgba(16,185,129,0.3)">
+        <div class="ref-card-title" style="color:#10B981">CRONTAB SYNTAX &amp; MANAGEMENT</div>
+        <div class="ref-code"><span class="c-yel"># Crontab time format:</span>
+<span class="c-yel"># ┌─── minute (0-59)</span>
+<span class="c-yel"># │ ┌─── hour (0-23)</span>
+<span class="c-yel"># │ │ ┌─── day of month (1-31)</span>
+<span class="c-yel"># │ │ │ ┌─── month (1-12)</span>
+<span class="c-yel"># │ │ │ │ ┌─── day of week (0=Sun, 6=Sat)</span>
+<span class="c-yel"># │ │ │ │ │</span>
+  0 1 * * *  /home/oracle/scripts/rman_backup.sh
+ 30 6 * * 1  /home/oracle/scripts/weekly_stats.sh   <span class="c-yel"># Mon 6:30am</span>
+  0 */4 * * * /home/oracle/scripts/check_space.sh   <span class="c-yel"># Every 4 hrs</span>
+  0 0 1 * *  /home/oracle/scripts/monthly_report.sh <span class="c-yel"># 1st of month</span>
+ 15 2 * * 0  /home/oracle/scripts/index_rebuild.sh  <span class="c-yel"># Sunday 2:15am</span>
+
+<span class="c-yel"># Edit oracle user's crontab</span>
+crontab -e            <span class="c-yel"># Opens in $EDITOR</span>
+crontab -l            <span class="c-yel"># List current crontab</span>
+crontab -r            <span class="c-yel"># REMOVE all cron jobs (dangerous!)</span>
+
+<span class="c-yel"># Edit another user's crontab (as root)</span>
+crontab -u oracle -e
+
+<span class="c-yel"># System-wide cron directories (no crontab needed):</span>
+/etc/cron.daily/      <span class="c-yel"># Scripts run once daily</span>
+/etc/cron.weekly/     <span class="c-yel"># Scripts run once weekly</span>
+/etc/cron.hourly/     <span class="c-yel"># Scripts run every hour</span>
+
+<span class="c-yel"># Check cron daemon status</span>
+systemctl status crond</div>
+      </div>
+      <div class="ref-card" style="border-color:rgba(16,185,129,0.3)">
+        <div class="ref-card-title" style="color:#10B981">ORACLE DBA CRON SCRIPT TEMPLATE</div>
+        <div class="ref-code">#!/bin/bash
+<span class="c-yel"># Oracle DBA script template — safe environment setup</span>
+
+<span class="c-yel"># === Environment (CRITICAL — cron has no .bash_profile) ===</span>
+export ORACLE_BASE=/u01/app/oracle
+export ORACLE_HOME=$ORACLE_BASE/product/19c/dbhome_1
+export ORACLE_SID=ORCL
+export PATH=$ORACLE_HOME/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export LD_LIBRARY_PATH=$ORACLE_HOME/lib
+
+SCRIPT_DIR="/home/oracle/scripts"
+LOG_DIR="/home/oracle/logs"
+LOG_FILE="$LOG_DIR/$(basename $0 .sh)_$(date +%Y%m%d_%H%M%S).log"
+
+<span class="c-yel"># Redirect all output to log file</span>
+exec >> "$LOG_FILE" 2>&amp;1
+echo "=== $(date '+%Y-%m-%d %H:%M:%S') START ==="
+
+<span class="c-yel"># Run sqlplus block</span>
+sqlplus -s / as sysdba &lt;&lt;EOF
+SET FEEDBACK OFF HEADING OFF PAGESIZE 0
+-- Your SQL here
+SELECT 'Space check: '||ROUND(SUM(bytes)/1024/1024/1024,2)||' GB free'
+  FROM dba_free_space;
+EXIT;
+EOF
+
+echo "=== $(date '+%Y-%m-%d %H:%M:%S') END ==="
+
+<span class="c-yel"># Cleanup logs older than 30 days</span>
+find "$LOG_DIR" -name "$(basename $0 .sh)_*.log" -mtime +30 -delete</div>
+      </div>
+    </div>
+
+    <!-- Performance & Kernel Tuning for Oracle -->
+    <div class="ref-section-title" style="border-left-color:#3B82F6;margin-top:20px">
+      <span style="color:#3B82F6">&#9670;</span> KERNEL PARAMETERS &amp; PERFORMANCE TUNING FOR ORACLE
+    </div>
+    <div class="ref-grid">
+      <div class="ref-card" style="border-color:rgba(59,130,246,0.3)">
+        <div class="ref-card-title" style="color:#3B82F6">REQUIRED KERNEL PARAMETERS (/etc/sysctl.conf)</div>
+        <div class="ref-code"><span class="c-yel"># Oracle 19c minimum kernel parameters (RHEL 7/8)</span>
+<span class="c-yel"># File: /etc/sysctl.d/97-oracle.conf (or /etc/sysctl.conf)</span>
+
+fs.aio-max-nr = 1048576        <span class="c-yel"># Async I/O requests (critical for Oracle)</span>
+fs.file-max = 6815744          <span class="c-yel"># Max open file handles system-wide</span>
+kernel.shmall = 2097152        <span class="c-yel"># Total shared memory pages</span>
+kernel.shmmax = 4294967295     <span class="c-yel"># Max shared memory segment (4GB here)</span>
+kernel.shmmni = 4096           <span class="c-yel"># Max shared memory segments</span>
+kernel.sem = 250 32000 100 128 <span class="c-yel"># Semaphore limits</span>
+net.ipv4.ip_local_port_range = 9000 65500
+net.core.rmem_default = 262144 <span class="c-yel"># Network receive buffer</span>
+net.core.rmem_max = 4194304
+net.core.wmem_default = 262144 <span class="c-yel"># Network send buffer</span>
+net.core.wmem_max = 1048576
+vm.dirty_background_ratio = 3  <span class="c-yel"># % dirty pages before background flush</span>
+vm.dirty_ratio = 15            <span class="c-yel"># % dirty pages before process blocks</span>
+
+<span class="c-yel"># Apply immediately without reboot:</span>
+sysctl -p /etc/sysctl.d/97-oracle.conf
+<span class="c-yel"># Verify:</span>
+sysctl -a | grep shmmax</div>
+      </div>
+      <div class="ref-card" style="border-color:rgba(59,130,246,0.3)">
+        <div class="ref-card-title" style="color:#3B82F6">LIMITS.CONF — ORACLE USER RESOURCE LIMITS</div>
+        <div class="ref-code"><span class="c-yel"># File: /etc/security/limits.conf  (or /etc/security/limits.d/oracle.conf)</span>
+<span class="c-yel"># Format: &lt;user&gt; &lt;type&gt; &lt;item&gt; &lt;value&gt;</span>
+
+oracle   soft   nofile    1024     <span class="c-yel"># Soft open files limit</span>
+oracle   hard   nofile    65536    <span class="c-yel"># Hard open files limit</span>
+oracle   soft   nproc     2047     <span class="c-yel"># Soft process limit</span>
+oracle   hard   nproc     16384    <span class="c-yel"># Hard process limit</span>
+oracle   soft   stack     10240    <span class="c-yel"># Stack size (KB)</span>
+oracle   hard   stack     32768
+oracle   soft   memlock   3145728  <span class="c-yel"># Memory lock (KB) — for HugePages</span>
+oracle   hard   memlock   3145728
+grid     soft   nofile    65536    <span class="c-yel"># Grid user (same as oracle)</span>
+grid     hard   nofile    65536
+
+<span class="c-yel"># Verify limits for running oracle process:</span>
+cat /proc/$(pgrep -f "ora_pmon")/limits
+
+<span class="c-yel"># Check current user limits:</span>
+ulimit -a</div>
+      </div>
+      <div class="ref-card" style="border-color:rgba(59,130,246,0.3)">
+        <div class="ref-card-title" style="color:#3B82F6">HUGEPAGES SETUP FOR ORACLE SGA</div>
+        <div class="ref-code"><span class="c-yel"># HugePages: 2MB pages (vs 4KB default) — reduces TLB pressure</span>
+<span class="c-yel"># Oracle SGA should reside in HugePages for production</span>
+<span class="c-yel"># HugePages are NOT swappable — reserved exclusively</span>
+
+<span class="c-yel"># Step 1: Calculate pages needed</span>
+<span class="c-yel"># SGA_MAX_SIZE (bytes) / 2MB = number of HugePages</span>
+<span class="c-yel"># Example: 32GB SGA = 32*1024/2 = 16384 pages</span>
+
+<span class="c-yel"># Step 2: Set HugePages in sysctl</span>
+echo "vm.nr_hugepages = 16384" >> /etc/sysctl.conf
+sysctl -p
+
+<span class="c-yel"># Step 3: Disable AMM (MEMORY_TARGET won't work with HugePages)</span>
+<span class="c-yel"># In Oracle: use SGA_TARGET + PGA_AGGREGATE_TARGET instead</span>
+ALTER SYSTEM SET MEMORY_TARGET=0 SCOPE=SPFILE;
+ALTER SYSTEM SET MEMORY_MAX_TARGET=0 SCOPE=SPFILE;
+
+<span class="c-yel"># Step 4: Verify Oracle is using HugePages</span>
+grep HugePages /proc/meminfo
+<span class="c-yel"># HugePages_Total:   16384</span>
+<span class="c-yel"># HugePages_Free:     1024  (most should be in use = good)</span>
+<span class="c-yel"># HugePages_Rsvd:       32</span></div>
+      </div>
+    </div>
+
+    <!-- Systemd & Service Management -->
+    <div class="ref-section-title" style="border-left-color:#F59E0B;margin-top:20px">
+      <span style="color:#F59E0B">&#9670;</span> SYSTEMD — ORACLE SERVICES &amp; AUTO-START
+    </div>
+    <div class="ref-grid-wide">
+      <div class="ref-card" style="border-color:rgba(245,158,11,0.3)">
+        <div class="ref-card-title" style="color:#F59E0B">SYSTEMCTL ESSENTIALS FOR ORACLE DBAs</div>
+        <div class="ref-code"><span class="c-yel"># Service lifecycle</span>
+systemctl start   oracledb_ORCL-19c     <span class="c-yel"># Start Oracle DB service</span>
+systemctl stop    oracledb_ORCL-19c     <span class="c-yel"># Stop Oracle DB service</span>
+systemctl restart oracledb_ORCL-19c     <span class="c-yel"># Restart</span>
+systemctl status  oracledb_ORCL-19c     <span class="c-yel"># Check status + recent logs</span>
+systemctl reload  oracledb_ORCL-19c     <span class="c-yel"># Reload config without full restart</span>
+
+<span class="c-yel"># Enable / disable auto-start on boot</span>
+systemctl enable  oracledb_ORCL-19c     <span class="c-yel"># Start at boot</span>
+systemctl disable oracledb_ORCL-19c     <span class="c-yel"># Don't start at boot</span>
+systemctl is-enabled oracledb_ORCL-19c  <span class="c-yel"># Check if enabled</span>
+
+<span class="c-yel"># Oracle listener service</span>
+systemctl start  oracle-ohasd           <span class="c-yel"># Grid Infrastructure</span>
+systemctl status oracle-ohasd
+
+<span class="c-yel"># View recent logs for a service</span>
+journalctl -u oracledb_ORCL-19c -n 50   <span class="c-yel"># Last 50 lines</span>
+journalctl -u oracledb_ORCL-19c -f      <span class="c-yel"># Follow (like tail -f)</span>
+journalctl -u oracledb_ORCL-19c --since "1 hour ago"
+
+<span class="c-yel"># Check all Oracle-related services</span>
+systemctl list-units | grep -i oracle</div>
+      </div>
+      <div class="ref-card" style="border-color:rgba(245,158,11,0.3)">
+        <div class="ref-card-title" style="color:#F59E0B">PACKAGE MANAGEMENT (YUM / DNF)</div>
+        <div class="ref-code"><span class="c-yel"># Install Oracle prerequisites (automated)</span>
+yum install oracle-database-preinstall-19c  <span class="c-yel"># Sets all kernel params + users</span>
+dnf install oracle-database-preinstall-19c  <span class="c-yel"># RHEL 8+ uses dnf</span>
+
+<span class="c-yel"># Common Oracle dependency packages</span>
+yum install -y binutils compat-libstdc++ \
+  gcc glibc glibc-devel ksh libaio \
+  libaio-devel libgcc libstdc++ \
+  libstdc++-devel libXi libXtst \
+  make sysstat
+
+<span class="c-yel"># General package management</span>
+yum install package-name          <span class="c-yel"># Install</span>
+yum remove  package-name          <span class="c-yel"># Remove</span>
+yum update  package-name          <span class="c-yel"># Update one package</span>
+yum update                        <span class="c-yel"># Update everything (careful!)</span>
+yum list installed | grep oracle  <span class="c-yel"># List installed Oracle pkgs</span>
+yum info package-name             <span class="c-yel"># Package details</span>
+rpm -qa | grep oracle             <span class="c-yel"># RPM query: Oracle packages</span>
+rpm -qi oracle-database-ee-19c    <span class="c-yel"># RPM info for specific package</span>
+
+<span class="c-yel"># Disable/enable a repo</span>
+yum-config-manager --enable  ol8_latest
+yum-config-manager --disable ol8_latest</div>
+      </div>
+    </div>
+
   </div><!-- /ref-linux -->
 
 </div><!-- /view-reference -->
@@ -6613,15 +7428,15 @@ su oracle      # Non-login:   .bash_profile NOT loaded → ORACLE_SID unset ✗
 
   <!-- ── OVERVIEW ─────────────────────────────────────────────── -->
   <div id="crs-overview" class="crs-section">
-    <div class="crs-section-title"><span class="crs-module-tag">COURSE INTRO</span> SQL SERVER TO ORACLE DBA — 5-DAY TRANSITION COURSE</div>
+    <div class="crs-section-title"><span class="crs-module-tag">COURSE INTRO</span> SQL SERVER TO ORACLE DBA — 5-WEEK TRANSITION COURSE</div>
     <div class="ref-grid">
       <div class="ref-card">
         <div class="ref-card-title" style="color:#A855F7">&#127891; COURSE OVERVIEW</div>
-        <div class="ref-row"><div class="ref-cmd">Duration</div><div class="ref-desc">5 Days / 40 Hours (instructor-led with labs)</div></div>
+        <div class="ref-row"><div class="ref-cmd">Duration</div><div class="ref-desc">5 Weeks / 40 Hours (self-paced or instructor-led with labs)</div></div>
         <div class="ref-row"><div class="ref-cmd">Target Audience</div><div class="ref-desc">Experienced SQL Server DBAs (2+ years)</div></div>
         <div class="ref-row"><div class="ref-cmd">Prerequisite</div><div class="ref-desc">Solid SQL Server DBA knowledge</div></div>
         <div class="ref-row"><div class="ref-cmd">Oracle Version</div><div class="ref-desc">Oracle Database 12c/19c/21c</div></div>
-        <div class="ref-row"><div class="ref-cmd">Modules</div><div class="ref-desc">30 modules across 5 days</div></div>
+        <div class="ref-row"><div class="ref-cmd">Modules</div><div class="ref-desc">30 modules across 5 weeks</div></div>
         <div class="ref-row"><div class="ref-cmd">Philosophy</div><div class="ref-desc">Every Oracle concept taught by comparison to SQL Server equivalent</div></div>
       </div>
       <div class="ref-card">
@@ -6641,41 +7456,41 @@ su oracle      # Non-login:   .bash_profile NOT loaded → ORACLE_SID unset ✗
       </div>
     </div>
 
-    <div class="crs-section-title"><span class="crs-module-tag">30 MODULES</span> 5-DAY CURRICULUM OVERVIEW</div>
+    <div class="crs-section-title"><span class="crs-module-tag">30 MODULES</span> 5-WEEK CURRICULUM OVERVIEW</div>
     <div class="ref-grid-full">
       <div class="ref-card">
         <table class="crs-table">
-          <tr><th>Day</th><th>Module</th><th>Topic</th><th>Duration</th></tr>
-          <tr><td class="c-pur">Day 1</td><td>M1</td><td>Architecture Deep Dive — SGA, PGA, Background Processes</td><td>2h</td></tr>
-          <tr><td class="c-pur">Day 1</td><td>M2</td><td>Multitenant Architecture — CDB, PDB, CDB$ROOT</td><td>1h</td></tr>
-          <tr><td class="c-pur">Day 1</td><td>M3</td><td>Installation &amp; Configuration — DBCA, env vars, directory structure</td><td>1h</td></tr>
-          <tr><td class="c-pur">Day 1</td><td>M4</td><td>Initialization Parameters — PFILE, SPFILE, ALTER SYSTEM SET</td><td>1.5h</td></tr>
-          <tr><td class="c-pur">Day 1</td><td>M5</td><td>Startup &amp; Shutdown — 4 stages, shutdown modes</td><td>1.5h</td></tr>
-          <tr><td class="c-pur">Day 1</td><td>M6</td><td>Network Configuration — listener.ora, tnsnames.ora, sqlnet.ora</td><td>1h</td></tr>
-          <tr><td class="c-blu">Day 2</td><td>M7</td><td>Storage Architecture — Tablespaces, datafiles, segments, ASM</td><td>2h</td></tr>
-          <tr><td class="c-blu">Day 2</td><td>M8</td><td>Redo Logs &amp; Archive Logs — circular logging, ARCHIVELOG mode</td><td>1h</td></tr>
-          <tr><td class="c-blu">Day 2</td><td>M9</td><td>Control Files &amp; Alert Log — multiplexing, V$DIAG_INFO</td><td>1h</td></tr>
-          <tr><td class="c-blu">Day 2</td><td>M10</td><td>Data Type Mapping — NUMBER, VARCHAR2, DATE gotcha</td><td>1.5h</td></tr>
-          <tr><td class="c-blu">Day 2</td><td>M11</td><td>Core SQL Syntax Differences — SYSDATE, NVL, ||, DUAL, FETCH FIRST</td><td>1.5h</td></tr>
-          <tr><td class="c-blu">Day 2</td><td>M12</td><td>DDL &amp; DML Differences — CREATE TABLE, sequences, INSERT ALL, MERGE</td><td>1h</td></tr>
-          <tr><td class="c-org">Day 3</td><td>M13</td><td>Transaction Model — no auto-commit, DDL commits, SAVEPOINT</td><td>1.5h</td></tr>
-          <tr><td class="c-org">Day 3</td><td>M14</td><td>Concurrency &amp; Locking — MVCC, row-level locks, ORA-01555</td><td>1.5h</td></tr>
-          <tr><td class="c-org">Day 3</td><td>M15</td><td>PL/SQL Fundamentals — block structure, variables, control flow</td><td>1h</td></tr>
-          <tr><td class="c-org">Day 3</td><td>M16</td><td>PL/SQL Procedures, Functions &amp; Packages</td><td>2h</td></tr>
-          <tr><td class="c-org">Day 3</td><td>M17</td><td>Error Handling &amp; Triggers — EXCEPTION WHEN, :OLD/:NEW</td><td>1h</td></tr>
-          <tr><td class="c-org">Day 3</td><td>M18</td><td>Security &amp; User Management — User=Schema, privs, roles, auditing</td><td>1h</td></tr>
-          <tr><td class="c-grn">Day 4</td><td>M19</td><td>RMAN Fundamentals — connect, full/incremental, validate, retention</td><td>2h</td></tr>
-          <tr><td class="c-grn">Day 4</td><td>M20</td><td>Recovery Scenarios — complete, PITR, tablespace, datafile</td><td>1.5h</td></tr>
-          <tr><td class="c-grn">Day 4</td><td>M21</td><td>Flashback Technologies — Query, Table, Drop, Database</td><td>0.5h</td></tr>
-          <tr><td class="c-grn">Day 4</td><td>M22</td><td>Data Pump &amp; SQL*Loader — expdp/impdp, REMAP_SCHEMA</td><td>1h</td></tr>
-          <tr><td class="c-grn">Day 4</td><td>M23</td><td>Performance — EXPLAIN PLAN, DBMS_XPLAN, hints, DBMS_STATS</td><td>1.5h</td></tr>
-          <tr><td class="c-grn">Day 4</td><td>M24</td><td>AWR, ASH &amp; ADDM — snapshots, reports, wait events</td><td>1.5h</td></tr>
-          <tr><td class="c-cyn">Day 5</td><td>M25</td><td>Indexes &amp; Partitioning — B-tree, bitmap, IOT, range/list/hash</td><td>1.5h</td></tr>
-          <tr><td class="c-cyn">Day 5</td><td>M26</td><td>Data Guard — physical standby, protection modes, switchover</td><td>1.5h</td></tr>
-          <tr><td class="c-cyn">Day 5</td><td>M27</td><td>Oracle RAC — active-active, Cache Fusion, SCAN listener</td><td>1h</td></tr>
-          <tr><td class="c-cyn">Day 5</td><td>M28</td><td>Daily Operations Toolkit — SQL*Plus, EM, DBMS_SCHEDULER</td><td>1.5h</td></tr>
-          <tr><td class="c-cyn">Day 5</td><td>M29</td><td>Advanced Features — DB Links, Materialized Views, Synonyms</td><td>1h</td></tr>
-          <tr><td class="c-cyn">Day 5</td><td>M30</td><td>Comprehensive Review &amp; Assessment — 50 MCQ + practical exam</td><td>1.5h</td></tr>
+          <tr><th>Week</th><th>Module</th><th>Topic</th><th>Duration</th></tr>
+          <tr><td class="c-pur">Week 1</td><td>M1</td><td class="crs-topic-link" onclick="crsTab('architecture')">Architecture Deep Dive — SGA, PGA, Background Processes</td><td>2h</td></tr>
+          <tr><td class="c-pur">Week 1</td><td>M2</td><td class="crs-topic-link" onclick="crsTab('architecture')">Multitenant Architecture — CDB, PDB, CDB$ROOT</td><td>1h</td></tr>
+          <tr><td class="c-pur">Week 1</td><td>M3</td><td class="crs-topic-link" onclick="crsTab('architecture')">Installation &amp; Configuration — DBCA, env vars, directory structure</td><td>1h</td></tr>
+          <tr><td class="c-pur">Week 1</td><td>M4</td><td class="crs-topic-link" onclick="crsTab('storage')">Initialization Parameters — PFILE, SPFILE, ALTER SYSTEM SET</td><td>1.5h</td></tr>
+          <tr><td class="c-pur">Week 1</td><td>M5</td><td class="crs-topic-link" onclick="crsTab('storage')">Startup &amp; Shutdown — 4 stages, shutdown modes</td><td>1.5h</td></tr>
+          <tr><td class="c-pur">Week 1</td><td>M6</td><td class="crs-topic-link" onclick="crsTab('storage')">Network Configuration — listener.ora, tnsnames.ora, sqlnet.ora</td><td>1h</td></tr>
+          <tr><td class="c-blu">Week 2</td><td>M7</td><td class="crs-topic-link" onclick="crsTab('storage')">Storage Architecture — Tablespaces, datafiles, segments, ASM</td><td>2h</td></tr>
+          <tr><td class="c-blu">Week 2</td><td>M8</td><td class="crs-topic-link" onclick="crsTab('storage')">Redo Logs &amp; Archive Logs — circular logging, ARCHIVELOG mode</td><td>1h</td></tr>
+          <tr><td class="c-blu">Week 2</td><td>M9</td><td class="crs-topic-link" onclick="crsTab('storage')">Control Files &amp; Alert Log — multiplexing, V$DIAG_INFO</td><td>1h</td></tr>
+          <tr><td class="c-blu">Week 2</td><td>M10</td><td class="crs-topic-link" onclick="crsTab('sqllang')">Data Type Mapping — NUMBER, VARCHAR2, DATE gotcha</td><td>1.5h</td></tr>
+          <tr><td class="c-blu">Week 2</td><td>M11</td><td class="crs-topic-link" onclick="crsTab('sqllang')">Core SQL Syntax Differences — SYSDATE, NVL, ||, DUAL, FETCH FIRST</td><td>1.5h</td></tr>
+          <tr><td class="c-blu">Week 2</td><td>M12</td><td class="crs-topic-link" onclick="crsTab('sqllang')">DDL &amp; DML Differences — CREATE TABLE, sequences, INSERT ALL, MERGE</td><td>1h</td></tr>
+          <tr><td class="c-org">Week 3</td><td>M13</td><td class="crs-topic-link" onclick="crsTab('transactions')">Transaction Model — no auto-commit, DDL commits, SAVEPOINT</td><td>1.5h</td></tr>
+          <tr><td class="c-org">Week 3</td><td>M14</td><td class="crs-topic-link" onclick="crsTab('transactions')">Concurrency &amp; Locking — MVCC, row-level locks, ORA-01555</td><td>1.5h</td></tr>
+          <tr><td class="c-org">Week 3</td><td>M15</td><td class="crs-topic-link" onclick="crsTab('plsql')">PL/SQL Fundamentals — block structure, variables, control flow</td><td>1h</td></tr>
+          <tr><td class="c-org">Week 3</td><td>M16</td><td class="crs-topic-link" onclick="crsTab('plsql')">PL/SQL Procedures, Functions &amp; Packages</td><td>2h</td></tr>
+          <tr><td class="c-org">Week 3</td><td>M17</td><td class="crs-topic-link" onclick="crsTab('plsql')">Error Handling &amp; Triggers — EXCEPTION WHEN, :OLD/:NEW</td><td>1h</td></tr>
+          <tr><td class="c-org">Week 3</td><td>M18</td><td class="crs-topic-link" onclick="crsTab('security')">Security &amp; User Management — User=Schema, privs, roles, auditing</td><td>1h</td></tr>
+          <tr><td class="c-grn">Week 4</td><td>M19</td><td class="crs-topic-link" onclick="crsTab('backup')">RMAN Fundamentals — connect, full/incremental, validate, retention</td><td>2h</td></tr>
+          <tr><td class="c-grn">Week 4</td><td>M20</td><td class="crs-topic-link" onclick="crsTab('backup')">Recovery Scenarios — complete, PITR, tablespace, datafile</td><td>1.5h</td></tr>
+          <tr><td class="c-grn">Week 4</td><td>M21</td><td class="crs-topic-link" onclick="crsTab('backup')">Flashback Technologies — Query, Table, Drop, Database</td><td>0.5h</td></tr>
+          <tr><td class="c-grn">Week 4</td><td>M22</td><td class="crs-topic-link" onclick="crsTab('backup')">Data Pump &amp; SQL*Loader — expdp/impdp, REMAP_SCHEMA</td><td>1h</td></tr>
+          <tr><td class="c-grn">Week 4</td><td>M23</td><td class="crs-topic-link" onclick="crsTab('performance')">Performance — EXPLAIN PLAN, DBMS_XPLAN, hints, DBMS_STATS</td><td>1.5h</td></tr>
+          <tr><td class="c-grn">Week 4</td><td>M24</td><td class="crs-topic-link" onclick="crsTab('performance')">AWR, ASH &amp; ADDM — snapshots, reports, wait events</td><td>1.5h</td></tr>
+          <tr><td class="c-cyn">Week 5</td><td>M25</td><td class="crs-topic-link" onclick="crsTab('performance')">Indexes &amp; Partitioning — B-tree, bitmap, IOT, range/list/hash</td><td>1.5h</td></tr>
+          <tr><td class="c-cyn">Week 5</td><td>M26</td><td class="crs-topic-link" onclick="crsTab('highavail')">Data Guard — physical standby, protection modes, switchover</td><td>1.5h</td></tr>
+          <tr><td class="c-cyn">Week 5</td><td>M27</td><td class="crs-topic-link" onclick="crsTab('highavail')">Oracle RAC — active-active, Cache Fusion, SCAN listener</td><td>1h</td></tr>
+          <tr><td class="c-cyn">Week 5</td><td>M28</td><td class="crs-topic-link" onclick="crsTab('highavail')">Daily Operations Toolkit — SQL*Plus, EM, DBMS_SCHEDULER</td><td>1.5h</td></tr>
+          <tr><td class="c-cyn">Week 5</td><td>M29</td><td class="crs-topic-link" onclick="crsTab('highavail')">Advanced Features — DB Links, Materialized Views, Synonyms</td><td>1h</td></tr>
+          <tr><td class="c-cyn">Week 5</td><td>M30</td><td class="crs-topic-link" onclick="crsTab('highavail')">Comprehensive Review &amp; Assessment — 50 MCQ + practical exam</td><td>1.5h</td></tr>
         </table>
       </div>
     </div>
@@ -6731,7 +7546,7 @@ su oracle      # Non-login:   .bash_profile NOT loaded → ORACLE_SID unset ✗
 
   <!-- ── ARCHITECTURE ──────────────────────────────────────────── -->
   <div id="crs-architecture" class="crs-section" style="display:none">
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 1 · M1</span> INSTANCE vs DATABASE — THE CRITICAL DISTINCTION</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 1 · M1</span> INSTANCE vs DATABASE — THE CRITICAL DISTINCTION</div>
     <div class="ref-grid">
       <div class="ref-card">
         <div class="ref-card-title" style="color:#3B82F6">SQL SERVER MODEL</div>
@@ -6751,7 +7566,7 @@ su oracle      # Non-login:   .bash_profile NOT loaded → ORACLE_SID unset ✗
       </div>
     </div>
 
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 1 · M1</span> SGA — SYSTEM GLOBAL AREA (SHARED BY ALL SESSIONS)</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 1 · M1</span> SGA — SYSTEM GLOBAL AREA (SHARED BY ALL SESSIONS)</div>
     <div class="ref-grid">
       <div class="ref-card">
         <div class="ref-card-title" style="color:#C74634">SGA COMPONENTS</div>
@@ -6785,7 +7600,7 @@ FROM v$pgastat WHERE name IN
       </div>
     </div>
 
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 1 · M1</span> KEY BACKGROUND PROCESSES</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 1 · M1</span> KEY BACKGROUND PROCESSES</div>
     <div class="ref-grid-full">
       <div class="ref-card">
         <table class="crs-table">
@@ -6804,7 +7619,7 @@ FROM v$pgastat WHERE name IN
       </div>
     </div>
 
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 1 · M2</span> MULTITENANT ARCHITECTURE — CDB AND PDB</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 1 · M2</span> MULTITENANT ARCHITECTURE — CDB AND PDB</div>
     <div class="ref-grid">
       <div class="ref-card">
         <div class="ref-card-title" style="color:#C74634">CDB COMPONENTS</div>
@@ -6841,7 +7656,7 @@ DROP PLUGGABLE DATABASE pdb3 INCLUDING DATAFILES;</div>
       </div>
     </div>
 
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 1 · M3</span> INSTALLATION &amp; ENVIRONMENT</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 1 · M3</span> INSTALLATION &amp; ENVIRONMENT</div>
     <div class="ref-grid">
       <div class="ref-card">
         <div class="ref-card-title" style="color:#2ECC71">ORACLE ENVIRONMENT VARIABLES</div>
@@ -6877,7 +7692,7 @@ dbca -silent -createDatabase \
 
   <!-- ── STORAGE & CONFIG ──────────────────────────────────────── -->
   <div id="crs-storage" class="crs-section" style="display:none">
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 1 · M4</span> INIT PARAMETERS — PFILE vs SPFILE</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 1 · M4</span> INIT PARAMETERS — PFILE vs SPFILE</div>
     <div class="ref-grid">
       <div class="ref-card">
         <div class="ref-card-title" style="color:#FB923C">PFILE vs SPFILE</div>
@@ -6917,7 +7732,7 @@ ALTER SYSTEM SET SGA_TARGET=3G SCOPE=BOTH;</div>
       </div>
     </div>
 
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 1 · M5</span> STARTUP &amp; SHUTDOWN STAGES</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 1 · M5</span> STARTUP &amp; SHUTDOWN STAGES</div>
     <div class="ref-grid">
       <div class="ref-card">
         <div class="ref-card-title" style="color:#FB923C">THE 4 STARTUP STAGES</div>
@@ -6949,7 +7764,7 @@ STARTUP FORCE;           -- ABORT then STARTUP (equivalent to kill+restart)</div
       </div>
     </div>
 
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 2 · M7</span> TABLESPACES &amp; STORAGE HIERARCHY</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 2 · M7</span> TABLESPACES &amp; STORAGE HIERARCHY</div>
     <div class="ref-grid">
       <div class="ref-card">
         <div class="ref-card-title" style="color:#FB923C">STORAGE HIERARCHY</div>
@@ -6980,7 +7795,7 @@ FROM dba_tablespace_usage_metrics;</div>
       </div>
     </div>
 
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 2 · M8–M9</span> REDO LOGS, ARCHIVE LOGS &amp; CONTROL FILES</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 2 · M8–M9</span> REDO LOGS, ARCHIVE LOGS &amp; CONTROL FILES</div>
     <div class="ref-grid">
       <div class="ref-card">
         <div class="ref-card-title" style="color:#2ECC71">REDO LOG MODEL</div>
@@ -7021,7 +7836,7 @@ ALTER SYSTEM SET CONTROL_FILES=
       </div>
     </div>
 
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 1 · M6</span> NETWORK CONFIGURATION FILES</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 1 · M6</span> NETWORK CONFIGURATION FILES</div>
     <div class="ref-grid">
       <div class="ref-card">
         <div class="ref-card-title" style="color:#A855F7">LISTENER.ORA — SERVER-SIDE</div>
@@ -7064,7 +7879,7 @@ tnsping ORCL</div>
 
   <!-- ── SQL LANGUAGE ──────────────────────────────────────────── -->
   <div id="crs-sqllang" class="crs-section" style="display:none">
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 2 · M10</span> DATA TYPE MAPPING</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 2 · M10</span> DATA TYPE MAPPING</div>
     <div class="ref-grid-full">
       <div class="ref-card">
         <table class="crs-table">
@@ -7091,7 +7906,7 @@ tnsping ORCL</div>
       </div>
     </div>
 
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 2 · M11</span> CORE SQL SYNTAX DIFFERENCES</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 2 · M11</span> CORE SQL SYNTAX DIFFERENCES</div>
     <div class="ref-grid-full">
       <div class="ref-card">
         <table class="crs-table">
@@ -7116,7 +7931,7 @@ tnsping ORCL</div>
       </div>
     </div>
 
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 2 · M12</span> DDL &amp; DML SIDE-BY-SIDE</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 2 · M12</span> DDL &amp; DML SIDE-BY-SIDE</div>
     <div class="ref-grid">
       <div class="ref-card">
         <div class="ref-card-title" style="color:#00D4FF">CREATE TABLE COMPARISON</div>
@@ -7204,7 +8019,7 @@ WHEN NOT MATCHED THEN
 
   <!-- ── TRANSACTIONS ──────────────────────────────────────────── -->
   <div id="crs-transactions" class="crs-section" style="display:none">
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 3 · M13</span> TRANSACTION MODEL — THE MOST CRITICAL DIFFERENCE</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 3 · M13</span> TRANSACTION MODEL — THE MOST CRITICAL DIFFERENCE</div>
     <div class="ref-grid">
       <div class="ref-card">
         <div class="ref-card-title" style="color:#F1C40F">NO AUTO-COMMIT IN ORACLE</div>
@@ -7239,7 +8054,7 @@ COMMIT;  -- commits work before savepoint</div>
       </div>
     </div>
 
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 3 · M14</span> MVCC, LOCKING &amp; CONCURRENCY</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 3 · M14</span> MVCC, LOCKING &amp; CONCURRENCY</div>
     <div class="ref-grid">
       <div class="ref-card">
         <div class="ref-card-title" style="color:#F1C40F">HOW ORACLE MVCC WORKS</div>
@@ -7280,7 +8095,7 @@ SELECT * FROM accounts WHERE id = 1 FOR UPDATE;
 
   <!-- ── PL/SQL ─────────────────────────────────────────────────── -->
   <div id="crs-plsql" class="crs-section" style="display:none">
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 3 · M15</span> PL/SQL FUNDAMENTALS</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 3 · M15</span> PL/SQL FUNDAMENTALS</div>
     <div class="ref-grid">
       <div class="ref-card">
         <div class="ref-card-title" style="color:#FF6B9D">BLOCK STRUCTURE</div>
@@ -7355,7 +8170,7 @@ END;
       </div>
     </div>
 
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 3 · M16</span> PROCEDURES, FUNCTIONS &amp; PACKAGES</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 3 · M16</span> PROCEDURES, FUNCTIONS &amp; PACKAGES</div>
     <div class="ref-grid">
       <div class="ref-card">
         <div class="ref-card-title" style="color:#FF6B9D">STORED PROCEDURE WITH REFCURSOR</div>
@@ -7428,7 +8243,7 @@ SELECT emp_pkg.get_salary(101) FROM DUAL;</div>
       </div>
     </div>
 
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 3 · M17</span> ERROR HANDLING &amp; TRIGGERS</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 3 · M17</span> ERROR HANDLING &amp; TRIGGERS</div>
     <div class="ref-grid">
       <div class="ref-card">
         <div class="ref-card-title" style="color:#FF6B9D">EXCEPTION HANDLING</div>
@@ -7496,7 +8311,7 @@ END;
 
   <!-- ── SECURITY ──────────────────────────────────────────────── -->
   <div id="crs-security" class="crs-section" style="display:none">
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 3 · M18</span> USER = SCHEMA — THE KEY CONCEPT</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 3 · M18</span> USER = SCHEMA — THE KEY CONCEPT</div>
     <div class="ref-grid">
       <div class="ref-card">
         <div class="ref-card-title" style="color:#C74634">SQL SERVER vs ORACLE IDENTITY MODEL</div>
@@ -7537,7 +8352,7 @@ REVOKE SELECT ON hr.employees FROM app_user;</div>
       </div>
     </div>
 
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 3 · M18</span> ROLES, PROFILES &amp; AUDITING</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 3 · M18</span> ROLES, PROFILES &amp; AUDITING</div>
     <div class="ref-grid">
       <div class="ref-card">
         <div class="ref-card-title" style="color:#C74634">BUILT-IN ROLES vs CUSTOM</div>
@@ -7589,7 +8404,7 @@ ORDER BY event_timestamp DESC;</div>
 
   <!-- ── BACKUP & RECOVERY ──────────────────────────────────────── -->
   <div id="crs-backup" class="crs-section" style="display:none">
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 4 · M19</span> RMAN — RECOVERY MANAGER</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 4 · M19</span> RMAN — RECOVERY MANAGER</div>
     <div class="ref-grid">
       <div class="ref-card">
         <div class="ref-card-title" style="color:#2ECC71">BACKUP TOOL COMPARISON</div>
@@ -7639,7 +8454,7 @@ CONFIGURE RETENTION POLICY TO RECOVERY WINDOW OF 14 DAYS;
       </div>
     </div>
 
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 4 · M20</span> RECOVERY SCENARIOS</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 4 · M20</span> RECOVERY SCENARIOS</div>
     <div class="ref-grid">
       <div class="ref-card">
         <div class="ref-card-title" style="color:#2ECC71">COMPLETE DATABASE RECOVERY</div>
@@ -7690,7 +8505,7 @@ SELECT object_name, original_name FROM recyclebin;</div>
       </div>
     </div>
 
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 4 · M22</span> DATA PUMP — LOGICAL EXPORT/IMPORT</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 4 · M22</span> DATA PUMP — LOGICAL EXPORT/IMPORT</div>
     <div class="ref-grid">
       <div class="ref-card">
         <div class="ref-card-title" style="color:#2ECC71">EXPDP — EXPORT DATA PUMP</div>
@@ -7739,7 +8554,7 @@ impdp system/pwd NETWORK_LINK=source_db
 
   <!-- ── PERFORMANCE ───────────────────────────────────────────── -->
   <div id="crs-performance" class="crs-section" style="display:none">
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 4 · M23</span> EXECUTION PLANS &amp; OPTIMIZER HINTS</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 4 · M23</span> EXECUTION PLANS &amp; OPTIMIZER HINTS</div>
     <div class="ref-grid">
       <div class="ref-card">
         <div class="ref-card-title" style="color:#34D399">EXPLAIN PLAN &amp; DBMS_XPLAN</div>
@@ -7792,7 +8607,7 @@ SELECT * FROM TABLE(
       </div>
     </div>
 
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 4 · M24</span> AWR, ASH &amp; ADDM</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 4 · M24</span> AWR, ASH &amp; ADDM</div>
     <div class="ref-grid">
       <div class="ref-card">
         <div class="ref-card-title" style="color:#34D399">DIAGNOSTIC TOOLS COMPARISON</div>
@@ -7842,7 +8657,7 @@ FETCH FIRST 15 ROWS ONLY;</div>
       </div>
     </div>
 
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 5 · M25</span> INDEXES &amp; PARTITIONING</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 5 · M25</span> INDEXES &amp; PARTITIONING</div>
     <div class="ref-grid">
       <div class="ref-card">
         <div class="ref-card-title" style="color:#34D399">ORACLE INDEX TYPES</div>
@@ -7892,7 +8707,7 @@ SELECT * FROM sales WHERE sale_date = DATE '2026-03-01';</div>
 
   <!-- ── HA & OPERATIONS ───────────────────────────────────────── -->
   <div id="crs-highavail" class="crs-section" style="display:none">
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 5 · M26–M27</span> HIGH AVAILABILITY COMPARISON</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 5 · M26–M27</span> HIGH AVAILABILITY COMPARISON</div>
     <div class="ref-grid-full">
       <div class="ref-card">
         <table class="crs-table">
@@ -7909,7 +8724,7 @@ SELECT * FROM sales WHERE sale_date = DATE '2026-03-01';</div>
       </div>
     </div>
 
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 5 · M28</span> DAILY OPERATIONS TOOLKIT</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 5 · M28</span> DAILY OPERATIONS TOOLKIT</div>
     <div class="ref-grid">
       <div class="ref-card">
         <div class="ref-card-title" style="color:#E74C3C">SQL*PLUS ESSENTIALS</div>
@@ -7975,7 +8790,7 @@ EXEC DBMS_SCHEDULER.DISABLE('NIGHTLY_STATS');</div>
       </div>
     </div>
 
-    <div class="crs-section-title"><span class="crs-module-tag">DAY 5 · M28</span> V$ VIEWS vs DMVs &amp; ESSENTIAL MONITORING</div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 5 · M28</span> V$ VIEWS vs DMVs &amp; ESSENTIAL MONITORING</div>
     <div class="ref-grid">
       <div class="ref-card">
         <div class="ref-card-title" style="color:#E74C3C">V$ VIEW ↔ DMV MAPPING</div>
@@ -8062,6 +8877,135 @@ ORDER BY cpu_time DESC FETCH FIRST 5 ROWS ONLY;</div>
         <div class="crs-quiz-q"><div class="q-text">Q8. What Oracle feature = SQL Server Always On AG?</div><div class="q-ans">&#9654; Data Guard</div></div>
         <div class="crs-quiz-q"><div class="q-text">Q9. How do you return a result set from an Oracle stored procedure?</div><div class="q-ans">&#9654; OUT parameter of type SYS_REFCURSOR</div></div>
         <div class="crs-quiz-q"><div class="q-text">Q10. What enables Oracle point-in-time recovery?</div><div class="q-ans">&#9654; ARCHIVELOG mode (= SQL Server FULL recovery model)</div></div>
+      </div>
+    </div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 5 · M26</span> DATA GUARD — DETAILED CONFIGURATION</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#00D4FF">DATA GUARD PROTECTION MODES</div>
+        <table class="crs-table">
+          <tr><th>Mode</th><th>Redo Sync</th><th>Performance Impact</th><th>Data Loss Risk</th></tr>
+          <tr><td class="c-red">Maximum Protection</td><td>Synchronous — LGWR waits</td><td>High — primary stalls if standby unreachable</td><td class="c-grn">Zero</td></tr>
+          <tr><td class="c-yel">Maximum Availability</td><td>Synchronous — switches async if standby down</td><td>Low in normal ops</td><td class="c-yel">Near-zero</td></tr>
+          <tr><td class="c-grn">Maximum Performance</td><td>Asynchronous — LGWR continues</td><td>Minimal</td><td class="c-org">Seconds of data</td></tr>
+        </table>
+        <div class="ref-code" style="margin-top:8px">-- Set protection mode (primary, MOUNT stage)
+ALTER DATABASE SET STANDBY DATABASE TO MAXIMIZE AVAILABILITY;
+
+-- Switchover to standby (planned, zero data loss)
+-- On primary:
+ALTER DATABASE COMMIT TO SWITCHOVER TO STANDBY WITH SESSION SHUTDOWN;
+-- On standby (becomes new primary):
+ALTER DATABASE COMMIT TO SWITCHOVER TO PRIMARY WITH SESSION SHUTDOWN;
+ALTER DATABASE OPEN;
+
+-- Failover (emergency, standby becomes primary)
+ALTER DATABASE RECOVER MANAGED STANDBY DATABASE FINISH;
+ALTER DATABASE ACTIVATE STANDBY DATABASE;</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#00D4FF">SWITCHOVER vs FAILOVER</div>
+        <table class="crs-table">
+          <tr><th>Aspect</th><th>Switchover</th><th>Failover</th></tr>
+          <tr><td>Primary state</td><td class="c-grn">Online and healthy</td><td class="c-red">Failed or unreachable</td></tr>
+          <tr><td>Data loss</td><td class="c-grn">Zero</td><td class="c-yel">Possible (async mode)</td></tr>
+          <tr><td>Reversible</td><td class="c-grn">Yes — easy switchback</td><td class="c-org">Requires reinstate</td></tr>
+          <tr><td>Use case</td><td>Planned maintenance</td><td>DR emergency</td></tr>
+          <tr><td>SQL Server equiv</td><td>Manual AG failover</td><td>Forced failover</td></tr>
+        </table>
+        <div class="crs-tip-box">SQL Server DBA note: Switchover = "manual planned failover" in Always On AG (ALTER AVAILABILITY GROUP ... FAILOVER). Failover = forced failover with ALLOW_DATA_LOSS in SQL Server.</div>
+      </div>
+    </div>
+
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 5 · M27</span> RAC — REAL APPLICATION CLUSTERS</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#2ECC71">RAC KEY CONCEPTS</div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#2ECC71">Active-Active</div><div class="ref-desc">All nodes serve read/write traffic simultaneously — unlike SQL Server FCI which is active-passive</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#F1C40F">Cache Fusion</div><div class="ref-desc">Interconnect protocol that ships data blocks between nodes instead of disk I/O — each node has its own SGA; Cache Fusion synchronizes buffer caches</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#00D4FF">SCAN Listener</div><div class="ref-desc">Single Client Access Name — clients connect to 1 virtual IP (3 physical IPs round-robin); Oracle routes to least-loaded node. Equivalent to SQL Server AG listener</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#FB923C">GCS / GES</div><div class="ref-desc">Global Cache Services / Global Enqueue Services — coordinate locks and data blocks across nodes via interconnect</div></div>
+        <div class="ref-code" style="margin-top:8px">-- RAC-specific views
+SELECT inst_id, instance_name, status FROM gv$instance;
+SELECT inst_id, sid, username, status FROM gv$session;
+
+-- Check interconnect
+SELECT * FROM v$cluster_interconnects;
+
+-- Services (route connections to specific nodes)
+EXEC DBMS_SERVICE.CREATE_SERVICE('app_svc','app_svc');
+EXEC DBMS_SERVICE.START_SERVICE('app_svc');</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#2ECC71">RAC vs SQL SERVER FCI vs AG</div>
+        <table class="crs-table">
+          <tr><th>Feature</th><th>Oracle RAC</th><th>SQL Server FCI</th><th>SQL Server AG</th></tr>
+          <tr><td>Active nodes</td><td class="c-grn">All active (R/W)</td><td>1 active, N passive</td><td>1 R/W + readable secondaries</td></tr>
+          <tr><td>Shared storage</td><td class="c-grn">Yes (ASM/SAN)</td><td class="c-grn">Yes (SAN)</td><td class="c-org">No — log shipping</td></tr>
+          <tr><td>Automatic failover</td><td class="c-grn">Yes</td><td class="c-grn">Yes</td><td class="c-grn">Yes</td></tr>
+          <tr><td>Scale out reads</td><td class="c-grn">Yes</td><td class="c-red">No</td><td class="c-grn">Yes (secondary)</td></tr>
+          <tr><td>License cost</td><td class="c-red">Very high (EE + RAC)</td><td>Included in EE</td><td>Included in EE</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 5 · M28</span> DAILY OPERATIONS CHECKLIST</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#FB923C">MORNING HEALTH CHECKS</div>
+        <div class="ref-code">-- 1. Check database and instance status
+SELECT instance_name, status, database_status FROM v$instance;
+
+-- 2. Check alert log for ORA- errors (from OS)
+-- tail -100 $ORACLE_BASE/diag/rdbms/orcl/orcl/trace/alert_ORCL.log | grep ORA-
+
+-- 3. Check tablespace usage (alert if >85%)
+SELECT tablespace_name,
+  ROUND((1 - free_space/tablespace_size)*100,1) pct_used
+FROM dba_tablespace_usage_metrics
+WHERE ROUND((1 - free_space/tablespace_size)*100,1) > 80
+ORDER BY pct_used DESC;
+
+-- 4. Check failed jobs
+SELECT job_name, run_duration, error# FROM dba_scheduler_job_run_details
+WHERE status = 'FAILED'
+AND req_start_date > SYSDATE - 1;
+
+-- 5. Check for blocking sessions
+SELECT blocking_session, sid, wait_class, seconds_in_wait
+FROM v$session
+WHERE blocking_session IS NOT NULL;
+
+-- 6. Verify archive log destination
+SELECT dest_id, status, target, archiver, schedule
+FROM v$archive_dest WHERE status = 'VALID';</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#FB923C">WEEKLY MAINTENANCE TASKS</div>
+        <div class="ref-code">-- Update statistics (equivalent to UPDATE STATISTICS in SQL Server)
+EXEC DBMS_STATS.GATHER_SCHEMA_STATS('HR', cascade=>TRUE);
+EXEC DBMS_STATS.GATHER_DATABASE_STATS(cascade=>TRUE);
+
+-- Check for invalid objects
+SELECT owner, object_name, object_type, status
+FROM dba_objects WHERE status = 'INVALID'
+ORDER BY owner, object_type;
+
+-- Recompile invalid objects
+EXEC UTL_RECOMP.RECOMP_SERIAL('HR');
+
+-- Check undo usage and retention
+SELECT name, value FROM v$parameter
+WHERE name IN ('undo_retention','undo_tablespace');
+
+SELECT to_char(begin_time,'HH24:MI') time,
+  undoblks, txncount, maxconcurrency
+FROM v$undostat ORDER BY begin_time DESC
+FETCH FIRST 10 ROWS ONLY;
+
+-- RMAN crosscheck and delete expired
+-- RMAN> CROSSCHECK BACKUP;
+-- RMAN> DELETE EXPIRED BACKUP;</div>
       </div>
     </div>
   </div><!-- /crs-highavail -->
@@ -9090,7 +10034,7 @@ function switchView(v) {
     v === 'security'    ? 'SECURITY — ORACLE DATABASE DEFENSE-IN-DEPTH SECURITY ARCHITECTURE' :
     v === 'perftune'    ? 'PERFORMANCE TUNING — AWR, ADDM, ASH, SQL TUNING & OPTIMIZATION' :
     v === 'networking'   ? 'NETWORKING — ORACLE NET, LISTENERS, CONNECTION MANAGEMENT & LOAD BALANCING' :
-    v === 'course'      ? 'COURSE — SQL SERVER TO ORACLE DBA 5-DAY TRANSITION COURSE' :
+    v === 'course'      ? 'COURSE — SQL SERVER TO ORACLE DBA 5-WEEK TRANSITION COURSE' :
                           'CHEATSHEET — ORACLE COMMANDS, COMPONENTS, INDEXES & PARTITIONING QUICK REFERENCE';
 
   // Update legend visibility and content per view

@@ -6,6 +6,23 @@
     <title>SQL to Oracle Converter</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
+<script>
+(function() {
+  var s = sessionStorage.getItem('ora_auth_session_v2');
+  if (!s) { window.location.replace('/'); return; }
+  var session = JSON.parse(s);
+  if (session.role === 'admin') return; // admin always has access
+  try {
+    var raw = localStorage.getItem('oracle_tab_unlocks');
+    var unlocked = raw ? JSON.parse(raw) : ['standard'];
+    if (unlocked.indexOf('sql_converter') < 0) {
+      window.location.replace('/architecture');
+    }
+  } catch(e) {
+    window.location.replace('/architecture');
+  }
+})();
+</script>
 <body>
     <header>
         <div class="header-inner">
