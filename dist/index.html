@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oracle Database Architecture — Process & Data Flow</title>
+  <script type="module" crossorigin src="/assets/index-B9Bn8omV.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-Bc7zE2pq.css">
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="header">
+  <div class="h-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="486.67 -662.98 466.66 300.52"><path d="M705.47,-511.18 C705.47,-512.52 704.66,-513.68 703.50,-514.18 C702.63,-516.21 702.43,-518.15 702.93,-519.95 C703.69,-522.66 705.82,-524.63 707.29,-525.71 C708.05,-525.16 708.99,-524.83 710.01,-524.83 C712.60,-524.83 714.70,-526.93 714.70,-529.52 C714.70,-532.11 712.60,-534.21 710.01,-534.21 C707.61,-534.21 705.66,-532.41 705.38,-530.09 C703.43,-528.81 699.73,-525.85 698.43,-521.25 C697.62,-518.38 697.88,-515.40 699.17,-512.37 C699.02,-512.00 698.94,-511.60 698.94,-511.18 C698.94,-509.38 700.40,-507.91 702.20,-507.91 C704.01,-507.91 705.47,-509.38 705.47,-511.18 Z" fill="#fd7e04"/><path d="M714.70,-549.63 C714.70,-552.59 712.30,-554.98 709.34,-554.98 C707.23,-554.98 705.42,-553.75 704.55,-551.97 L699.58,-551.97 C700.51,-554.72 703.22,-558.10 705.77,-560.69 C706.72,-559.84 707.96,-559.30 709.34,-559.30 C712.30,-559.30 714.70,-561.70 714.70,-564.66 C714.70,-567.61 712.30,-570.01 709.34,-570.01 C706.70,-570.01 704.52,-568.10 704.08,-565.58 C701.52,-563.22 695.14,-556.76 694.62,-550.88 L683.73,-543.48 C683.10,-543.82 682.38,-544.03 681.61,-544.03 C679.11,-544.03 677.07,-542.00 677.07,-539.49 C677.07,-536.98 679.11,-534.95 681.61,-534.95 C684.11,-534.95 686.13,-536.97 686.15,-539.46 L697.65,-547.29 L704.55,-547.29 C705.42,-545.51 707.23,-544.27 709.34,-544.27 C712.30,-544.27 714.70,-546.67 714.70,-549.63 Z" fill="#fd7e04"/><path d="M690.63,-521.61 L691.09,-521.63 C691.09,-521.70 690.93,-527.33 697.48,-530.96 C698.62,-530.24 700.04,-529.92 701.56,-530.28 C703.60,-530.76 705.21,-532.45 705.58,-534.51 C706.18,-537.90 703.59,-540.84 700.31,-540.84 C697.35,-540.84 694.95,-538.45 694.95,-535.49 C694.95,-535.30 694.99,-535.12 695.01,-534.94 C689.57,-531.87 687.55,-527.63 686.83,-524.71 C681.13,-526.43 677.35,-529.21 675.65,-533.04 C672.50,-540.12 676.97,-548.89 677.01,-548.97 L677.91,-550.68 L682.51,-554.07 C682.18,-554.55 681.93,-555.09 681.79,-555.67 L675.86,-553.69 C673.64,-556.18 672.29,-558.65 671.83,-561.05 C676.63,-561.70 680.17,-562.69 682.57,-564.07 C680.60,-564.15 678.97,-565.50 678.47,-567.32 C677.06,-566.79 675.03,-566.25 672.09,-565.81 C673.46,-570.33 677.57,-573.49 678.40,-574.10 C679.14,-573.49 679.82,-572.85 680.36,-572.22 C681.05,-572.66 681.86,-572.92 682.74,-572.92 C684.12,-572.92 685.35,-572.29 686.16,-571.31 C685.26,-574.80 681.58,-577.69 679.70,-578.97 C679.15,-580.38 679.36,-581.27 679.66,-581.87 C680.16,-582.90 681.21,-583.85 682.48,-584.68 C685.85,-581.96 691.81,-576.36 692.43,-572.14 C692.53,-571.45 692.41,-570.88 692.18,-570.36 C691.99,-570.38 691.81,-570.41 691.61,-570.41 C688.79,-570.41 686.57,-567.83 687.18,-564.90 C687.54,-563.18 688.92,-561.80 690.64,-561.44 C693.57,-560.83 696.15,-563.05 696.15,-565.87 C696.15,-566.39 696.05,-566.88 695.89,-567.34 C696.93,-568.93 697.36,-570.81 697.06,-572.82 C696.27,-578.18 690.71,-583.78 687.10,-586.92 C687.85,-587.20 688.56,-587.41 689.22,-587.59 L695.00,-588.92 C694.94,-589.22 694.90,-589.53 694.90,-589.85 C694.90,-590.42 695.01,-590.95 695.20,-591.45 L692.22,-593.00 C692.10,-593.47 692.20,-593.64 692.24,-593.70 C693.25,-595.20 698.40,-596.26 702.40,-596.27 C704.98,-593.17 708.58,-587.85 708.37,-583.60 C708.28,-581.90 707.57,-580.52 706.20,-579.37 C705.18,-579.83 703.99,-580.01 702.73,-579.70 C700.65,-579.20 699.01,-577.45 698.69,-575.33 C698.21,-572.11 700.60,-569.32 703.68,-569.15 C705.17,-569.07 706.58,-569.76 707.61,-570.84 C709.47,-572.79 709.52,-574.34 709.18,-575.75 C711.59,-577.76 712.89,-580.32 713.04,-583.37 C713.28,-588.15 710.49,-593.19 707.95,-596.72 C706.48,-598.78 706.96,-601.76 709.13,-603.05 C709.49,-603.26 709.86,-603.40 710.25,-603.46 C712.91,-603.82 715.28,-601.75 715.28,-599.06 L715.28,-518.61 C715.28,-513.20 712.04,-508.20 706.96,-506.34 C704.94,-505.61 703.08,-505.48 701.40,-505.97 C695.18,-507.77 691.54,-517.77 690.63,-521.61 M703.51,-498.64 C704.36,-498.64 705.45,-498.93 706.68,-499.41 C716.27,-503.19 722.30,-512.79 722.30,-523.11 L722.30,-595.02 C722.30,-605.13 718.15,-608.44 713.30,-610.10 C712.28,-610.44 710.11,-610.53 709.34,-610.42 C705.68,-609.94 702.61,-607.52 700.20,-603.22 C696.38,-602.97 689.29,-601.91 686.41,-597.61 C685.77,-596.67 685.18,-595.36 685.13,-593.68 C681.43,-592.39 675.69,-589.71 673.36,-584.98 C672.34,-582.91 672.07,-580.67 672.54,-578.39 C669.83,-576.02 665.46,-571.28 664.72,-564.81 C664.14,-559.74 665.84,-554.76 669.78,-549.96 C668.24,-546.07 665.85,-537.84 669.21,-530.23 C671.72,-524.54 676.80,-520.47 684.31,-518.11 C685.76,-513.37 690.16,-501.93 699.43,-499.23 C700.76,-498.84 702.12,-498.64 703.51,-498.64 Z" fill="#fd7e04"/><path d="M725.62,-540.33 C725.55,-540.33 725.49,-540.34 725.43,-540.34 L725.43,-533.32 C725.49,-533.31 725.55,-533.31 725.62,-533.31 C737.18,-533.31 746.59,-542.55 746.59,-553.91 C746.59,-565.26 737.18,-574.50 725.62,-574.50 C725.55,-574.50 725.49,-574.49 725.43,-574.49 L725.43,-567.46 C725.49,-567.47 725.55,-567.47 725.62,-567.47 C733.31,-567.47 739.57,-561.39 739.57,-553.91 C739.57,-546.42 733.31,-540.33 725.62,-540.33 Z" fill="#2680fd"/><path d="M762.15,-536.76 L762.52,-537.64 C762.89,-538.51 763.60,-539.20 764.48,-539.55 C778.90,-545.18 778.90,-545.86 778.90,-548.30 L778.90,-560.00 C778.91,-562.50 778.91,-563.21 764.51,-568.40 C763.59,-568.74 762.84,-569.44 762.46,-570.35 L762.08,-571.24 C761.71,-572.13 761.72,-573.13 762.11,-574.01 C763.45,-577.08 764.47,-579.49 765.23,-581.41 C765.95,-583.23 766.43,-584.60 766.73,-585.66 C766.75,-585.73 766.77,-585.81 766.79,-585.88 C766.80,-585.90 766.80,-585.91 766.81,-585.93 C766.81,-585.94 766.81,-585.95 766.81,-585.95 C766.87,-586.17 766.92,-586.37 766.96,-586.56 C767.42,-588.74 766.85,-589.29 765.95,-590.17 L757.48,-598.44 C755.76,-600.11 755.23,-600.62 741.30,-594.35 C740.42,-593.95 739.42,-593.93 738.53,-594.29 L737.43,-594.74 C736.55,-595.09 735.85,-595.79 735.49,-596.67 C729.75,-610.74 729.02,-610.74 726.66,-610.74 L724.74,-610.74 L724.74,-603.71 C725.95,-601.25 728.24,-595.89 730.09,-591.29 L730.09,-591.29 C730.45,-590.40 731.15,-589.70 732.03,-589.34 L738.70,-586.65 C739.59,-586.29 740.59,-586.31 741.47,-586.71 L741.47,-586.71 C746.01,-588.78 751.38,-591.10 753.97,-592.05 L759.63,-586.53 C759.48,-586.12 759.30,-585.63 759.09,-585.10 C758.54,-583.67 757.79,-581.85 756.97,-579.91 C756.17,-578.00 755.30,-575.97 754.46,-574.09 C754.07,-573.21 754.06,-572.20 754.43,-571.30 L757.18,-564.77 C757.57,-563.86 758.31,-563.16 759.24,-562.83 L759.25,-562.83 C763.90,-561.17 769.32,-559.11 771.87,-557.99 L771.87,-550.27 C769.35,-549.08 763.88,-546.84 759.17,-545.03 C758.28,-544.68 757.57,-543.99 757.20,-543.11 L754.46,-536.59 C754.07,-535.66 754.09,-534.62 754.52,-533.71 L754.52,-533.71 C756.61,-529.35 758.94,-524.17 759.94,-521.60 L754.29,-516.08 C751.67,-516.98 746.15,-519.19 741.48,-521.18 L741.48,-521.18 C740.62,-521.55 739.65,-521.56 738.79,-521.21 L732.12,-518.51 C731.21,-518.14 730.49,-517.40 730.14,-516.48 C728.45,-511.91 726.34,-506.59 725.19,-504.10 L720.74,-504.10 L720.74,-497.08 L727.16,-497.08 C729.58,-497.08 730.34,-497.08 735.65,-511.13 C735.99,-512.05 736.71,-512.79 737.62,-513.15 L738.73,-513.60 C739.59,-513.95 740.56,-513.94 741.41,-513.58 C755.64,-507.59 756.11,-508.06 757.84,-509.72 L766.32,-518.01 C768.07,-519.74 768.62,-520.28 762.21,-533.90 C761.79,-534.80 761.77,-535.84 762.15,-536.76 Z" fill="#2680fd"/><path d="M718.06,-638.05 C717.85,-636.19 717.97,-620.00 717.95,-615.62 L721.91,-615.57 C722.08,-623.20 722.19,-636.51 722.03,-638.02 C724.75,-638.60 727.21,-640.38 728.55,-643.19 C730.37,-647.02 729.30,-651.73 726.01,-654.41 C721.63,-657.98 715.29,-656.90 712.27,-652.36 C710.11,-649.12 710.38,-644.85 712.59,-641.65 C714.08,-639.50 716.04,-638.50 718.06,-638.05 Z" fill="#2680fd"/><path d="M773.09,-585.03 C779.64,-588.96 790.94,-595.99 792.13,-596.93 C794.08,-594.94 796.90,-593.81 799.98,-594.19 C804.20,-594.70 807.60,-598.12 808.11,-602.33 C808.78,-607.95 804.48,-612.73 799.03,-612.85 C795.14,-612.94 791.68,-610.43 790.15,-606.85 C789.12,-604.44 789.33,-602.25 790.03,-600.31 C788.35,-599.48 774.73,-590.73 771.02,-588.41 Z" fill="#2680fd"/><path d="M809.00,-515.48 C807.49,-519.06 803.77,-521.19 799.88,-521.10 C797.26,-521.05 795.35,-519.96 793.87,-518.52 C792.42,-519.72 778.85,-528.52 775.20,-530.94 L772.97,-527.66 C779.25,-523.32 790.31,-515.92 791.66,-515.22 C790.65,-512.62 790.78,-509.59 792.39,-506.93 C794.59,-503.30 799.10,-501.60 803.15,-502.88 C808.55,-504.58 811.13,-510.46 809.00,-515.48 Z" fill="#2680fd"/><path d="M749.04,-608.16 C751.84,-611.93 756.62,-618.57 757.08,-619.38 C758.65,-618.70 760.52,-618.72 762.18,-619.65 C764.46,-620.93 765.60,-623.66 764.90,-626.18 C763.97,-629.53 760.41,-631.24 757.28,-630.04 C755.05,-629.18 753.67,-626.95 753.64,-624.56 C753.62,-622.95 754.24,-621.75 755.10,-620.81 C754.33,-619.94 748.64,-611.79 747.07,-609.60 Z" fill="#2680fd"/><path d="M798.31,-559.22 C796.99,-558.30 796.37,-557.09 796.10,-555.85 C794.95,-555.98 785.01,-555.89 782.32,-555.90 L782.28,-553.46 C786.98,-553.36 795.16,-553.31 796.08,-553.41 C796.45,-551.74 797.54,-550.22 799.27,-549.41 C801.63,-548.29 804.52,-548.95 806.16,-550.98 C808.35,-553.67 807.69,-557.57 804.89,-559.42 C802.90,-560.75 800.28,-560.58 798.31,-559.22 Z" fill="#2680fd"/><path d="M649.85,-606.85 C648.33,-610.43 644.86,-612.94 640.97,-612.85 C635.52,-612.73 631.22,-607.94 631.89,-602.33 C632.40,-598.11 635.80,-594.70 640.02,-594.19 C643.10,-593.81 645.92,-594.94 647.87,-596.93 C649.06,-595.99 660.36,-588.96 666.91,-585.03 L668.98,-588.41 C665.27,-590.73 651.66,-599.48 649.97,-600.31 C650.67,-602.25 650.88,-604.44 649.85,-606.85 Z" fill="#2680fd"/><path d="M646.13,-518.52 C644.65,-519.96 642.74,-521.05 640.12,-521.10 C636.23,-521.19 632.51,-519.06 631.00,-515.48 C628.87,-510.46 631.45,-504.58 636.85,-502.88 C640.90,-501.60 645.41,-503.30 647.61,-506.93 C649.22,-509.59 649.35,-512.62 648.34,-515.22 C649.69,-515.92 660.75,-523.32 667.03,-527.67 L664.80,-530.94 C661.15,-528.52 647.58,-519.72 646.13,-518.52 Z" fill="#2680fd"/><path d="M692.93,-609.60 C691.36,-611.79 685.67,-619.94 684.90,-620.81 C685.76,-621.75 686.38,-622.95 686.36,-624.56 C686.33,-626.95 684.95,-629.18 682.71,-630.04 C679.59,-631.24 676.03,-629.53 675.10,-626.18 C674.40,-623.66 675.54,-620.93 677.82,-619.65 C679.48,-618.72 681.35,-618.70 682.92,-619.38 C683.38,-618.57 688.16,-611.93 690.96,-608.16 Z" fill="#2680fd"/><path d="M640.73,-549.41 C642.46,-550.23 643.55,-551.74 643.92,-553.41 C644.84,-553.31 653.02,-553.36 657.72,-553.46 L657.68,-555.90 C654.99,-555.89 645.04,-555.98 643.90,-555.85 C643.63,-557.10 643.01,-558.30 641.69,-559.22 C639.72,-560.58 637.10,-560.75 635.11,-559.42 C632.31,-557.57 631.65,-553.68 633.84,-550.98 C635.48,-548.95 638.37,-548.29 640.73,-549.41 Z" fill="#2680fd"/><path d="M744.76,-494.39 L698.75,-494.39 C696.81,-494.39 695.24,-492.82 695.24,-490.88 C695.24,-488.94 696.81,-487.37 698.75,-487.37 L744.76,-487.37 C746.70,-487.37 748.27,-488.94 748.27,-490.88 C748.27,-492.82 746.70,-494.39 744.76,-494.39 Z" fill="#2680fd"/><path d="M734.18,-484.25 L707.59,-484.25 C705.65,-484.25 704.08,-482.67 704.08,-480.73 C704.08,-478.79 705.65,-477.22 707.59,-477.22 L734.18,-477.22 C736.12,-477.22 737.69,-478.79 737.69,-480.73 C737.69,-482.67 736.12,-484.25 734.18,-484.25 Z" fill="#2680fd"/><path d="M729.84,-474.49 L714.39,-474.49 C712.45,-474.49 710.88,-472.91 710.88,-470.97 C710.88,-469.03 712.45,-467.46 714.39,-467.46 L716.96,-467.46 C716.96,-464.87 719.06,-462.78 721.64,-462.78 L722.42,-462.78 C725.01,-462.78 727.11,-464.87 727.11,-467.46 L729.84,-467.46 C731.78,-467.46 733.35,-469.03 733.35,-470.97 C733.35,-472.91 731.78,-474.49 729.84,-474.49 Z" fill="#2680fd"/><path d="M681.66,-569.56 C681.80,-570.22 681.26,-571.20 680.36,-572.23 C679.13,-571.44 678.31,-570.06 678.31,-568.49 C678.31,-568.08 678.37,-567.69 678.47,-567.32 C681.27,-568.37 681.62,-569.39 681.66,-569.56 Z" fill="#fd7e04"/><path d="M687.17,-568.49 C687.17,-569.56 686.79,-570.54 686.16,-571.31 C686.38,-570.43 686.44,-569.51 686.24,-568.58 C685.84,-566.75 684.63,-565.27 682.57,-564.07 C682.62,-564.07 682.68,-564.06 682.74,-564.06 C685.19,-564.06 687.17,-566.05 687.17,-568.49 Z" fill="#fd7e04"/><path d="M686.24,-568.58 C686.44,-569.51 686.38,-570.43 686.16,-571.31 C685.35,-572.29 684.12,-572.92 682.74,-572.92 C681.87,-572.92 681.05,-572.66 680.37,-572.23 C681.26,-571.20 681.80,-570.22 681.66,-569.56 C681.62,-569.39 681.27,-568.37 678.47,-567.32 C678.97,-565.50 680.61,-564.15 682.57,-564.07 C684.63,-565.27 685.84,-566.75 686.24,-568.58 Z" fill="#fd7e04"/><path d="M686.11,-552.22 C688.56,-552.22 690.54,-554.21 690.54,-556.65 C690.54,-559.10 688.56,-561.08 686.11,-561.08 C683.66,-561.08 681.68,-559.10 681.68,-556.65 C681.68,-556.32 681.72,-555.99 681.79,-555.67 L687.08,-557.43 L682.51,-554.07 C683.32,-552.96 684.63,-552.22 686.11,-552.22 Z" fill="#fd7e04"/><path d="M681.79,-555.67 C681.93,-555.09 682.18,-554.55 682.51,-554.07 L687.08,-557.43 Z" fill="#fd7e04"/><path d="M699.33,-585.42 C701.78,-585.42 703.76,-587.40 703.76,-589.85 C703.76,-592.30 701.78,-594.28 699.33,-594.28 C697.45,-594.28 695.85,-593.10 695.20,-591.45 L698.50,-589.73 L695.00,-588.92 C695.43,-586.92 697.20,-585.42 699.33,-585.42 Z" fill="#fd7e04"/><path d="M695.20,-591.45 C695.01,-590.95 694.90,-590.42 694.90,-589.85 C694.90,-589.53 694.94,-589.22 695.00,-588.92 L698.50,-589.73 Z" fill="#fd7e04"/><path d="M505.78,-443.26 L491.67,-443.26 L491.67,-450.89 L528.28,-450.89 L528.28,-443.26 L514.17,-443.26 L514.17,-406.39 L505.78,-406.39 Z" fill="#2680fd"/><path d="M539.66,-428.19 C539.85,-420.88 543.79,-413.06 554.28,-413.06 C564.77,-413.06 568.71,-420.95 568.84,-428.26 C568.96,-435.76 564.77,-444.15 554.28,-444.15 C543.79,-444.15 539.47,-435.69 539.66,-428.19 M577.10,-428.38 C576.97,-416.88 569.92,-405.37 554.28,-405.37 C538.64,-405.37 531.40,-416.62 531.40,-428.32 C531.40,-440.02 538.90,-451.78 554.28,-451.78 C569.60,-451.78 577.23,-440.02 577.10,-428.38 Z" fill="#2680fd"/><path d="M591.72,-443.07 L591.72,-428.83 L604.50,-428.83 C609.84,-428.83 612.13,-432.39 612.13,-435.95 C612.13,-439.51 609.77,-443.07 604.50,-443.07 M622.74,-406.39 L612.76,-406.39 L599.79,-421.26 L591.72,-421.26 L591.72,-406.39 L583.33,-406.39 L583.33,-450.95 C590.39,-450.95 597.44,-450.89 604.50,-450.89 C614.99,-450.82 620.52,-443.83 620.52,-436.14 C620.52,-430.04 617.72,-423.87 609.27,-422.15 L622.74,-406.96 Z" fill="#2680fd"/><path d="M665.40,-411.98 C660.82,-407.47 654.91,-405.37 648.49,-405.37 C631.96,-405.37 624.97,-416.75 624.90,-428.32 C624.84,-439.95 632.40,-451.78 648.49,-451.78 C654.53,-451.78 660.25,-449.49 664.82,-444.97 L659.23,-439.57 C656.31,-442.43 652.36,-443.77 648.49,-443.77 C637.74,-443.77 633.10,-435.76 633.17,-428.32 C633.23,-420.95 637.49,-413.25 648.49,-413.25 C652.36,-413.25 656.75,-414.84 659.68,-417.77 Z" fill="#2680fd"/><path d="M700.42,-406.32 L700.42,-424.31 L678.55,-424.31 L678.55,-406.32 L670.16,-406.32 L670.16,-450.82 L678.55,-450.82 L678.55,-432.07 L700.42,-432.07 L700.42,-450.82 L708.75,-450.82 L708.75,-406.32 Z" fill="#2680fd"/><path d="M759.79,-406.32 L759.79,-424.31 L737.92,-424.31 L737.92,-406.32 L729.53,-406.32 L729.53,-450.82 L737.92,-450.82 L737.92,-432.07 L759.79,-432.07 L759.79,-450.82 L768.12,-450.82 L768.12,-406.32 Z" fill="#2680fd"/><path d="M782.29,-428.19 C782.48,-420.88 786.43,-413.06 796.91,-413.06 C807.40,-413.06 811.34,-420.95 811.47,-428.26 C811.60,-435.76 807.40,-444.15 796.91,-444.15 C786.43,-444.15 782.10,-435.69 782.29,-428.19 M819.74,-428.38 C819.61,-416.88 812.55,-405.37 796.91,-405.37 C781.28,-405.37 774.03,-416.62 774.03,-428.32 C774.03,-440.02 781.53,-451.78 796.91,-451.78 C812.23,-451.78 819.86,-440.02 819.74,-428.38 Z" fill="#2680fd"/><path d="M864.93,-450.82 L864.93,-425.33 C864.93,-412.17 856.86,-405.44 845.67,-405.44 C834.99,-405.44 825.90,-411.92 825.90,-425.33 L825.90,-450.82 L834.23,-450.82 L834.23,-425.33 C834.23,-417.32 838.81,-413.06 845.73,-413.06 C852.66,-413.06 856.61,-417.70 856.61,-425.33 L856.61,-450.82 Z" fill="#2680fd"/><path d="M900.59,-440.14 C899.07,-442.69 894.87,-445.10 890.04,-445.10 C883.81,-445.10 880.82,-442.50 880.82,-439.19 C880.82,-435.31 885.40,-434.23 890.74,-433.60 C900.02,-432.45 908.67,-430.04 908.67,-419.42 C908.67,-409.50 899.89,-405.24 889.98,-405.24 C880.89,-405.24 873.89,-408.04 870.59,-416.18 L877.58,-419.80 C879.55,-414.91 884.70,-412.74 890.10,-412.74 C895.38,-412.74 900.34,-414.59 900.34,-419.42 C900.34,-423.62 895.95,-425.33 890.04,-425.97 C880.95,-427.05 872.56,-429.46 872.56,-439.44 C872.56,-448.60 881.59,-452.35 889.79,-452.41 C896.72,-452.41 903.90,-450.44 907.27,-443.58 Z" fill="#2680fd"/><path d="M948.33,-406.39 L915.02,-406.39 L915.02,-450.89 L948.33,-450.89 L948.33,-442.75 L923.35,-442.75 L923.35,-432.52 L947.44,-432.52 L947.44,-424.70 L923.35,-424.70 L923.35,-414.65 L948.33,-414.65 Z" fill="#2680fd"/><path d="M667.80,-393.66 L658.04,-393.66 L658.04,-398.94 L683.36,-398.94 L683.36,-393.66 L673.60,-393.66 L673.60,-368.17 L667.80,-368.17 Z" fill="#fd7e04"/><path d="M713.34,-368.17 L690.31,-368.17 L690.31,-398.94 L713.34,-398.94 L713.34,-393.31 L696.06,-393.31 L696.06,-386.23 L712.73,-386.23 L712.73,-380.83 L696.06,-380.83 L696.06,-373.88 L713.34,-373.88 Z" fill="#fd7e04"/><path d="M748.46,-372.03 C745.30,-368.91 741.21,-367.46 736.77,-367.46 C725.34,-367.46 720.50,-375.33 720.46,-383.33 C720.42,-391.38 725.65,-399.56 736.77,-399.56 C740.95,-399.56 744.90,-397.97 748.07,-394.85 L744.20,-391.11 C742.18,-393.09 739.45,-394.02 736.77,-394.02 C729.34,-394.02 726.13,-388.48 726.18,-383.33 C726.22,-378.23 729.16,-372.91 736.77,-372.91 C739.45,-372.91 742.49,-374.01 744.51,-376.03 Z" fill="#fd7e04"/><path d="M776.20,-368.12 L776.20,-380.56 L761.08,-380.56 L761.08,-368.12 L755.27,-368.12 L755.27,-398.90 L761.08,-398.90 L761.08,-385.93 L776.20,-385.93 L776.20,-398.90 L781.96,-398.90 L781.96,-368.12 Z" fill="#fd7e04"/></svg></div>
+  <div>
+    <div class="h-title">ORACLE DATABASE ARCHITECTURE</div>
+    <div class="h-sub">PROCESS · MEMORY · DATA FLOW · STORAGE — CLICK ANY COMPONENT</div>
+  </div>
+  <div class="h-tabs">
+    <button class="h-tab active" onclick="switchView('standard')">STANDARD 1:1</button>
+    <button class="h-tab" onclick="switchView('multitenant')">MULTITENANT</button>
+    <button class="h-tab" onclick="switchView('dataguard')">DATA GUARD</button>
+    <button class="h-tab" onclick="switchView('rac')">RAC</button>
+  </div>
+</div>
+
+<!-- MAIN CANVAS -->
+<div id="canvas">
+<div id="diagram">
+<div id="view-standard" class="view-container">
+
+  <!-- LAYER BACKGROUNDS -->
+  <div class="layer" id="layer-client">
+    <div class="layer-label" style="color:#2980B9">CLIENT / NETWORK LAYER</div>
+  </div>
+  <div class="layer" id="layer-sga">
+    <div class="layer-label">ORACLE INSTANCE — SYSTEM GLOBAL AREA (SGA) + PGA</div>
+  </div>
+  <div class="layer" id="layer-bridge">
+    <div class="layer-label">BACKGROUND PROCESSES — MEMORY ↔ DISK BRIDGE</div>
+  </div>
+  <div class="layer" id="layer-db">
+    <div class="layer-label">ORACLE DATABASE — PHYSICAL STORAGE (DISK / ASM)</div>
+  </div>
+
+  <!-- ══════ CLIENT LAYER ══════ -->
+  <!-- Client App -->
+  <div class="client-box" style="left:30px;top:18px;width:160px;height:60px;" onclick="showInfo('client')">
+    <div class="client-screen">
+      <div class="screen-line" style="width:28px"></div>
+      <div class="screen-line" style="width:22px;opacity:0.6"></div>
+      <div class="screen-line" style="width:26px;opacity:0.4"></div>
+    </div>
+    <div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#2980B9;font-weight:700">CLIENT APPLICATION</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--txt-dim)">JDBC · ODBC · OCI</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--txt-dim)">SQL*PLUS · APP SERVER</div>
+    </div>
+  </div>
+
+  <!-- Listener -->
+  <div class="listener-box" style="left:260px;top:18px;width:140px;height:60px;" onclick="showInfo('listener')">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="listener-ear"></div>
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#2ECC71;font-weight:700">LISTENER</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:7.5px;color:var(--txt-dim)">PORT 1521</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:7.5px;color:var(--txt-dim)">TNS RESOLVE</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ SGA COMPONENTS ══════ -->
+
+  <!-- PGA / Server Process -->
+  <div class="comp sga-comp pga-area" style="left:30px;top:126px;width:160px;height:210px;" onclick="openDetailView('pga', event)">
+    <div class="comp-inner" style="color:#A855F7">
+      <div class="proc-status"></div>
+      <div class="comp-icon">⚙</div>
+      <div class="comp-name" style="color:#A855F7">SERVER PROCESS<br>+ PGA</div>
+      <div class="comp-role" style="color:#C084FC">Private mem per session<br>Sort Area · Hash Area<br>Cursor State · Session Stack<br>Bind Variable values<br><br>Spawned by PMON/LISTENER<br>1 process per session<br>(Dedicated Server)</div>
+      <div class="trigger-badge">PER SESSION</div>
+    </div>
+  </div>
+
+  <!-- Buffer Cache -->
+  <div class="comp sga-comp bc" style="left:210px;top:126px;width:286px;height:210px;" onclick="openDetailView('buffercache', event)">
+    <div class="comp-inner" style="color:#2ECC71">
+      <div class="comp-name" style="color:#2ECC71;font-size:9px">DATABASE BUFFER CACHE</div>
+      <div class="comp-role" style="color:#6EE7A0">8KB blocks from disk, cached in RAM<br>LRU eviction · Clean/Dirty buffers<br>Hash chains by DBA (file#+block#)</div>
+      <div class="block-grid" id="block-grid">
+        <!-- JS fills this -->
+      </div>
+      <div style="display:flex;gap:8px;margin-top:6px;font-family:'Share Tech Mono',monospace;font-size:7px;color:var(--txt-dim)">
+        <span>🟩 CLEAN</span><span style="color:rgba(255,71,87,0.8)">🟥 DIRTY</span><span>LRU ORDER →</span>
+      </div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:7.5px;color:#3D7A55;margin-top:4px">
+        DB_CACHE_SIZE · KEEP · RECYCLE POOLS
+      </div>
+    </div>
+  </div>
+
+  <!-- Shared Pool -->
+  <div class="comp sga-comp sp" style="left:510px;top:126px;width:248px;height:210px;" onclick="openDetailView('sharedpool', event)">
+    <div class="comp-inner" style="color:#F1C40F">
+      <div class="comp-name" style="color:#F1C40F;font-size:9px">SHARED POOL</div>
+      <!-- Library Cache sub -->
+      <div style="border:1px solid rgba(241,196,15,0.35);border-radius:4px;padding:5px 7px;margin-top:2px">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:7.5px;color:#F1C40F">LIBRARY CACHE</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#A0801A;line-height:1.5">Parsed SQL · PL/SQL code<br>Execution plans · Cursors<br>Hard parse ↔ Soft parse</div>
+      </div>
+      <!-- Dict Cache sub -->
+      <div style="border:1px solid rgba(241,196,15,0.2);border-radius:4px;padding:5px 7px;margin-top:4px">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:7.5px;color:#D4AC0D">DATA DICT CACHE (ROW CACHE)</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#806010;line-height:1.5">Table/Column metadata<br>Privilege info · Object IDs</div>
+      </div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#504010;margin-top:4px">
+        RESULT CACHE · JAVA POOL
+      </div>
+    </div>
+  </div>
+
+  <!-- Redo Log Buffer -->
+  <div class="comp sga-comp rlb" style="left:772px;top:126px;width:200px;height:210px;" onclick="openDetailView('redobuffer', event)">
+    <div class="comp-inner" style="color:var(--lgwr)">
+      <div class="comp-name" style="color:var(--lgwr);font-size:9px">REDO LOG BUFFER</div>
+      <div style="display:flex;justify-content:center;margin:8px 0">
+        <div class="redo-ring">
+          <div class="redo-ring-inner">REDO<br>RING</div>
+        </div>
+      </div>
+      <div class="comp-role" style="color:rgba(255,71,87,0.75)">
+        Circular fixed-size buffer<br>
+        Change vectors: before/after<br>
+        Filled by server processes<br>
+        Drained by LGWR<br><br>
+        LOG_BUFFER = 512KB–16MB
+      </div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#702010;margin-top:2px">
+        LGWR FLUSH TRIGGERS:<br>
+        ▸ COMMIT ▸ 1/3 FULL ▸ 3 SEC
+      </div>
+    </div>
+  </div>
+
+  <!-- Large Pool -->
+  <div class="comp sga-comp lp" style="left:986px;top:126px;width:178px;height:100px;" onclick="openDetailView('largepool', event)">
+    <div class="comp-inner" style="color:#38BDF8">
+      <div class="comp-name" style="color:#38BDF8;font-size:9px">LARGE POOL</div>
+      <div class="comp-role" style="color:#0EA5E9">
+        RMAN I/O buffers<br>Parallel query msgs<br>Shared Server (UGA)<br>Oracle XStream
+      </div>
+    </div>
+  </div>
+
+  <!-- Streams Pool -->
+  <div class="comp sga-comp lp" style="left:1178px;top:126px;width:150px;height:100px;" onclick="showInfo('streamspool')">
+    <div class="comp-inner" style="color:#67E8F9">
+      <div class="comp-name" style="color:#67E8F9;font-size:9px">STREAMS POOL</div>
+      <div class="comp-role" style="color:#0891B2">
+        GoldenGate capture<br>Advanced Queuing<br>LogMiner buffers<br>Replication msgs
+      </div>
+    </div>
+  </div>
+
+  <!-- Java Pool -->
+  <div class="comp sga-comp lp" style="left:986px;top:234px;width:178px;height:102px;" onclick="showInfo('javapool')">
+    <div class="comp-inner" style="color:#60A5FA">
+      <div class="comp-name" style="color:#60A5FA;font-size:9px">JAVA POOL</div>
+      <div class="comp-role" style="color:#2563EB">
+        Java class data<br>Java stored procs<br>JVM session state<br>JAVA_POOL_SIZE
+      </div>
+    </div>
+  </div>
+
+  <!-- Fixed SGA -->
+  <div class="comp sga-comp lp" style="left:1178px;top:234px;width:150px;height:102px;" onclick="showInfo('fixedsga')">
+    <div class="comp-inner" style="color:#818CF8">
+      <div class="comp-name" style="color:#818CF8;font-size:9px">FIXED SGA</div>
+      <div class="comp-role" style="color:#4338CA">
+        Internal pointers<br>Lock structures<br>V$ view data<br>X$ base tables<br>Instance state
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ BACKGROUND PROCESSES ══════ -->
+
+  <!-- LGWR -->
+  <div class="comp proc lgwr-c" id="proc-lgwr" style="left:30px;top:372px;width:138px;height:138px;" onclick="showInfo('lgwr')">
+    <div class="comp-inner">
+      <div class="proc-status"></div>
+      <div class="comp-name">LGWR</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:7.5px;color:rgba(255,71,87,0.7);line-height:1.5">
+        LOG WRITER<br><br>
+        Redo Buffer → Redo Logs<br>
+        Sequential I/O<br>
+        COMMIT gatekeeper<br>
+        Fastest background proc
+      </div>
+      <div class="trigger-badge">ON COMMIT</div>
+    </div>
+  </div>
+
+  <!-- DBWn -->
+  <div class="comp proc dbwn-c" id="proc-dbwn" style="left:182px;top:372px;width:138px;height:138px;" onclick="showInfo('dbwn')">
+    <div class="comp-inner">
+      <div class="proc-status" style="background:var(--dbwn);box-shadow:0 0 4px var(--dbwn)"></div>
+      <div class="comp-name">DBWn</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:7.5px;color:rgba(46,204,113,0.7);line-height:1.5">
+        DB WRITER<br><br>
+        Dirty bufs → Data Files<br>
+        Scattered async I/O<br>
+        Checkpoint driven<br>
+        Up to 20 writers
+      </div>
+      <div class="trigger-badge">CHECKPOINT</div>
+    </div>
+  </div>
+
+  <!-- CKPT -->
+  <div class="comp proc ckpt-c" id="proc-ckpt" style="left:334px;top:372px;width:138px;height:138px;" onclick="showInfo('ckpt')">
+    <div class="comp-inner">
+      <div class="proc-status" style="background:var(--ckpt);box-shadow:0 0 4px var(--ckpt)"></div>
+      <div class="comp-name">CKPT</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:7.5px;color:rgba(241,196,15,0.7);line-height:1.5">
+        CHECKPOINT<br><br>
+        Signals DBWn to write<br>
+        Updates file headers<br>
+        Updates control file<br>
+        Advances checkpoint SCN
+      </div>
+      <div class="trigger-badge">PERIODIC</div>
+    </div>
+  </div>
+
+  <!-- ARCn -->
+  <div class="comp proc arcn-c" id="proc-arcn" style="left:486px;top:372px;width:138px;height:138px;" onclick="showInfo('arcn')">
+    <div class="comp-inner">
+      <div class="proc-status" style="background:var(--arcn);box-shadow:0 0 4px var(--arcn)"></div>
+      <div class="comp-name">ARCn</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:7.5px;color:rgba(0,212,255,0.7);line-height:1.5">
+        ARCHIVER<br><br>
+        Redo Logs → Archive<br>
+        After log switch<br>
+        Enables PITR recovery<br>
+        Multiple: ARC0..ARC9
+      </div>
+      <div class="trigger-badge">LOG SWITCH</div>
+    </div>
+  </div>
+
+  <!-- SMON -->
+  <div class="comp proc smon-c" id="proc-smon" style="left:638px;top:372px;width:138px;height:138px;" onclick="showInfo('smon')">
+    <div class="comp-inner">
+      <div class="proc-status" style="background:var(--smon);box-shadow:0 0 4px var(--smon)"></div>
+      <div class="comp-name">SMON</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:7.5px;color:rgba(168,85,247,0.7);line-height:1.5">
+        SYS MONITOR<br><br>
+        Instance crash recovery<br>
+        TEMP seg cleanup<br>
+        Dead txn rollback<br>
+        Free space coalesce
+      </div>
+      <div class="trigger-badge">STARTUP+IDLE</div>
+    </div>
+  </div>
+
+  <!-- PMON -->
+  <div class="comp proc pmon-c" id="proc-pmon" style="left:790px;top:372px;width:138px;height:138px;" onclick="showInfo('pmon')">
+    <div class="comp-inner">
+      <div class="proc-status" style="background:var(--pmon);box-shadow:0 0 4px var(--pmon)"></div>
+      <div class="comp-name">PMON</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:7.5px;color:rgba(251,146,60,0.7);line-height:1.5">
+        PROC MONITOR<br><br>
+        Dead process cleanup<br>
+        Rollback dead TX<br>
+        Release all locks<br>
+        Free PGA memory
+      </div>
+      <div class="trigger-badge">ON DISCONNECT</div>
+    </div>
+  </div>
+
+  <!-- MMON -->
+  <div class="comp proc mmon-c" id="proc-mmon" style="left:942px;top:372px;width:138px;height:138px;" onclick="showInfo('mmon')">
+    <div class="comp-inner">
+      <div class="proc-status" style="background:var(--mmon);box-shadow:0 0 4px var(--mmon)"></div>
+      <div class="comp-name">MMON</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:7.5px;color:rgba(56,189,248,0.7);line-height:1.5">
+        MANAGEABILITY<br><br>
+        AWR snapshots every 1hr<br>
+        Metric capture (ASH)<br>
+        Alert threshold checks<br>
+        ADDM triggers
+      </div>
+      <div class="trigger-badge">EVERY 1HR</div>
+    </div>
+  </div>
+
+  <!-- MMAN -->
+  <div class="comp proc mman-c" id="proc-mman" style="left:1094px;top:372px;width:138px;height:138px;" onclick="showInfo('mman')">
+    <div class="comp-inner">
+      <div class="proc-status" style="background:var(--mman);box-shadow:0 0 4px var(--mman)"></div>
+      <div class="comp-name">MMAN</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:7.5px;color:rgba(52,211,153,0.7);line-height:1.5">
+        MEM MANAGER<br><br>
+        ASMM auto-tunes SGA<br>
+        Grows/shrinks BC, SP<br>
+        Monitors SGA pressure<br>
+        AMM: SGA+PGA total
+      </div>
+      <div class="trigger-badge">CONTINUOUS</div>
+    </div>
+  </div>
+
+  <!-- RECO (smaller) -->
+  <div class="comp proc" id="proc-reco"
+    style="left:1246px;top:372px;width:100px;height:62px;border:1.5px solid rgba(251,113,133,0.5);background:rgba(22,6,10,0.95)"
+    onclick="showInfo('reco')">
+    <div class="comp-inner" style="color:rgba(251,113,133,0.8)">
+      <div class="comp-name" style="font-size:8px;color:rgba(251,113,133,0.9)">RECO</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(251,113,133,0.6)">Distributed TX<br>recovery (2PC)</div>
+    </div>
+  </div>
+
+  <!-- CJQ0 (smaller) -->
+  <div class="comp proc" id="proc-cjq"
+    style="left:1246px;top:448px;width:100px;height:62px;border:1.5px solid rgba(163,230,53,0.4);background:rgba(10,18,4,0.95)"
+    onclick="showInfo('cjq')">
+    <div class="comp-inner" style="color:rgba(163,230,53,0.8)">
+      <div class="comp-name" style="font-size:8px;color:rgba(163,230,53,0.9)">CJQ0</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(163,230,53,0.5)">Scheduler job<br>queue process</div>
+    </div>
+  </div>
+
+  <!-- ══════ DATABASE / DISK LAYER ══════ -->
+
+  <!-- Data Files -->
+  <div class="comp disk-comp df-c" style="left:30px;top:556px;width:260px;height:340px;" onclick="showInfo('datafiles')">
+    <div class="comp-inner" style="color:#2ECC71">
+      <div class="comp-name" style="color:#2ECC71;font-size:9px">DATA FILES (.DBF)</div>
+      <div class="comp-role" style="color:#1E8449">Physical storage · Tablespaces<br>Segments → Extents → 8KB Blocks</div>
+      <div style="margin-top:8px;display:flex;flex-direction:column;gap:4px">
+        <div style="display:flex;align-items:center;gap:6px;font-family:'Share Tech Mono',monospace;font-size:8px">
+          <div class="cyl-wrap" style="color:#2ECC71">
+            <div class="cyl-top" style="border-color:#2ECC71"></div>
+            <div class="cyl-body" style="border-color:#2ECC71"></div>
+            <div class="cyl-bot" style="border-color:#2ECC71"></div>
+          </div>
+          <div style="color:#1A5C2A;line-height:1.6">
+            SYSTEM.DBF<br>SYSAUX.DBF<br>USERS01.DBF<br>APP_DATA01.DBF<br>UNDOTBS01.DBF
+          </div>
+        </div>
+        <div style="border:1px solid rgba(46,204,113,0.2);border-radius:4px;padding:5px 7px;margin-top:4px">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#3D7A55;line-height:1.6">
+            Tablespace Types:<br>
+            ▸ SYSTEM — data dictionary<br>
+            ▸ SYSAUX — AWR/EM repository<br>
+            ▸ USERS  — default user data<br>
+            ▸ APP_*  — application data<br>
+            ▸ INDEX_* — index segments<br>
+            ▸ LOB_*  — BLOB/CLOB storage
+          </div>
+        </div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#1A3A20;margin-top:2px">
+          DBWn writes dirty 8KB blocks here<br>
+          Server process reads blocks from here<br>
+          CKPT updates file headers (SCN)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Online Redo Log Files -->
+  <div class="comp disk-comp rl-c" style="left:304px;top:556px;width:220px;height:230px;" onclick="showInfo('redologs')">
+    <div class="comp-inner" style="color:var(--lgwr)">
+      <div class="comp-name" style="color:var(--lgwr);font-size:9px">ONLINE REDO LOGS</div>
+      <div class="comp-role" style="color:rgba(255,71,87,0.65)">WAL journal · Circular · LGWR writes</div>
+      <div style="margin-top:8px;display:flex;flex-direction:column;gap:3px">
+        <div class="log-group">
+          <div class="log-dot active"></div>
+          <span style="color:var(--lgwr);font-family:'Share Tech Mono',monospace;font-size:8px">GROUP 1 ★ CURRENT</span>
+        </div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#922B21;padding-left:14px">
+          REDO01a.LOG · REDO01b.LOG (mirrored)
+        </div>
+        <div class="log-group" style="margin-top:4px">
+          <div class="log-dot"></div>
+          <span style="color:#922B21;font-family:'Share Tech Mono',monospace;font-size:8px">GROUP 2</span>
+        </div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#702010;padding-left:14px">
+          REDO02a.LOG · REDO02b.LOG
+        </div>
+        <div class="log-group" style="margin-top:4px">
+          <div class="log-dot"></div>
+          <span style="color:#702010;font-family:'Share Tech Mono',monospace;font-size:8px">GROUP 3</span>
+        </div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#502010;padding-left:14px">
+          REDO03a.LOG · REDO03b.LOG
+        </div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#402010;margin-top:8px;line-height:1.5">
+          LOG SWITCH: GRP1→GRP2→GRP3→GRP1<br>
+          LGWR fills current group sequentially<br>
+          ARCn copies full group → archive dest<br>
+          Minimum 2 groups, recommend 3+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Control File -->
+  <div class="comp disk-comp cf-c" style="left:304px;top:800px;width:220px;height:96px;" onclick="showInfo('controlfile')">
+    <div class="comp-inner" style="color:var(--ckpt)">
+      <div class="comp-name" style="color:var(--ckpt);font-size:9px">CONTROL FILE</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:7.5px;color:#A0801A;line-height:1.6">
+        DB name · Current SCN · Checkpoint SCN<br>
+        Datafile list · Redo log locations<br>
+        RMAN backup catalog · Log sequence#<br>
+        <span style="color:#705010">CKPT updates on every checkpoint event</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Archived Redo Logs -->
+  <div class="comp disk-comp al-c" style="left:538px;top:556px;width:230px;height:200px;" onclick="showInfo('archivelogs')">
+    <div class="comp-inner" style="color:var(--arcn)">
+      <div class="comp-name" style="color:var(--arcn);font-size:9px">ARCHIVED REDO LOGS</div>
+      <div class="comp-role" style="color:rgba(0,212,255,0.65)">ARCn copies here after log switch</div>
+      <div style="margin-top:8px">
+        <div class="cyl-wrap" style="color:var(--arcn);width:fit-content;margin:0 auto">
+          <div class="cyl-top" style="border-color:var(--arcn);width:48px;height:10px"></div>
+          <div class="cyl-body" style="border-color:var(--arcn);width:48px;height:40px"></div>
+          <div class="cyl-bot" style="border-color:var(--arcn);width:48px;height:10px"></div>
+        </div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:7.5px;color:#0090B0;line-height:1.6;margin-top:8px;text-align:center">
+          ARCHIVELOG MODE required<br>
+          Archive dest 1 (local)<br>
+          Archive dest 2 (Data Guard)<br>
+          Enables Point-In-Time Recovery<br>
+          RMAN uses for backup sets
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UNDO Tablespace -->
+  <div class="comp disk-comp un-c" style="left:538px;top:768px;width:230px;height:128px;" onclick="showInfo('undo')">
+    <div class="comp-inner" style="color:#A855F7">
+      <div class="comp-name" style="color:#A855F7;font-size:9px">UNDO TABLESPACE</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:7.5px;color:rgba(168,85,247,0.7);line-height:1.6">
+        Before-images of changed rows<br>
+        ROLLBACK: undo transaction changes<br>
+        MVCC: read consistency snapshots<br>
+        ORA-01555 if undo retention exceeded<br>
+        <span style="color:#6B21A8">Managed by SMON + AUM (9i+)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEMP Tablespace -->
+  <div class="comp disk-comp tmp-c" style="left:782px;top:556px;width:210px;height:160px;" onclick="showInfo('temp')">
+    <div class="comp-inner" style="color:#38BDF8">
+      <div class="comp-name" style="color:#38BDF8;font-size:9px">TEMP TABLESPACE</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:7.5px;color:rgba(56,189,248,0.65);line-height:1.6;margin-top:4px">
+        Sort spill (ORDER BY, GROUP BY)<br>
+        Hash join build side overflow<br>
+        Index build (CREATE INDEX)<br>
+        Global temp table data<br>
+        Rebuilt at instance restart<br>
+        Not archived / not backed up<br>
+        <span style="color:#075985">Server proc reads/writes directly</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SYSAUX / AWR -->
+  <div class="comp disk-comp awr-c" style="left:782px;top:728px;width:210px;height:168px;" onclick="showInfo('awr')">
+    <div class="comp-inner" style="color:var(--mmon)">
+      <div class="comp-name" style="color:var(--mmon);font-size:9px">SYSAUX / AWR</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:7.5px;color:rgba(56,189,248,0.6);line-height:1.6;margin-top:4px">
+        WRH$_SYSSTAT — system stats history<br>
+        WRH$_ACTIVE_SESSION_HISTORY (ASH)<br>
+        WRH$_SQL_PLAN — plan history<br>
+        WRH$_SQLSTAT — SQL execution stats<br>
+        Enterprise Manager repository<br>
+        Oracle Text · Spatial metadata<br>
+        <span style="color:#0369A1">MMON writes AWR snapshots here</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPFILE / PFILE -->
+  <div class="comp disk-comp sp-c" style="left:1006px;top:556px;width:200px;height:160px;" onclick="showInfo('spfile')">
+    <div class="comp-inner" style="color:rgba(231,76,60,0.7)">
+      <div class="comp-name" style="color:rgba(231,76,60,0.8);font-size:9px">SPFILE / PFILE</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:7.5px;color:rgba(192,57,43,0.6);line-height:1.6;margin-top:4px">
+        Instance startup parameters<br>
+        DB_NAME · SGA_TARGET<br>
+        DB_BLOCK_SIZE · LOG_BUFFER<br>
+        UNDO_TABLESPACE · PROCESSES<br>
+        Read at STARTUP (NOMOUNT state)<br>
+        ALTER SYSTEM...SCOPE=SPFILE<br>
+        <span style="color:#601010">Lives in $ORACLE_HOME/dbs/</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alert Log / Trace Files -->
+  <div class="comp disk-comp" style="left:1006px;top:728px;width:200px;height:168px;border:1.5px solid rgba(251,146,60,0.4);background:rgba(20,10,4,0.95);" onclick="showInfo('alertlog')">
+    <div class="comp-inner" style="color:var(--pmon)">
+      <div class="comp-name" style="color:var(--pmon);font-size:9px">ALERT LOG + TRACE</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:7.5px;color:rgba(251,146,60,0.6);line-height:1.6;margin-top:4px">
+        alert_ORCL.log — all errors<br>
+        Checkpoint events logged<br>
+        Log switch events<br>
+        DB startup/shutdown<br>
+        ORA- error messages<br>
+        Background proc trace files<br>
+        <span style="color:#92400E">ADR: $ORACLE_BASE/diag/</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Password File -->
+  <div class="comp disk-comp" style="left:1220px;top:556px;width:140px;height:340px;border:1.5px solid rgba(148,163,184,0.3);background:rgba(10,14,18,0.95);" onclick="showInfo('pwdfile')">
+    <div class="comp-inner" style="color:rgba(148,163,184,0.8)">
+      <div class="comp-name" style="font-size:8px;color:rgba(148,163,184,0.9)">PASSWORD<br>FILE</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(148,163,184,0.5);line-height:1.6;margin-top:4px">
+        orapwORCL<br>
+        SYS auth<br>
+        SYSDBA/<br>SYSOPER<br>
+        Remote DBA<br>
+        connections<br><br>
+        orapwd<br>
+        utility creates<br>this file
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ SVG FLOW OVERLAY ══════ -->
+  <svg id="flows-svg" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- Arrow markers for each process color -->
+      <marker id="arr-lgwr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L6,3 z" fill="var(--lgwr)" opacity="0.9"/>
+      </marker>
+      <marker id="arr-dbwn" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L6,3 z" fill="var(--dbwn)" opacity="0.9"/>
+      </marker>
+      <marker id="arr-ckpt" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L6,3 z" fill="var(--ckpt)" opacity="0.9"/>
+      </marker>
+      <marker id="arr-arcn" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L6,3 z" fill="var(--arcn)" opacity="0.9"/>
+      </marker>
+      <marker id="arr-smon" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L6,3 z" fill="var(--smon)" opacity="0.9"/>
+      </marker>
+      <marker id="arr-pmon" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L6,3 z" fill="var(--pmon)" opacity="0.9"/>
+      </marker>
+      <marker id="arr-mmon" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L6,3 z" fill="var(--mmon)" opacity="0.9"/>
+      </marker>
+      <marker id="arr-mman" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L6,3 z" fill="var(--mman)" opacity="0.9"/>
+      </marker>
+      <marker id="arr-gray" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L6,3 z" fill="rgba(148,163,184,0.6)"/>
+      </marker>
+    </defs>
+
+    <!-- ══ LGWR FLOWS ══ -->
+    <!-- Redo Buffer (top of RLB ~y=126+80=206, x=872 center) → LGWR top (y=372, x=99) -->
+    <path class="flow-path path-lgwr" d="M 872,336 L 872,360 L 99,360 L 99,372"
+      stroke-dasharray="6,4" stroke-opacity="0.4" marker-end="url(#arr-lgwr)"/>
+    <!-- LGWR → Online Redo Log (x=414 center, y=556) -->
+    <path class="flow-path path-lgwr" d="M 99,510 L 99,544 L 414,544 L 414,556"
+      stroke-dasharray="6,4" stroke-opacity="0.55" marker-end="url(#arr-lgwr)"/>
+
+    <!-- ══ DBWn FLOWS ══ -->
+    <!-- Buffer Cache (y=126+105=231, x=353 center) → DBWn top -->
+    <path class="flow-path path-dbwn" d="M 353,336 L 353,360 L 251,360 L 251,372"
+      stroke-dasharray="6,4" stroke-opacity="0.4" marker-end="url(#arr-dbwn)"/>
+    <!-- DBWn → Data Files -->
+    <path class="flow-path path-dbwn" d="M 251,510 L 251,540 L 160,540 L 160,556"
+      stroke-dasharray="6,4" stroke-opacity="0.55" marker-end="url(#arr-dbwn)"/>
+    <!-- DBWn → UNDO Tablespace -->
+    <path class="flow-path path-dbwn" d="M 251,510 L 251,530 L 653,530 L 653,768"
+      stroke-dasharray="5,4" stroke-opacity="0.3" marker-end="url(#arr-dbwn)"/>
+
+    <!-- ══ CKPT FLOWS ══ -->
+    <!-- CKPT signals DBWn (same layer arrow) -->
+    <path class="flow-path path-ckpt" d="M 334,441 L 320,441" stroke-dasharray="3,3" stroke-opacity="0.5" marker-end="url(#arr-ckpt)"/>
+    <!-- CKPT → Control File header update -->
+    <path class="flow-path path-ckpt" d="M 403,510 L 403,534 L 414,534 L 414,800"
+      stroke-dasharray="6,4" stroke-opacity="0.5" marker-end="url(#arr-ckpt)"/>
+    <!-- CKPT → Data File headers -->
+    <path class="flow-path path-ckpt" d="M 403,510 L 403,528 L 160,528 L 160,556"
+      stroke-dasharray="4,4" stroke-opacity="0.3" marker-end="url(#arr-ckpt)"/>
+
+    <!-- ══ ARCn FLOWS ══ -->
+    <!-- Redo Log Files → ARCn (reads after log switch) -->
+    <path class="flow-path path-arcn" d="M 414,556 L 414,520 L 555,520 L 555,510"
+      stroke-dasharray="6,4" stroke-opacity="0.45" marker-end="url(#arr-arcn)"/>
+    <!-- ARCn → Archived Logs -->
+    <path class="flow-path path-arcn" d="M 555,510 L 555,534 L 653,534 L 653,556"
+      stroke-dasharray="6,4" stroke-opacity="0.55" marker-end="url(#arr-arcn)"/>
+
+    <!-- ══ SMON FLOWS ══ -->
+    <!-- SMON → Data Files (crash recovery: applies redo to data files) -->
+    <path class="flow-path path-smon" d="M 707,510 L 707,525 L 120,525 L 120,556"
+      stroke-dasharray="5,4" stroke-opacity="0.35" marker-end="url(#arr-smon)"/>
+    <!-- Archived Logs → SMON (reads during recovery) -->
+    <path class="flow-path path-smon" d="M 653,556 L 653,515 L 707,515 L 707,510"
+      stroke-dasharray="4,4" stroke-opacity="0.3" marker-end="url(#arr-smon)"/>
+    <!-- SMON → TEMP (cleanup) -->
+    <path class="flow-path path-smon" d="M 707,510 L 707,535 L 887,535 L 887,556"
+      stroke-dasharray="4,4" stroke-opacity="0.25" marker-end="url(#arr-smon)"/>
+
+    <!-- ══ PMON FLOWS ══ -->
+    <!-- PMON ↔ PGA (cleans up dead session PGA) -->
+    <path class="flow-path path-pmon" d="M 859,372 L 859,358 L 110,358 L 110,336"
+      stroke-dasharray="5,4" stroke-opacity="0.35" marker-end="url(#arr-pmon)"/>
+    <!-- PMON → UNDO (rollback dead TX) -->
+    <path class="flow-path path-pmon" d="M 859,510 L 859,530 L 653,530 L 653,768"
+      stroke-dasharray="4,4" stroke-opacity="0.3" marker-end="url(#arr-pmon)"/>
+
+    <!-- ══ MMON FLOWS ══ -->
+    <!-- MMON reads Buffer Cache stats (top connection) -->
+    <path class="flow-path path-mmon" d="M 1011,372 L 1011,356 L 353,356 L 353,336"
+      stroke-dasharray="4,4" stroke-opacity="0.3" marker-end="url(#arr-mmon)"/>
+    <!-- MMON → AWR/SYSAUX (writes snapshots) -->
+    <path class="flow-path path-mmon" d="M 1011,510 L 1011,530 L 887,530 L 887,728"
+      stroke-dasharray="6,4" stroke-opacity="0.5" marker-end="url(#arr-mmon)"/>
+
+    <!-- ══ MMAN FLOWS ══ -->
+    <!-- MMAN adjusts Buffer Cache / Shared Pool (bidirectional) -->
+    <path class="flow-path path-mman" d="M 1163,372 L 1163,354 L 510,354 L 510,336"
+      stroke-dasharray="4,3" stroke-opacity="0.3" marker-end="url(#arr-mman)"/>
+    <path class="flow-path path-mman" d="M 1163,372 L 1163,352 L 634,352 L 634,336"
+      stroke-dasharray="4,3" stroke-opacity="0.25" marker-end="url(#arr-mman)"/>
+
+    <!-- ══ SERVER PROCESS FLOWS ══ -->
+    <!-- Client → Listener -->
+    <path class="flow-path" d="M 192,48 L 260,48" stroke="rgba(41,128,185,0.5)" stroke-dasharray="5,3" marker-end="url(#arr-gray)"/>
+    <!-- Listener → Server Process / PGA -->
+    <path class="flow-path" d="M 330,78 L 330,100 L 110,100 L 110,126"
+      stroke="rgba(46,204,113,0.5)" stroke-dasharray="5,3" marker-end="url(#arr-gray)"/>
+    <!-- Server Process ↔ Buffer Cache -->
+    <path class="flow-path" d="M 190,231 L 210,231" stroke="rgba(46,204,113,0.4)" stroke-dasharray="3,2" marker-end="url(#arr-dbwn)"/>
+    <!-- Server Process ↔ Shared Pool -->
+    <path class="flow-path" d="M 190,200 L 210,200 L 510,200" stroke="rgba(241,196,15,0.3)" stroke-dasharray="3,2" marker-end="url(#arr-ckpt)"/>
+    <!-- Server Process → Redo Buffer -->
+    <path class="flow-path" d="M 110,290 L 110,310 L 810,310 L 810,336"
+      stroke="rgba(255,71,87,0.35)" stroke-dasharray="4,3" marker-end="url(#arr-lgwr)"/>
+
+    <!-- ══ ANIMATED PARTICLES (JS-driven) ══ -->
+    <!-- Defined via JS; these are placeholder IDs -->
+  </svg>
+
+  <!-- Flow label annotations -->
+  <div class="flow-label" style="left:132px;top:350px;color:var(--lgwr);background:rgba(20,4,4,0.85);border:1px solid rgba(255,71,87,0.3)">REDO RECORDS → LGWR</div>
+  <div class="flow-label" style="left:192px;top:520px;color:var(--lgwr);background:rgba(20,4,4,0.85);border:1px solid rgba(255,71,87,0.3)">SEQUENTIAL WRITE</div>
+  <div class="flow-label" style="left:260px;top:350px;color:var(--dbwn);background:rgba(4,18,8,0.85);border:1px solid rgba(46,204,113,0.3)">DIRTY BLOCKS → DBWn</div>
+  <div class="flow-label" style="left:178px;top:520px;color:var(--dbwn);background:rgba(4,18,8,0.85);border:1px solid rgba(46,204,113,0.3)">SCATTERED WRITE</div>
+  <div class="flow-label" style="left:416px;top:514px;color:var(--arcn);background:rgba(4,18,22,0.85);border:1px solid rgba(0,212,255,0.3)">COPY ON LOG SWITCH →</div>
+  <div class="flow-label" style="left:618px;top:350px;color:var(--smon);background:rgba(16,4,22,0.85);border:1px solid rgba(168,85,247,0.3)">RECOVERY: REDO APPLY</div>
+  <div class="flow-label" style="left:938px;top:514px;color:var(--mmon);background:rgba(4,16,24,0.85);border:1px solid rgba(56,189,248,0.3)">AWR SNAPSHOT WRITE</div>
+
+</div><!-- end view-standard -->
+
+<!-- ╔══════════════════════════════════════════════════════════════════╗ -->
+<!-- ║                    MULTITENANT VIEW                              ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════════╝ -->
+<div id="view-multitenant" class="view-container" style="display:none">
+
+  <!-- CDB Banner -->
+  <div class="mt-cdb-banner" onclick="showInfo('mt_cdb')" style="cursor:pointer">
+    <svg class="ora-db-icon" width="32" height="32" viewBox="0 0 32 32">
+      <ellipse cx="16" cy="7" rx="13" ry="5.5" fill="rgba(199,70,52,0.15)" stroke="#C74634" stroke-width="1.8"/>
+      <path d="M3,7 L3,25 Q3,30.5 16,30.5 Q29,30.5 29,25 L29,7" fill="rgba(199,70,52,0.08)" stroke="#C74634" stroke-width="1.8"/>
+      <ellipse cx="16" cy="25" rx="13" ry="5.5" fill="none" stroke="#C74634" stroke-width="1" opacity="0.4"/>
+      <ellipse cx="16" cy="16" rx="13" ry="5.5" fill="none" stroke="#C74634" stroke-width="0.8" opacity="0.25"/>
+      <text x="16" y="19" text-anchor="middle" fill="#C74634" font-size="7" font-family="Orbitron" font-weight="700">CDB</text>
+    </svg>
+    <div>
+      <div style="font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;color:#C74634;letter-spacing:2px">CONTAINER DATABASE (CDB)</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--txt-dim)">ORACLE 12c+ MULTITENANT ARCHITECTURE — ONE INSTANCE · MANY DATABASES</div>
+    </div>
+    <div class="dg-mode-badge" style="margin-left:auto;background:rgba(199,70,52,0.15);border:1px solid rgba(199,70,52,0.4);color:#C74634">CON_ID=0</div>
+  </div>
+
+  <!-- Shared SGA -->
+  <div class="mt-shared-sga">
+    <div class="layer-label" style="color:#3B82F6">SHARED SGA — ALL PDBs USE THIS SINGLE INSTANCE SGA</div>
+
+    <!-- Buffer Cache -->
+    <div class="mt-sga-comp" style="left:20px;top:30px;width:260px;height:120px;border-color:rgba(46,204,113,0.4);background:rgba(14,30,18,0.9);cursor:pointer" onclick="showInfo('mt_buffercache')">
+      <div style="color:#2ECC71">
+        <svg class="ora-db-icon" width="20" height="20" viewBox="0 0 20 20" style="vertical-align:middle;margin-right:6px">
+          <rect x="2" y="2" width="16" height="16" rx="2" fill="none" stroke="#2ECC71" stroke-width="1.2"/>
+          <line x1="2" y1="6" x2="18" y2="6" stroke="#2ECC71" stroke-width="0.8" opacity="0.5"/>
+          <line x1="2" y1="10" x2="18" y2="10" stroke="#2ECC71" stroke-width="0.8" opacity="0.5"/>
+          <line x1="2" y1="14" x2="18" y2="14" stroke="#2ECC71" stroke-width="0.8" opacity="0.5"/>
+        </svg>
+        <span class="comp-name" style="color:#2ECC71">DATABASE BUFFER CACHE</span>
+        <div class="comp-role" style="color:#6EE7A0;margin-top:4px">Shared 8KB block cache for ALL PDBs<br>PDB-level memory limits (12.2+)<br>DB_CACHE_SIZE shared across containers<br>Each PDB can set MAX_SIZE limit</div>
+      </div>
+    </div>
+
+    <!-- Shared Pool -->
+    <div class="mt-sga-comp" style="left:300px;top:30px;width:240px;height:120px;border-color:rgba(241,196,15,0.4);background:rgba(22,20,6,0.9);cursor:pointer" onclick="showInfo('mt_sharedpool')">
+      <div style="color:#F1C40F">
+        <svg width="20" height="20" viewBox="0 0 20 20" style="vertical-align:middle;margin-right:6px">
+          <circle cx="10" cy="10" r="8" fill="none" stroke="#F1C40F" stroke-width="1.2"/>
+          <path d="M6,10 L14,10 M10,6 L10,14" stroke="#F1C40F" stroke-width="1" opacity="0.6"/>
+        </svg>
+        <span class="comp-name" style="color:#F1C40F">SHARED POOL</span>
+        <div class="comp-role" style="color:#A0801A;margin-top:4px">Library Cache — SQL plans per PDB<br>Data Dict Cache — metadata per PDB<br>Each PDB has own namespace<br>Cursors tagged with CON_ID</div>
+      </div>
+    </div>
+
+    <!-- Redo Log Buffer -->
+    <div class="mt-sga-comp" style="left:560px;top:30px;width:200px;height:120px;border-color:rgba(255,71,87,0.5);background:rgba(26,8,8,0.9);cursor:pointer" onclick="showInfo('mt_redobuffer')">
+      <div style="color:var(--lgwr)">
+        <svg width="20" height="20" viewBox="0 0 20 20" style="vertical-align:middle;margin-right:6px">
+          <circle cx="10" cy="10" r="8" fill="none" stroke="#FF4757" stroke-width="1.5"/>
+          <path d="M10,4 A6,6 0 1,1 4,10" fill="none" stroke="#FF4757" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span class="comp-name" style="color:var(--lgwr)">REDO LOG BUFFER</span>
+        <div class="comp-role" style="color:rgba(255,71,87,0.7);margin-top:4px">Single shared redo stream<br>All PDB changes go here<br>LGWR writes for ALL containers<br>Each redo record tagged CON_ID</div>
+      </div>
+    </div>
+
+    <!-- Large Pool + Streams -->
+    <div class="mt-sga-comp" style="left:780px;top:30px;width:180px;height:120px;border-color:rgba(56,189,248,0.3);background:rgba(6,18,26,0.9);cursor:pointer" onclick="showInfo('mt_largepool')">
+      <div style="color:#38BDF8">
+        <span class="comp-name" style="color:#38BDF8">LARGE POOL</span>
+        <div class="comp-role" style="color:#0EA5E9;margin-top:4px">RMAN buffers (shared)<br>Parallel Query msgs<br>Shared Server UGA</div>
+      </div>
+    </div>
+
+    <!-- PGA note -->
+    <div class="mt-sga-comp" style="left:980px;top:30px;width:180px;height:120px;border-color:rgba(168,85,247,0.3);background:rgba(16,8,24,0.9);cursor:pointer" onclick="showInfo('mt_pga')">
+      <div style="color:#A855F7">
+        <svg width="20" height="20" viewBox="0 0 20 20" style="vertical-align:middle;margin-right:6px">
+          <rect x="3" y="3" width="14" height="14" rx="2" fill="none" stroke="#A855F7" stroke-width="1.2"/>
+          <circle cx="10" cy="10" r="3" fill="none" stroke="#A855F7" stroke-width="1"/>
+        </svg>
+        <span class="comp-name" style="color:#A855F7">PGA (PER SESSION)</span>
+        <div class="comp-role" style="color:#C084FC;margin-top:4px">Private per-session memory<br>Session knows its CON_ID<br>PGA_AGGREGATE_TARGET shared<br>PDB can limit via SGA_TARGET</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shared Background Processes -->
+  <div class="mt-bg-procs" onclick="showInfo('mt_bgprocs')" style="cursor:pointer">
+    <div class="layer-label" style="color:#22C55E">SHARED BACKGROUND PROCESSES — ONE SET SERVES ALL PDBs</div>
+    <div style="position:absolute;top:28px;left:20px;right:20px;display:flex;gap:8px;flex-wrap:wrap">
+      <div style="padding:4px 12px;border-radius:4px;border:1px solid var(--lgwr);background:rgba(20,4,4,0.9);font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--lgwr)">
+        <svg width="14" height="14" viewBox="0 0 14 14" style="vertical-align:middle;margin-right:4px"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M7,3 L7,7 L10,9" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+        LGWR</div>
+      <div style="padding:4px 12px;border-radius:4px;border:1px solid var(--dbwn);background:rgba(4,18,8,0.9);font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--dbwn)">
+        <svg width="14" height="14" viewBox="0 0 14 14" style="vertical-align:middle;margin-right:4px"><rect x="2" y="2" width="10" height="10" rx="1" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M5,5 L9,9 M9,5 L5,9" stroke="currentColor" stroke-width="0.8"/></svg>
+        DBWn</div>
+      <div style="padding:4px 12px;border-radius:4px;border:1px solid var(--ckpt);background:rgba(20,18,4,0.9);font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--ckpt)">CKPT</div>
+      <div style="padding:4px 12px;border-radius:4px;border:1px solid var(--arcn);background:rgba(4,18,22,0.9);font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--arcn)">ARCn</div>
+      <div style="padding:4px 12px;border-radius:4px;border:1px solid var(--smon);background:rgba(16,4,22,0.9);font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--smon)">SMON</div>
+      <div style="padding:4px 12px;border-radius:4px;border:1px solid var(--pmon);background:rgba(22,10,4,0.9);font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--pmon)">PMON</div>
+      <div style="padding:4px 12px;border-radius:4px;border:1px solid var(--mmon);background:rgba(4,16,24,0.9);font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--mmon)">MMON</div>
+      <div style="padding:4px 12px;border-radius:4px;border:1px solid var(--mman);background:rgba(4,20,16,0.9);font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--mman)">MMAN</div>
+      <div style="padding:4px 12px;border-radius:4px;border:1px solid rgba(251,113,133,0.5);background:rgba(22,6,10,0.9);font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(251,113,133,0.8)">CJQ0</div>
+      <div style="margin-left:auto;font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--txt-dim);padding-top:6px">
+        ALL processes are CDB-wide · No per-PDB background processes</div>
+    </div>
+  </div>
+
+  <!-- PDB Section -->
+  <div class="mt-pdb-section">
+    <div class="layer-label" style="color:#C74634;top:8px;left:16px">PLUGGABLE DATABASES — EACH PDB IS AN ISOLATED DATABASE WITHIN THE CDB</div>
+
+    <!-- CDB$ROOT -->
+    <div class="mt-pdb-box mt-pdb-root" style="left:16px;top:38px;width:250px;height:580px;" onclick="showInfo('mt_cdbroot')">
+      <div class="mt-pdb-label" style="color:#C74634">
+        <svg class="ora-db-icon" width="22" height="22" viewBox="0 0 22 22" style="vertical-align:middle;margin-right:6px">
+          <ellipse cx="11" cy="5" rx="9" ry="3.5" fill="rgba(199,70,52,0.2)" stroke="#C74634" stroke-width="1.3"/>
+          <path d="M2,5 L2,17 Q2,20.5 11,20.5 Q20,20.5 20,17 L20,5" fill="rgba(199,70,52,0.05)" stroke="#C74634" stroke-width="1.3"/>
+          <ellipse cx="11" cy="17" rx="9" ry="3.5" fill="none" stroke="#C74634" stroke-width="0.8" opacity="0.4"/>
+        </svg>
+        CDB$ROOT
+      </div>
+      <div class="dg-mode-badge" style="background:rgba(199,70,52,0.15);border:1px solid rgba(199,70,52,0.4);color:#C74634;position:absolute;top:8px;right:8px">CON_ID=1</div>
+      <div class="mt-pdb-desc" style="color:rgba(199,70,52,0.7)">
+        Root container — houses the<br>
+        master data dictionary for ALL<br>
+        containers in the CDB.<br><br>
+        <strong style="color:#C74634">Contains:</strong><br>
+        ▸ SYSTEM tablespace (shared DD)<br>
+        ▸ SYSAUX tablespace (AWR/EM)<br>
+        ▸ UNDO tablespace (shared)<br>
+        ▸ Online Redo Logs (shared)<br>
+        ▸ Control Files (shared)<br>
+        ▸ TEMP tablespace (shared)<br><br>
+        <strong style="color:#C74634">Common Users:</strong><br>
+        ▸ SYS, SYSTEM (C## prefix)<br>
+        ▸ C##DBA_ADMIN<br>
+        ▸ Visible in ALL PDBs<br><br>
+        <strong style="color:#C74634">Common Objects:</strong><br>
+        ▸ Common roles/profiles<br>
+        ▸ Common audit policies<br>
+        ▸ Object links to PDBs
+      </div>
+      <div style="margin-top:10px;display:flex;flex-wrap:wrap;justify-content:center">
+        <div class="mt-mini-cyl" style="color:#C74634">
+          <div class="cyl-top" style="border-color:#C74634"></div>
+          <div class="cyl-body" style="border-color:#C74634"></div>
+          <div class="cyl-bot" style="border-color:#C74634"></div>
+          <div style="font-size:6px;font-family:monospace;color:#C74634;margin-top:2px">SYSTEM</div>
+        </div>
+        <div class="mt-mini-cyl" style="color:#C74634">
+          <div class="cyl-top" style="border-color:#C74634"></div>
+          <div class="cyl-body" style="border-color:#C74634"></div>
+          <div class="cyl-bot" style="border-color:#C74634"></div>
+          <div style="font-size:6px;font-family:monospace;color:#C74634;margin-top:2px">SYSAUX</div>
+        </div>
+        <div class="mt-mini-cyl" style="color:#A855F7">
+          <div class="cyl-top" style="border-color:#A855F7"></div>
+          <div class="cyl-body" style="border-color:#A855F7"></div>
+          <div class="cyl-bot" style="border-color:#A855F7"></div>
+          <div style="font-size:6px;font-family:monospace;color:#A855F7;margin-top:2px">UNDO</div>
+        </div>
+        <div class="mt-mini-cyl" style="color:var(--lgwr)">
+          <div class="cyl-top" style="border-color:var(--lgwr)"></div>
+          <div class="cyl-body" style="border-color:var(--lgwr)"></div>
+          <div class="cyl-bot" style="border-color:var(--lgwr)"></div>
+          <div style="font-size:6px;font-family:monospace;color:var(--lgwr);margin-top:2px">REDO</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PDB$SEED -->
+    <div class="mt-pdb-box mt-pdb-seed" style="left:282px;top:38px;width:230px;height:580px;" onclick="showInfo('mt_pdbseed')">
+      <div class="mt-pdb-label" style="color:rgba(148,163,184,0.9)">
+        <svg width="22" height="22" viewBox="0 0 22 22" style="vertical-align:middle;margin-right:6px">
+          <ellipse cx="11" cy="5" rx="9" ry="3.5" fill="rgba(148,163,184,0.1)" stroke="rgba(148,163,184,0.6)" stroke-width="1.3"/>
+          <path d="M2,5 L2,17 Q2,20.5 11,20.5 Q20,20.5 20,17 L20,5" fill="rgba(148,163,184,0.03)" stroke="rgba(148,163,184,0.6)" stroke-width="1.3"/>
+          <ellipse cx="11" cy="17" rx="9" ry="3.5" fill="none" stroke="rgba(148,163,184,0.4)" stroke-width="0.8"/>
+          <text x="11" y="13" text-anchor="middle" fill="rgba(148,163,184,0.5)" font-size="5" font-family="monospace">SEED</text>
+        </svg>
+        PDB$SEED
+      </div>
+      <div class="dg-mode-badge" style="background:rgba(148,163,184,0.1);border:1px solid rgba(148,163,184,0.3);color:rgba(148,163,184,0.8);position:absolute;top:8px;right:8px">CON_ID=2</div>
+      <div class="mt-pdb-desc" style="color:rgba(148,163,184,0.6)">
+        READ-ONLY template PDB<br><br>
+        Used as the "gold image"<br>
+        when creating new PDBs.<br><br>
+        <strong style="color:rgba(148,163,184,0.8)">CREATE PLUGGABLE<br>DATABASE pdb3<br>ADMIN USER pdb3admin<br>IDENTIFIED BY pass;</strong><br><br>
+        Oracle copies PDB$SEED's<br>
+        data files to create the<br>
+        new PDB's initial set.<br><br>
+        Cannot be modified.<br>
+        Cannot be dropped.<br>
+        Always present in CDB.<br><br>
+        <strong style="color:rgba(148,163,184,0.8)">Status:</strong> READ ONLY<br>
+        <strong style="color:rgba(148,163,184,0.8)">Open Mode:</strong> MOUNTED
+      </div>
+      <div style="margin-top:10px;display:flex;flex-wrap:wrap;justify-content:center">
+        <div class="mt-mini-cyl" style="color:rgba(148,163,184,0.5)">
+          <div class="cyl-top" style="border-color:rgba(148,163,184,0.4)"></div>
+          <div class="cyl-body" style="border-color:rgba(148,163,184,0.4)"></div>
+          <div class="cyl-bot" style="border-color:rgba(148,163,184,0.4)"></div>
+          <div style="font-size:6px;font-family:monospace;color:rgba(148,163,184,0.5);margin-top:2px">SYSTEM</div>
+        </div>
+        <div class="mt-mini-cyl" style="color:rgba(148,163,184,0.5)">
+          <div class="cyl-top" style="border-color:rgba(148,163,184,0.4)"></div>
+          <div class="cyl-body" style="border-color:rgba(148,163,184,0.4)"></div>
+          <div class="cyl-bot" style="border-color:rgba(148,163,184,0.4)"></div>
+          <div style="font-size:6px;font-family:monospace;color:rgba(148,163,184,0.5);margin-top:2px">SYSAUX</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PDB1 -->
+    <div class="mt-pdb-box mt-pdb-user" style="left:528px;top:38px;width:330px;height:580px;" onclick="showInfo('mt_pdb1')">
+      <div class="mt-pdb-label" style="color:#2ECC71">
+        <svg class="ora-db-icon" width="22" height="22" viewBox="0 0 22 22" style="vertical-align:middle;margin-right:6px">
+          <ellipse cx="11" cy="5" rx="9" ry="3.5" fill="rgba(46,204,113,0.15)" stroke="#2ECC71" stroke-width="1.3"/>
+          <path d="M2,5 L2,17 Q2,20.5 11,20.5 Q20,20.5 20,17 L20,5" fill="rgba(46,204,113,0.05)" stroke="#2ECC71" stroke-width="1.3"/>
+          <ellipse cx="11" cy="17" rx="9" ry="3.5" fill="none" stroke="#2ECC71" stroke-width="0.8" opacity="0.4"/>
+        </svg>
+        PDB1 — HR_APPLICATION
+      </div>
+      <div class="dg-mode-badge" style="background:rgba(46,204,113,0.12);border:1px solid rgba(46,204,113,0.4);color:#2ECC71;position:absolute;top:8px;right:8px">CON_ID=3</div>
+      <div class="mt-pdb-desc" style="color:rgba(46,204,113,0.7)">
+        <strong style="color:#2ECC71">Fully isolated application database</strong><br><br>
+        ▸ Own SYSTEM + SYSAUX tablespaces<br>
+        ▸ Own TEMP tablespace (optional)<br>
+        ▸ Own application data files<br>
+        ▸ Own local users (HR, APP_USER)<br>
+        ▸ Own schemas, tables, indexes<br>
+        ▸ Separate service name for connections<br><br>
+        <strong style="color:#2ECC71">Connection:</strong><br>
+        sqlplus hr/pass@//host:1521/<strong style="color:#fff">pdb1</strong><br><br>
+        <strong style="color:#2ECC71">PDB Operations:</strong><br>
+        ALTER PLUGGABLE DATABASE pdb1 OPEN;<br>
+        ALTER PLUGGABLE DATABASE pdb1 CLOSE;<br><br>
+        <strong style="color:#2ECC71">Portability:</strong><br>
+        ALTER PLUGGABLE DATABASE pdb1<br>
+        &nbsp;&nbsp;UNPLUG INTO '/tmp/pdb1.xml';<br><br>
+        Can be unplugged and plugged<br>
+        into a different CDB — full<br>
+        database portability!
+      </div>
+      <div style="margin-top:10px;display:flex;flex-wrap:wrap;justify-content:center;gap:2px">
+        <div class="mt-mini-cyl" style="color:#2ECC71">
+          <div class="cyl-top" style="border-color:#2ECC71"></div>
+          <div class="cyl-body" style="border-color:#2ECC71"></div>
+          <div class="cyl-bot" style="border-color:#2ECC71"></div>
+          <div style="font-size:6px;font-family:monospace;color:#2ECC71;margin-top:2px">SYSTEM</div>
+        </div>
+        <div class="mt-mini-cyl" style="color:#2ECC71">
+          <div class="cyl-top" style="border-color:#2ECC71"></div>
+          <div class="cyl-body" style="border-color:#2ECC71"></div>
+          <div class="cyl-bot" style="border-color:#2ECC71"></div>
+          <div style="font-size:6px;font-family:monospace;color:#2ECC71;margin-top:2px">SYSAUX</div>
+        </div>
+        <div class="mt-mini-cyl" style="color:#2ECC71">
+          <div class="cyl-top" style="border-color:#2ECC71"></div>
+          <div class="cyl-body" style="border-color:#2ECC71"></div>
+          <div class="cyl-bot" style="border-color:#2ECC71"></div>
+          <div style="font-size:6px;font-family:monospace;color:#2ECC71;margin-top:2px">HR_DATA</div>
+        </div>
+        <div class="mt-mini-cyl" style="color:#2ECC71">
+          <div class="cyl-top" style="border-color:#2ECC71"></div>
+          <div class="cyl-body" style="border-color:#2ECC71"></div>
+          <div class="cyl-bot" style="border-color:#2ECC71"></div>
+          <div style="font-size:6px;font-family:monospace;color:#2ECC71;margin-top:2px">HR_IDX</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PDB2 -->
+    <div class="mt-pdb-box mt-pdb-user" style="left:874px;top:38px;width:330px;height:580px;border-color:rgba(59,130,246,0.5);background:rgba(59,130,246,0.04);" onclick="showInfo('mt_pdb2')">
+      <div class="mt-pdb-label" style="color:#3B82F6">
+        <svg class="ora-db-icon" width="22" height="22" viewBox="0 0 22 22" style="vertical-align:middle;margin-right:6px">
+          <ellipse cx="11" cy="5" rx="9" ry="3.5" fill="rgba(59,130,246,0.15)" stroke="#3B82F6" stroke-width="1.3"/>
+          <path d="M2,5 L2,17 Q2,20.5 11,20.5 Q20,20.5 20,17 L20,5" fill="rgba(59,130,246,0.05)" stroke="#3B82F6" stroke-width="1.3"/>
+          <ellipse cx="11" cy="17" rx="9" ry="3.5" fill="none" stroke="#3B82F6" stroke-width="0.8" opacity="0.4"/>
+        </svg>
+        PDB2 — SALES_APPLICATION
+      </div>
+      <div class="dg-mode-badge" style="background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.4);color:#3B82F6;position:absolute;top:8px;right:8px">CON_ID=4</div>
+      <div class="mt-pdb-desc" style="color:rgba(59,130,246,0.7)">
+        <strong style="color:#3B82F6">Fully isolated application database</strong><br><br>
+        ▸ Own SYSTEM + SYSAUX tablespaces<br>
+        ▸ Own TEMP tablespace (optional)<br>
+        ▸ Own application data files<br>
+        ▸ Own local users (SALES, ORDERS)<br>
+        ▸ Own schemas, tables, indexes<br>
+        ▸ Separate service name for connections<br><br>
+        <strong style="color:#3B82F6">Connection:</strong><br>
+        sqlplus sales/pass@//host:1521/<strong style="color:#fff">pdb2</strong><br><br>
+        <strong style="color:#3B82F6">Resource Limits (12.2+):</strong><br>
+        ALTER PLUGGABLE DATABASE pdb2<br>
+        &nbsp;&nbsp;SET MAX_CPU = 2;<br>
+        ALTER PLUGGABLE DATABASE pdb2<br>
+        &nbsp;&nbsp;SET MAX_SGA_SIZE = 4G;<br><br>
+        <strong style="color:#3B82F6">Isolation:</strong><br>
+        PDB1 users CANNOT see PDB2 data<br>
+        Complete namespace isolation<br>
+        Separate AWR data per PDB (21c+)
+      </div>
+      <div style="margin-top:10px;display:flex;flex-wrap:wrap;justify-content:center;gap:2px">
+        <div class="mt-mini-cyl" style="color:#3B82F6">
+          <div class="cyl-top" style="border-color:#3B82F6"></div>
+          <div class="cyl-body" style="border-color:#3B82F6"></div>
+          <div class="cyl-bot" style="border-color:#3B82F6"></div>
+          <div style="font-size:6px;font-family:monospace;color:#3B82F6;margin-top:2px">SYSTEM</div>
+        </div>
+        <div class="mt-mini-cyl" style="color:#3B82F6">
+          <div class="cyl-top" style="border-color:#3B82F6"></div>
+          <div class="cyl-body" style="border-color:#3B82F6"></div>
+          <div class="cyl-bot" style="border-color:#3B82F6"></div>
+          <div style="font-size:6px;font-family:monospace;color:#3B82F6;margin-top:2px">SYSAUX</div>
+        </div>
+        <div class="mt-mini-cyl" style="color:#3B82F6">
+          <div class="cyl-top" style="border-color:#3B82F6"></div>
+          <div class="cyl-body" style="border-color:#3B82F6"></div>
+          <div class="cyl-bot" style="border-color:#3B82F6"></div>
+          <div style="font-size:6px;font-family:monospace;color:#3B82F6;margin-top:2px">SALES_DATA</div>
+        </div>
+        <div class="mt-mini-cyl" style="color:#3B82F6">
+          <div class="cyl-top" style="border-color:#3B82F6"></div>
+          <div class="cyl-body" style="border-color:#3B82F6"></div>
+          <div class="cyl-bot" style="border-color:#3B82F6"></div>
+          <div style="font-size:6px;font-family:monospace;color:#3B82F6;margin-top:2px">ORDER_IDX</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key Concept annotations -->
+    <div style="position:absolute;bottom:16px;left:16px;right:16px;display:flex;gap:12px;flex-wrap:wrap">
+      <div style="padding:6px 12px;border-radius:5px;background:rgba(199,70,52,0.08);border:1px solid rgba(199,70,52,0.3);font-family:'Share Tech Mono',monospace;font-size:8px;color:#C74634">
+        MAX 4,098 PDBs per CDB (Oracle 21c)</div>
+      <div style="padding:6px 12px;border-radius:5px;background:rgba(46,204,113,0.08);border:1px solid rgba(46,204,113,0.3);font-family:'Share Tech Mono',monospace;font-size:8px;color:#2ECC71">
+        ALTER SESSION SET CONTAINER = pdb1;</div>
+      <div style="padding:6px 12px;border-radius:5px;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.3);font-family:'Share Tech Mono',monospace;font-size:8px;color:#3B82F6">
+        V$PDBS · CDB_DATA_FILES · DBA_PDBS</div>
+      <div style="padding:6px 12px;border-radius:5px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.3);font-family:'Share Tech Mono',monospace;font-size:8px;color:#A855F7">
+        UNPLUG → XML Manifest + Data Files → PLUG into new CDB</div>
+    </div>
+  </div>
+
+  <!-- Multitenant SVG Flows -->
+  <svg id="mt-flows-svg" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="mt-arr-green" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L0,8 L8,4 z" fill="#2ECC71" opacity="0.8"/></marker>
+      <marker id="mt-arr-blue" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L0,8 L8,4 z" fill="#3B82F6" opacity="0.8"/></marker>
+      <marker id="mt-arr-red" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L0,8 L8,4 z" fill="#C74634" opacity="0.8"/></marker>
+    </defs>
+    <!-- SGA → PDB1 data flow -->
+    <path class="flow-path mt-flow" d="M 400,214 L 400,244 L 693,244 L 693,352" stroke="#2ECC71" stroke-dasharray="8,5" stroke-opacity="0.4" stroke-width="2" marker-end="url(#mt-arr-green)"/>
+    <!-- SGA → PDB2 data flow -->
+    <path class="flow-path mt-flow" d="M 500,214 L 500,250 L 1039,250 L 1039,352" stroke="#3B82F6" stroke-dasharray="8,5" stroke-opacity="0.4" stroke-width="2" marker-end="url(#mt-arr-blue)"/>
+    <!-- SGA → CDB$ROOT data flow -->
+    <path class="flow-path mt-flow" d="M 200,214 L 200,240 L 141,240 L 141,352" stroke="#C74634" stroke-dasharray="8,5" stroke-opacity="0.4" stroke-width="2" marker-end="url(#mt-arr-red)"/>
+    <!-- Redo buffer shared flow -->
+    <path class="flow-path mt-flow" d="M 660,154 L 660,244 L 400,244" stroke="var(--lgwr)" stroke-dasharray="6,4" stroke-opacity="0.3" stroke-width="1.5"/>
+  </svg>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════════════════════╗ -->
+<!-- ║                    DATA GUARD VIEW                               ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════════╝ -->
+<div id="view-dataguard" class="view-container" style="display:none">
+
+  <!-- Data Guard Banner -->
+  <div class="dg-banner" onclick="showInfo('dg_overview')" style="cursor:pointer">
+    <svg class="ora-net-icon" width="32" height="32" viewBox="0 0 32 32">
+      <path d="M8,16 L24,16" stroke="#00D4FF" stroke-width="2" stroke-dasharray="4,2"/>
+      <circle cx="8" cy="16" r="5" fill="rgba(0,212,255,0.1)" stroke="#00D4FF" stroke-width="1.5"/>
+      <circle cx="24" cy="16" r="5" fill="rgba(0,212,255,0.1)" stroke="#00D4FF" stroke-width="1.5"/>
+      <text x="8" y="18" text-anchor="middle" fill="#00D4FF" font-size="5" font-weight="700">P</text>
+      <text x="24" y="18" text-anchor="middle" fill="#00D4FF" font-size="5" font-weight="700">S</text>
+      <path d="M14,13 L18,16 L14,19" fill="none" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    <div>
+      <div style="font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;color:#00D4FF;letter-spacing:2px">ORACLE DATA GUARD</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--txt-dim)">DISASTER RECOVERY — PRIMARY + PHYSICAL STANDBY WITH REAL-TIME REDO SHIPPING</div>
+    </div>
+    <div class="dg-mode-badge" style="margin-left:auto;background:rgba(46,204,113,0.15);border:1px solid rgba(46,204,113,0.4);color:#2ECC71">MAX AVAILABILITY</div>
+  </div>
+
+  <!-- Observer -->
+  <div class="dg-observer" onclick="showInfo('dg_observer')">
+    <svg width="24" height="24" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10" fill="none" stroke="#F1C40F" stroke-width="1.5"/>
+      <circle cx="12" cy="12" r="4" fill="rgba(241,196,15,0.3)" stroke="#F1C40F" stroke-width="1"/>
+      <circle cx="12" cy="12" r="1.5" fill="#F1C40F"/>
+    </svg>
+    <div>
+      <div style="font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;color:#F1C40F;letter-spacing:1px">OBSERVER</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(241,196,15,0.7)">FAST-START FAILOVER (FSFO)</div>
+    </div>
+  </div>
+
+  <!-- PRIMARY DATABASE -->
+  <div class="dg-db-container dg-primary">
+    <div class="dg-db-header" style="background:rgba(46,204,113,0.06);border-bottom:1px solid rgba(46,204,113,0.3);cursor:pointer" onclick="showInfo('dg_primary')">
+      <svg class="ora-db-icon" width="28" height="28" viewBox="0 0 28 28">
+        <ellipse cx="14" cy="6" rx="11" ry="4.5" fill="rgba(46,204,113,0.15)" stroke="#2ECC71" stroke-width="1.5"/>
+        <path d="M3,6 L3,22 Q3,26.5 14,26.5 Q25,26.5 25,22 L25,6" fill="rgba(46,204,113,0.05)" stroke="#2ECC71" stroke-width="1.5"/>
+        <ellipse cx="14" cy="22" rx="11" ry="4.5" fill="none" stroke="#2ECC71" stroke-width="0.8" opacity="0.4"/>
+        <text x="14" y="16" text-anchor="middle" fill="#2ECC71" font-size="6" font-family="Orbitron" font-weight="700">PRI</text>
+      </svg>
+      <div>
+        <div style="font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;color:#2ECC71;letter-spacing:2px">PRIMARY DATABASE</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(46,204,113,0.7)">READ-WRITE · PRODUCTION · DB_UNIQUE_NAME = ORCL</div>
+      </div>
+      <div class="dg-mode-badge" style="margin-left:auto;background:rgba(46,204,113,0.15);border:1px solid rgba(46,204,113,0.4);color:#2ECC71">OPEN READ WRITE</div>
+    </div>
+
+    <!-- Primary SGA -->
+    <div class="dg-section" style="top:52px;height:120px;border-color:rgba(59,130,246,0.3);background:rgba(59,130,246,0.03);cursor:pointer" onclick="showInfo('dg_primary_sga')">
+      <div style="font-family:'Orbitron',monospace;font-size:8px;color:#3B82F6;letter-spacing:2px;margin-bottom:6px">INSTANCE SGA</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div style="flex:1;min-width:100px;padding:6px;border:1px solid rgba(46,204,113,0.3);border-radius:4px;background:rgba(14,30,18,0.8)">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#2ECC71">BUFFER CACHE</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#1E8449;margin-top:2px">Data blocks cached</div>
+        </div>
+        <div style="flex:1;min-width:100px;padding:6px;border:1px solid rgba(241,196,15,0.3);border-radius:4px;background:rgba(22,20,6,0.8)">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#F1C40F">SHARED POOL</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#A0801A;margin-top:2px">SQL plans + Dict cache</div>
+        </div>
+        <div style="flex:1;min-width:100px;padding:6px;border:1px solid rgba(255,71,87,0.3);border-radius:4px;background:rgba(26,8,8,0.8)">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--lgwr)">REDO LOG BUFFER</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(255,71,87,0.6);margin-top:2px">Changes before disk write</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Primary Processes -->
+    <div class="dg-section" style="top:182px;height:70px;border-color:rgba(34,197,94,0.3);background:rgba(8,20,14,0.5);cursor:pointer" onclick="showInfo('dg_primary_procs')">
+      <div style="font-family:'Orbitron',monospace;font-size:8px;color:#22C55E;letter-spacing:2px;margin-bottom:6px">BACKGROUND PROCESSES</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <span style="padding:3px 8px;border-radius:3px;border:1px solid var(--lgwr);font-family:monospace;font-size:8px;color:var(--lgwr)">LGWR</span>
+        <span style="padding:3px 8px;border-radius:3px;border:1px solid var(--dbwn);font-family:monospace;font-size:8px;color:var(--dbwn)">DBWn</span>
+        <span style="padding:3px 8px;border-radius:3px;border:1px solid var(--arcn);font-family:monospace;font-size:8px;color:var(--arcn)">ARCn</span>
+        <span style="padding:3px 8px;border-radius:3px;border:1px solid #FF6B9D;font-family:monospace;font-size:8px;color:#FF6B9D;font-weight:700">NSS<sub>n</sub></span>
+        <span style="padding:3px 8px;border-radius:3px;border:1px solid var(--ckpt);font-family:monospace;font-size:8px;color:var(--ckpt)">CKPT</span>
+        <span style="padding:3px 8px;border-radius:3px;border:1px solid var(--smon);font-family:monospace;font-size:8px;color:var(--smon)">SMON</span>
+        <span style="padding:3px 8px;border-radius:3px;border:1px solid var(--pmon);font-family:monospace;font-size:8px;color:var(--pmon)">PMON</span>
+      </div>
+    </div>
+
+    <!-- Primary Storage -->
+    <div class="dg-section" style="top:262px;bottom:12px;border-color:rgba(199,70,52,0.3);background:rgba(20,8,8,0.4);cursor:pointer" onclick="showInfo('dg_primary_storage')">
+      <div style="font-family:'Orbitron',monospace;font-size:8px;color:#C74634;letter-spacing:2px;margin-bottom:8px">PHYSICAL STORAGE</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div style="flex:1;min-width:80px">
+          <div style="display:flex;flex-direction:column;align-items:center">
+            <div class="mt-mini-cyl" style="color:#2ECC71">
+              <div class="cyl-top" style="border-color:#2ECC71;width:32px;height:6px"></div>
+              <div class="cyl-body" style="border-color:#2ECC71;width:32px;height:20px"></div>
+              <div class="cyl-bot" style="border-color:#2ECC71;width:32px;height:6px"></div>
+            </div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#2ECC71;margin-top:4px">DATA FILES</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#1E8449;margin-top:2px">SYSTEM · SYSAUX<br>USERS · APP_DATA</div>
+          </div>
+        </div>
+        <div style="flex:1;min-width:80px">
+          <div style="display:flex;flex-direction:column;align-items:center">
+            <div class="mt-mini-cyl" style="color:var(--lgwr)">
+              <div class="cyl-top" style="border-color:var(--lgwr);width:32px;height:6px"></div>
+              <div class="cyl-body" style="border-color:var(--lgwr);width:32px;height:20px"></div>
+              <div class="cyl-bot" style="border-color:var(--lgwr);width:32px;height:6px"></div>
+            </div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--lgwr);margin-top:4px">ONLINE REDO</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#922B21;margin-top:2px">Group 1 · 2 · 3<br>LGWR writes here</div>
+          </div>
+        </div>
+        <div style="flex:1;min-width:80px">
+          <div style="display:flex;flex-direction:column;align-items:center">
+            <div class="mt-mini-cyl" style="color:var(--arcn)">
+              <div class="cyl-top" style="border-color:var(--arcn);width:32px;height:6px"></div>
+              <div class="cyl-body" style="border-color:var(--arcn);width:32px;height:20px"></div>
+              <div class="cyl-bot" style="border-color:var(--arcn);width:32px;height:6px"></div>
+            </div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--arcn);margin-top:4px">ARCHIVE LOGS</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#0090B0;margin-top:2px">ARCn copies here<br>→ shipped to standby</div>
+          </div>
+        </div>
+        <div style="flex:1;min-width:80px">
+          <div style="display:flex;flex-direction:column;align-items:center">
+            <div class="mt-mini-cyl" style="color:var(--ckpt)">
+              <div class="cyl-top" style="border-color:var(--ckpt);width:32px;height:6px"></div>
+              <div class="cyl-body" style="border-color:var(--ckpt);width:32px;height:20px"></div>
+              <div class="cyl-bot" style="border-color:var(--ckpt);width:32px;height:6px"></div>
+            </div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--ckpt);margin-top:4px">CONTROL FILE</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#A0801A;margin-top:2px">DB registry<br>Multiplexed x3</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Key Primary info -->
+      <div style="margin-top:14px;padding:8px;border:1px solid rgba(46,204,113,0.2);border-radius:4px;background:rgba(46,204,113,0.03)">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(46,204,113,0.8);line-height:1.7">
+          <strong style="color:#2ECC71">REDO TRANSPORT:</strong><br>
+          ▸ LGWR ASYNC — sends redo via NSS<sub>n</sub> as generated (real-time)<br>
+          ▸ ARCn — ships archived logs after log switch (not real-time)<br>
+          ▸ LOG_ARCHIVE_DEST_2 = 'SERVICE=standby ASYNC VALID_FOR=(ONLINE_LOGFILES,PRIMARY_ROLE)'<br>
+          ▸ LOG_ARCHIVE_DEST_STATE_2 = ENABLE
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRANSPORT ZONE (center) -->
+  <div class="dg-transport-band" onclick="showInfo('dg_transport')" style="cursor:pointer">
+    <div style="font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;color:#00D4FF;letter-spacing:2px;margin-bottom:4px">REDO TRANSPORT</div>
+    <div class="dg-transport-arrow">
+      <svg width="16" height="16" viewBox="0 0 16 16"><path d="M2,8 L14,8 M10,4 L14,8 L10,12" fill="none" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round"/></svg>
+      LGWR ASYNC → NSS<sub>n</sub> → NETWORK → RFS
+    </div>
+    <div class="dg-transport-arrow" style="border-color:rgba(0,212,255,0.2)">
+      <svg width="16" height="16" viewBox="0 0 16 16"><path d="M2,8 L14,8 M10,4 L14,8 L10,12" fill="none" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/></svg>
+      ARCn → ARCHIVED REDO → NETWORK → RFS
+    </div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:7.5px;color:var(--txt-dim);text-align:center;margin-top:4px">
+      Oracle Net Services · TCP/IP<br>
+      Encrypted with Oracle Advanced Security
+    </div>
+
+    <!-- DG Broker -->
+    <div style="margin-top:8px;padding:6px 14px;border-radius:6px;border:1.5px solid rgba(0,212,255,0.4);background:rgba(0,212,255,0.06);cursor:pointer" onclick="showInfo('dg_broker');event.stopPropagation()">
+      <div style="font-family:'Orbitron',sans-serif;font-size:8px;font-weight:700;color:#00D4FF;letter-spacing:1px;text-align:center">DATA GUARD BROKER</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(0,212,255,0.6);text-align:center;margin-top:2px">DGMGRL · Automated management · Switchover/Failover</div>
+    </div>
+
+    <!-- Protection Modes -->
+    <div style="display:flex;gap:6px;margin-top:6px;cursor:pointer" onclick="showInfo('dg_protection');event.stopPropagation()">
+      <div class="dg-mode-badge" style="background:rgba(46,204,113,0.15);border:1px solid rgba(46,204,113,0.4);color:#2ECC71;font-size:7px">MAX AVAILABILITY</div>
+      <div class="dg-mode-badge" style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);color:#3B82F6;font-size:7px;opacity:0.5">MAX PERFORMANCE</div>
+      <div class="dg-mode-badge" style="background:rgba(199,70,52,0.1);border:1px solid rgba(199,70,52,0.3);color:#C74634;font-size:7px;opacity:0.5">MAX PROTECTION</div>
+    </div>
+  </div>
+
+  <!-- STANDBY DATABASE -->
+  <div class="dg-db-container dg-standby">
+    <div class="dg-db-header" style="background:rgba(0,212,255,0.06);border-bottom:1px solid rgba(0,212,255,0.3);cursor:pointer" onclick="showInfo('dg_standby')">
+      <svg class="ora-db-icon" width="28" height="28" viewBox="0 0 28 28">
+        <ellipse cx="14" cy="6" rx="11" ry="4.5" fill="rgba(0,212,255,0.1)" stroke="#00D4FF" stroke-width="1.5"/>
+        <path d="M3,6 L3,22 Q3,26.5 14,26.5 Q25,26.5 25,22 L25,6" fill="rgba(0,212,255,0.03)" stroke="#00D4FF" stroke-width="1.5"/>
+        <ellipse cx="14" cy="22" rx="11" ry="4.5" fill="none" stroke="#00D4FF" stroke-width="0.8" opacity="0.4"/>
+        <text x="14" y="16" text-anchor="middle" fill="#00D4FF" font-size="5" font-family="Orbitron" font-weight="700">STBY</text>
+      </svg>
+      <div>
+        <div style="font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;color:#00D4FF;letter-spacing:2px">PHYSICAL STANDBY</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(0,212,255,0.7)">READ-ONLY (Active Data Guard) · DB_UNIQUE_NAME = ORCL_STBY</div>
+      </div>
+      <div class="dg-mode-badge" style="margin-left:auto;background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.4);color:#00D4FF">MOUNTED / READ ONLY</div>
+    </div>
+
+    <!-- Standby SGA -->
+    <div class="dg-section" style="top:52px;height:120px;border-color:rgba(59,130,246,0.3);background:rgba(59,130,246,0.03);cursor:pointer" onclick="showInfo('dg_standby_sga')">
+      <div style="font-family:'Orbitron',monospace;font-size:8px;color:#3B82F6;letter-spacing:2px;margin-bottom:6px">INSTANCE SGA (RECOVERY MODE)</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div style="flex:1;min-width:100px;padding:6px;border:1px solid rgba(46,204,113,0.3);border-radius:4px;background:rgba(14,30,18,0.8)">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#2ECC71">BUFFER CACHE</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#1E8449;margin-top:2px">Blocks from redo apply</div>
+        </div>
+        <div style="flex:1;min-width:100px;padding:6px;border:1px solid rgba(241,196,15,0.3);border-radius:4px;background:rgba(22,20,6,0.8)">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#F1C40F">SHARED POOL</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#A0801A;margin-top:2px">Active DG: read queries</div>
+        </div>
+        <div style="flex:1;min-width:100px;padding:6px;border:1px solid rgba(0,212,255,0.3);border-radius:4px;background:rgba(4,18,22,0.8)">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#00D4FF">STANDBY REDO LOGS</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#0090B0;margin-top:2px">RFS writes redo here</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Standby Processes -->
+    <div class="dg-section" style="top:182px;height:70px;border-color:rgba(0,212,255,0.3);background:rgba(0,20,28,0.5);cursor:pointer" onclick="showInfo('dg_standby_procs')">
+      <div style="font-family:'Orbitron',monospace;font-size:8px;color:#00D4FF;letter-spacing:2px;margin-bottom:6px">STANDBY PROCESSES</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <span style="padding:3px 8px;border-radius:3px;border:1.5px solid #00D4FF;font-family:monospace;font-size:8px;color:#00D4FF;font-weight:700;background:rgba(0,212,255,0.1)">RFS</span>
+        <span style="padding:3px 8px;border-radius:3px;border:1.5px solid #FF6B9D;font-family:monospace;font-size:8px;color:#FF6B9D;font-weight:700;background:rgba(255,107,157,0.1)">MRP<sub>0</sub></span>
+        <span style="padding:3px 8px;border-radius:3px;border:1px solid var(--lgwr);font-family:monospace;font-size:8px;color:var(--lgwr)">LGWR</span>
+        <span style="padding:3px 8px;border-radius:3px;border:1px solid var(--dbwn);font-family:monospace;font-size:8px;color:var(--dbwn)">DBWn</span>
+        <span style="padding:3px 8px;border-radius:3px;border:1px solid var(--arcn);font-family:monospace;font-size:8px;color:var(--arcn)">ARCn</span>
+        <span style="padding:3px 8px;border-radius:3px;border:1px solid var(--smon);font-family:monospace;font-size:8px;color:var(--smon)">SMON</span>
+      </div>
+    </div>
+
+    <!-- Standby Storage -->
+    <div class="dg-section" style="top:262px;bottom:12px;border-color:rgba(199,70,52,0.3);background:rgba(20,8,8,0.4);cursor:pointer" onclick="showInfo('dg_standby_storage')">
+      <div style="font-family:'Orbitron',monospace;font-size:8px;color:#C74634;letter-spacing:2px;margin-bottom:8px">PHYSICAL STORAGE (BLOCK-FOR-BLOCK COPY)</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div style="flex:1;min-width:80px">
+          <div style="display:flex;flex-direction:column;align-items:center">
+            <div class="mt-mini-cyl" style="color:#2ECC71">
+              <div class="cyl-top" style="border-color:#2ECC71;width:32px;height:6px"></div>
+              <div class="cyl-body" style="border-color:#2ECC71;width:32px;height:20px"></div>
+              <div class="cyl-bot" style="border-color:#2ECC71;width:32px;height:6px"></div>
+            </div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#2ECC71;margin-top:4px">DATA FILES</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#1E8449;margin-top:2px">Identical to primary<br>MRP applies redo here</div>
+          </div>
+        </div>
+        <div style="flex:1;min-width:80px">
+          <div style="display:flex;flex-direction:column;align-items:center">
+            <div class="mt-mini-cyl" style="color:#00D4FF">
+              <div class="cyl-top" style="border-color:#00D4FF;width:32px;height:6px"></div>
+              <div class="cyl-body" style="border-color:#00D4FF;width:32px;height:20px"></div>
+              <div class="cyl-bot" style="border-color:#00D4FF;width:32px;height:6px"></div>
+            </div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#00D4FF;margin-top:4px">STANDBY REDO</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#0090B0;margin-top:2px">RFS writes here<br>Real-time apply</div>
+          </div>
+        </div>
+        <div style="flex:1;min-width:80px">
+          <div style="display:flex;flex-direction:column;align-items:center">
+            <div class="mt-mini-cyl" style="color:var(--arcn)">
+              <div class="cyl-top" style="border-color:var(--arcn);width:32px;height:6px"></div>
+              <div class="cyl-body" style="border-color:var(--arcn);width:32px;height:20px"></div>
+              <div class="cyl-bot" style="border-color:var(--arcn);width:32px;height:6px"></div>
+            </div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--arcn);margin-top:4px">ARCHIVE LOGS</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#0090B0;margin-top:2px">Local archives<br>Gap resolution</div>
+          </div>
+        </div>
+        <div style="flex:1;min-width:80px">
+          <div style="display:flex;flex-direction:column;align-items:center">
+            <div class="mt-mini-cyl" style="color:var(--ckpt)">
+              <div class="cyl-top" style="border-color:var(--ckpt);width:32px;height:6px"></div>
+              <div class="cyl-body" style="border-color:var(--ckpt);width:32px;height:20px"></div>
+              <div class="cyl-bot" style="border-color:var(--ckpt);width:32px;height:6px"></div>
+            </div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--ckpt);margin-top:4px">CONTROL FILE</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#A0801A;margin-top:2px">Standby control<br>ALTER DATABASE<br>CREATE STANDBY<br>CONTROLFILE</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Key Standby info -->
+      <div style="margin-top:14px;padding:8px;border:1px solid rgba(0,212,255,0.2);border-radius:4px;background:rgba(0,212,255,0.03)">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(0,212,255,0.8);line-height:1.7">
+          <strong style="color:#00D4FF">REDO APPLY (MRP):</strong><br>
+          ▸ RFS receives redo → writes to Standby Redo Logs<br>
+          ▸ MRP<sub>0</sub> reads Standby Redo Logs → applies to Data Files<br>
+          ▸ REAL-TIME APPLY: MRP reads SRL as RFS writes (no wait)<br>
+          ▸ ALTER DATABASE RECOVER MANAGED STANDBY DATABASE USING CURRENT LOGFILE;
+        </div>
+      </div>
+
+      <!-- DG Operations -->
+      <div style="margin-top:8px;padding:8px;border:1px solid rgba(241,196,15,0.2);border-radius:4px;background:rgba(241,196,15,0.03)">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(241,196,15,0.8);line-height:1.7">
+          <strong style="color:#F1C40F">DG OPERATIONS:</strong><br>
+          ▸ SWITCHOVER: planned role reversal (zero data loss)<br>
+          ▸ FAILOVER: unplanned (Observer auto with FSFO)<br>
+          ▸ DGMGRL> SWITCHOVER TO 'orcl_stby';<br>
+          ▸ Active Data Guard: read-only queries on standby
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Guard SVG Flows -->
+  <svg id="dg-flows-svg" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="dg-arr-cyan" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L0,10 L10,5 z" fill="#00D4FF" opacity="0.8"/></marker>
+      <marker id="dg-arr-pink" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L0,10 L10,5 z" fill="#FF6B9D" opacity="0.8"/></marker>
+    </defs>
+    <!-- Redo transport: Primary → Standby (LGWR ASYNC via top) -->
+    <path class="flow-path dg-flow" d="M 620,170 C 700,170 820,170 900,170" stroke="#00D4FF" stroke-dasharray="10,6" stroke-opacity="0.5" stroke-width="2.5" marker-end="url(#dg-arr-cyan)"/>
+    <!-- Redo transport: Primary → Standby (ARCn via bottom) -->
+    <path class="flow-path dg-flow" d="M 620,210 C 700,210 820,210 900,210" stroke="#00D4FF" stroke-dasharray="8,6" stroke-opacity="0.3" stroke-width="2" marker-end="url(#dg-arr-cyan)"/>
+    <!-- MRP apply: SRL → Data Files on standby -->
+    <path class="flow-path dg-flow" d="M 1140,430 L 1140,460 L 970,460 L 970,430" stroke="#FF6B9D" stroke-dasharray="6,4" stroke-opacity="0.4" stroke-width="2" marker-end="url(#dg-arr-pink)"/>
+    <!-- Observer monitoring lines -->
+    <path class="flow-path" d="M 700,84 L 400,120" stroke="#F1C40F" stroke-dasharray="4,4" stroke-opacity="0.2" stroke-width="1"/>
+    <path class="flow-path" d="M 820,84 L 1100,120" stroke="#F1C40F" stroke-dasharray="4,4" stroke-opacity="0.2" stroke-width="1"/>
+  </svg>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════════════════════╗ -->
+<!-- ║                    RAC VIEW                                      ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════════╝ -->
+<div id="view-rac" class="view-container" style="display:none">
+
+  <!-- RAC Banner -->
+  <div class="rac-banner" onclick="showInfo('rac_overview')" style="cursor:pointer">
+    <svg width="32" height="32" viewBox="0 0 32 32">
+      <rect x="2" y="6" width="12" height="20" rx="2" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-width="1.3"/>
+      <rect x="18" y="6" width="12" height="20" rx="2" fill="rgba(46,204,113,0.1)" stroke="#2ECC71" stroke-width="1.3"/>
+      <path d="M14,14 L18,14 M14,18 L18,18" stroke="#A855F7" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="16" cy="16" r="2" fill="#A855F7" opacity="0.6"/>
+    </svg>
+    <div>
+      <div style="font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;color:#A855F7;letter-spacing:2px">ORACLE RAC (REAL APPLICATION CLUSTERS)</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--txt-dim)">MULTIPLE INSTANCES · ONE SHARED DATABASE · CACHE FUSION INTERCONNECT</div>
+    </div>
+    <div class="dg-mode-badge" style="margin-left:auto;background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.4);color:#A855F7">CLUSTER MODE</div>
+  </div>
+
+  <!-- SCAN Listener -->
+  <div class="rac-scan" onclick="showInfo('rac_scan')" style="cursor:pointer">
+    <svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="7" fill="none" stroke="#F1C40F" stroke-width="1.2"/><path d="M9,5 L9,9 L12,11" fill="none" stroke="#F1C40F" stroke-width="1" stroke-linecap="round"/></svg>
+    <div style="font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;color:#F1C40F;letter-spacing:1px">SCAN LISTENER</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(241,196,15,0.6)">scan-cluster:1521 · 3 SCAN VIPs · Load Balance</div>
+  </div>
+
+  <!-- INSTANCE 1 -->
+  <div class="rac-instance rac-inst1" style="height:360px">
+    <div class="rac-inst-header" style="background:rgba(59,130,246,0.06);border-bottom:1px solid rgba(59,130,246,0.3);cursor:pointer" onclick="showInfo('rac_inst1')">
+      <svg class="ora-inst-icon" width="26" height="26" viewBox="0 0 26 26">
+        <rect x="3" y="3" width="20" height="20" rx="3" fill="rgba(59,130,246,0.1)" stroke="#3B82F6" stroke-width="1.5"/>
+        <line x1="3" y1="9" x2="23" y2="9" stroke="#3B82F6" stroke-width="0.8" opacity="0.4"/>
+        <line x1="3" y1="15" x2="23" y2="15" stroke="#3B82F6" stroke-width="0.8" opacity="0.4"/>
+        <circle cx="7" cy="6" r="1.5" fill="#3B82F6" opacity="0.6"/>
+        <circle cx="7" cy="12" r="1.5" fill="#3B82F6" opacity="0.6"/>
+        <text x="13" y="21" text-anchor="middle" fill="#3B82F6" font-size="5" font-family="monospace" font-weight="700">NODE1</text>
+      </svg>
+      <div>
+        <div style="font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:#3B82F6;letter-spacing:2px">INSTANCE 1 (ORCL1)</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(59,130,246,0.7)">THREAD 1 · NODE rac-node1 · OWN SGA + PROCESSES</div>
+      </div>
+    </div>
+
+    <!-- Instance 1 SGA -->
+    <div class="rac-section" style="top:48px;left:10px;right:10px;height:110px;border-color:rgba(59,130,246,0.3);background:rgba(59,130,246,0.03);cursor:pointer" onclick="showInfo('rac_sga')">
+      <div style="font-family:'Orbitron',monospace;font-size:7px;color:#3B82F6;letter-spacing:2px;margin-bottom:4px">INSTANCE 1 SGA (PRIVATE)</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <div style="flex:1;min-width:80px;padding:5px;border:1px solid rgba(46,204,113,0.3);border-radius:4px;background:rgba(14,30,18,0.8)">
+          <div style="font-family:monospace;font-size:7.5px;color:#2ECC71">BUFFER CACHE</div>
+          <div style="font-family:monospace;font-size:6.5px;color:#1E8449;margin-top:2px">Local + GCS copies<br>CR blocks from node2</div>
+        </div>
+        <div style="flex:1;min-width:80px;padding:5px;border:1px solid rgba(241,196,15,0.3);border-radius:4px;background:rgba(22,20,6,0.8)">
+          <div style="font-family:monospace;font-size:7.5px;color:#F1C40F">SHARED POOL</div>
+          <div style="font-family:monospace;font-size:6.5px;color:#A0801A;margin-top:2px">Local SQL plans<br>GES lock info</div>
+        </div>
+        <div style="flex:1;min-width:80px;padding:5px;border:1px solid rgba(255,71,87,0.3);border-radius:4px;background:rgba(26,8,8,0.8)">
+          <div style="font-family:monospace;font-size:7.5px;color:var(--lgwr)">REDO BUFFER</div>
+          <div style="font-family:monospace;font-size:6.5px;color:rgba(255,71,87,0.6);margin-top:2px">Thread 1 redo<br>Own redo stream</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Instance 1 Processes -->
+    <div class="rac-section" style="top:168px;left:10px;right:10px;height:80px;border-color:rgba(34,197,94,0.3);background:rgba(8,20,14,0.4);cursor:pointer" onclick="showInfo('rac_gcs')">
+      <div style="font-family:'Orbitron',monospace;font-size:7px;color:#22C55E;letter-spacing:2px;margin-bottom:4px">BACKGROUND PROCESSES</div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap">
+        <span style="padding:2px 6px;border-radius:3px;border:1px solid var(--lgwr);font-family:monospace;font-size:7.5px;color:var(--lgwr)">LGWR</span>
+        <span style="padding:2px 6px;border-radius:3px;border:1px solid var(--dbwn);font-family:monospace;font-size:7.5px;color:var(--dbwn)">DBWn</span>
+        <span style="padding:2px 6px;border-radius:3px;border:1px solid var(--ckpt);font-family:monospace;font-size:7.5px;color:var(--ckpt)">CKPT</span>
+        <span style="padding:2px 6px;border-radius:3px;border:1px solid var(--smon);font-family:monospace;font-size:7.5px;color:var(--smon)">SMON</span>
+        <span style="padding:2px 6px;border-radius:3px;border:1.5px solid #A855F7;font-family:monospace;font-size:7.5px;color:#A855F7;font-weight:700;background:rgba(168,85,247,0.1)">LMS<sub>n</sub></span>
+        <span style="padding:2px 6px;border-radius:3px;border:1.5px solid #A855F7;font-family:monospace;font-size:7.5px;color:#A855F7;font-weight:700;background:rgba(168,85,247,0.1)">LMD</span>
+        <span style="padding:2px 6px;border-radius:3px;border:1.5px solid #A855F7;font-family:monospace;font-size:7.5px;color:#A855F7;font-weight:700;background:rgba(168,85,247,0.1)">LMON</span>
+        <span style="padding:2px 6px;border-radius:3px;border:1px solid var(--arcn);font-family:monospace;font-size:7.5px;color:var(--arcn)">ARCn</span>
+      </div>
+      <div style="font-family:monospace;font-size:7px;color:rgba(168,85,247,0.7);margin-top:4px">LMS = GCS (block shipping) · LMD = GES (lock mgmt) · LMON = Global Monitor</div>
+    </div>
+
+    <!-- Instance 1 Local Storage -->
+    <div class="rac-section" style="top:258px;left:10px;right:10px;height:90px;border-color:rgba(199,70,52,0.3);background:rgba(20,8,8,0.4);cursor:pointer" onclick="showInfo('rac_thread')">
+      <div style="font-family:'Orbitron',monospace;font-size:7px;color:#C74634;letter-spacing:2px;margin-bottom:4px">PER-INSTANCE (THREAD 1)</div>
+      <div style="display:flex;gap:8px">
+        <div style="display:flex;flex-direction:column;align-items:center">
+          <div class="mt-mini-cyl" style="color:var(--lgwr)">
+            <div class="cyl-top" style="border-color:var(--lgwr);width:24px;height:5px"></div>
+            <div class="cyl-body" style="border-color:var(--lgwr);width:24px;height:12px"></div>
+            <div class="cyl-bot" style="border-color:var(--lgwr);width:24px;height:5px"></div>
+          </div>
+          <div style="font-size:6.5px;font-family:monospace;color:var(--lgwr);margin-top:2px">REDO THREAD 1</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center">
+          <div class="mt-mini-cyl" style="color:#A855F7">
+            <div class="cyl-top" style="border-color:#A855F7;width:24px;height:5px"></div>
+            <div class="cyl-body" style="border-color:#A855F7;width:24px;height:12px"></div>
+            <div class="cyl-bot" style="border-color:#A855F7;width:24px;height:5px"></div>
+          </div>
+          <div style="font-size:6.5px;font-family:monospace;color:#A855F7;margin-top:2px">UNDO TBS 1</div>
+        </div>
+        <div style="font-family:monospace;font-size:7px;color:var(--txt-dim);padding-top:8px;line-height:1.6">Each instance has own<br>redo thread + UNDO tbs<br>for crash recovery isolation</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INSTANCE 2 -->
+  <div class="rac-instance rac-inst2" style="height:360px">
+    <div class="rac-inst-header" style="background:rgba(46,204,113,0.06);border-bottom:1px solid rgba(46,204,113,0.3);cursor:pointer" onclick="showInfo('rac_inst2')">
+      <svg class="ora-inst-icon" width="26" height="26" viewBox="0 0 26 26">
+        <rect x="3" y="3" width="20" height="20" rx="3" fill="rgba(46,204,113,0.1)" stroke="#2ECC71" stroke-width="1.5"/>
+        <line x1="3" y1="9" x2="23" y2="9" stroke="#2ECC71" stroke-width="0.8" opacity="0.4"/>
+        <line x1="3" y1="15" x2="23" y2="15" stroke="#2ECC71" stroke-width="0.8" opacity="0.4"/>
+        <circle cx="7" cy="6" r="1.5" fill="#2ECC71" opacity="0.6"/>
+        <circle cx="7" cy="12" r="1.5" fill="#2ECC71" opacity="0.6"/>
+        <text x="13" y="21" text-anchor="middle" fill="#2ECC71" font-size="5" font-family="monospace" font-weight="700">NODE2</text>
+      </svg>
+      <div>
+        <div style="font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:#2ECC71;letter-spacing:2px">INSTANCE 2 (ORCL2)</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(46,204,113,0.7)">THREAD 2 · NODE rac-node2 · OWN SGA + PROCESSES</div>
+      </div>
+    </div>
+
+    <!-- Instance 2 SGA -->
+    <div class="rac-section" style="top:48px;left:10px;right:10px;height:110px;border-color:rgba(46,204,113,0.3);background:rgba(46,204,113,0.03);cursor:pointer" onclick="showInfo('rac_sga')">
+      <div style="font-family:'Orbitron',monospace;font-size:7px;color:#2ECC71;letter-spacing:2px;margin-bottom:4px">INSTANCE 2 SGA (PRIVATE)</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <div style="flex:1;min-width:80px;padding:5px;border:1px solid rgba(46,204,113,0.3);border-radius:4px;background:rgba(14,30,18,0.8)">
+          <div style="font-family:monospace;font-size:7.5px;color:#2ECC71">BUFFER CACHE</div>
+          <div style="font-family:monospace;font-size:6.5px;color:#1E8449;margin-top:2px">Local + GCS copies<br>CR blocks from node1</div>
+        </div>
+        <div style="flex:1;min-width:80px;padding:5px;border:1px solid rgba(241,196,15,0.3);border-radius:4px;background:rgba(22,20,6,0.8)">
+          <div style="font-family:monospace;font-size:7.5px;color:#F1C40F">SHARED POOL</div>
+          <div style="font-family:monospace;font-size:6.5px;color:#A0801A;margin-top:2px">Local SQL plans<br>GES lock info</div>
+        </div>
+        <div style="flex:1;min-width:80px;padding:5px;border:1px solid rgba(255,71,87,0.3);border-radius:4px;background:rgba(26,8,8,0.8)">
+          <div style="font-family:monospace;font-size:7.5px;color:var(--lgwr)">REDO BUFFER</div>
+          <div style="font-family:monospace;font-size:6.5px;color:rgba(255,71,87,0.6);margin-top:2px">Thread 2 redo<br>Own redo stream</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Instance 2 Processes -->
+    <div class="rac-section" style="top:168px;left:10px;right:10px;height:80px;border-color:rgba(34,197,94,0.3);background:rgba(8,20,14,0.4);cursor:pointer" onclick="showInfo('rac_gcs')">
+      <div style="font-family:'Orbitron',monospace;font-size:7px;color:#22C55E;letter-spacing:2px;margin-bottom:4px">BACKGROUND PROCESSES</div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap">
+        <span style="padding:2px 6px;border-radius:3px;border:1px solid var(--lgwr);font-family:monospace;font-size:7.5px;color:var(--lgwr)">LGWR</span>
+        <span style="padding:2px 6px;border-radius:3px;border:1px solid var(--dbwn);font-family:monospace;font-size:7.5px;color:var(--dbwn)">DBWn</span>
+        <span style="padding:2px 6px;border-radius:3px;border:1px solid var(--ckpt);font-family:monospace;font-size:7.5px;color:var(--ckpt)">CKPT</span>
+        <span style="padding:2px 6px;border-radius:3px;border:1px solid var(--smon);font-family:monospace;font-size:7.5px;color:var(--smon)">SMON</span>
+        <span style="padding:2px 6px;border-radius:3px;border:1.5px solid #A855F7;font-family:monospace;font-size:7.5px;color:#A855F7;font-weight:700;background:rgba(168,85,247,0.1)">LMS<sub>n</sub></span>
+        <span style="padding:2px 6px;border-radius:3px;border:1.5px solid #A855F7;font-family:monospace;font-size:7.5px;color:#A855F7;font-weight:700;background:rgba(168,85,247,0.1)">LMD</span>
+        <span style="padding:2px 6px;border-radius:3px;border:1.5px solid #A855F7;font-family:monospace;font-size:7.5px;color:#A855F7;font-weight:700;background:rgba(168,85,247,0.1)">LMON</span>
+        <span style="padding:2px 6px;border-radius:3px;border:1px solid var(--arcn);font-family:monospace;font-size:7.5px;color:var(--arcn)">ARCn</span>
+      </div>
+      <div style="font-family:monospace;font-size:7px;color:rgba(168,85,247,0.7);margin-top:4px">LMS = GCS (block shipping) · LMD = GES (lock mgmt) · LMON = Global Monitor</div>
+    </div>
+
+    <!-- Instance 2 Local Storage -->
+    <div class="rac-section" style="top:258px;left:10px;right:10px;height:90px;border-color:rgba(199,70,52,0.3);background:rgba(20,8,8,0.4);cursor:pointer" onclick="showInfo('rac_thread2')">
+      <div style="font-family:'Orbitron',monospace;font-size:7px;color:#C74634;letter-spacing:2px;margin-bottom:4px">PER-INSTANCE (THREAD 2)</div>
+      <div style="display:flex;gap:8px">
+        <div style="display:flex;flex-direction:column;align-items:center">
+          <div class="mt-mini-cyl" style="color:var(--lgwr)">
+            <div class="cyl-top" style="border-color:var(--lgwr);width:24px;height:5px"></div>
+            <div class="cyl-body" style="border-color:var(--lgwr);width:24px;height:12px"></div>
+            <div class="cyl-bot" style="border-color:var(--lgwr);width:24px;height:5px"></div>
+          </div>
+          <div style="font-size:6.5px;font-family:monospace;color:var(--lgwr);margin-top:2px">REDO THREAD 2</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center">
+          <div class="mt-mini-cyl" style="color:#A855F7">
+            <div class="cyl-top" style="border-color:#A855F7;width:24px;height:5px"></div>
+            <div class="cyl-body" style="border-color:#A855F7;width:24px;height:12px"></div>
+            <div class="cyl-bot" style="border-color:#A855F7;width:24px;height:5px"></div>
+          </div>
+          <div style="font-size:6.5px;font-family:monospace;color:#A855F7;margin-top:2px">UNDO TBS 2</div>
+        </div>
+        <div style="font-family:monospace;font-size:7px;color:var(--txt-dim);padding-top:8px;line-height:1.6">Each instance has own<br>redo thread + UNDO tbs<br>for crash recovery isolation</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTERCONNECT (Cache Fusion) -->
+  <div class="rac-interconnect" style="top:470px;cursor:pointer" onclick="showInfo('rac_interconnect')">
+    <svg width="28" height="28" viewBox="0 0 28 28">
+      <path d="M4,14 L24,14" stroke="#A855F7" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M8,8 L14,14 L8,20" fill="none" stroke="#A855F7" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M20,8 L14,14 L20,20" fill="none" stroke="#A855F7" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    <div class="rac-cf-badge">CACHE FUSION — PRIVATE INTERCONNECT</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--txt-dim);max-width:500px;text-align:center;line-height:1.5">
+      High-speed private network (InfiniBand / 10GbE+)<br>
+      <strong style="color:#A855F7">GCS (LMS)</strong> ships data blocks between instances on demand<br>
+      <strong style="color:#A855F7">GES (LMD)</strong> coordinates global enqueue / lock resources<br>
+      <strong style="color:#A855F7">LMON</strong> monitors cluster membership + node eviction (split-brain)<br>
+      Wait events: gc cr request · gc current request · gc buffer busy
+    </div>
+  </div>
+
+  <!-- SHARED STORAGE (ASM) -->
+  <div class="rac-shared-storage" style="top:570px;height:370px">
+    <div class="layer-label" style="color:#C74634;top:8px;left:16px">SHARED STORAGE — ALL INSTANCES ACCESS THE SAME DATABASE FILES VIA ASM</div>
+
+    <!-- ASM Banner -->
+    <div style="position:absolute;top:34px;left:16px;right:16px;height:40px;border-radius:6px;border:1.5px solid rgba(199,70,52,0.5);background:rgba(199,70,52,0.08);display:flex;align-items:center;padding:0 14px;gap:10px;cursor:pointer" onclick="showInfo('rac_asm')">
+      <svg width="24" height="24" viewBox="0 0 24 24">
+        <rect x="2" y="4" width="20" height="16" rx="2" fill="none" stroke="#C74634" stroke-width="1.3"/>
+        <circle cx="8" cy="12" r="3" fill="none" stroke="#C74634" stroke-width="1"/>
+        <circle cx="16" cy="12" r="3" fill="none" stroke="#C74634" stroke-width="1"/>
+        <line x1="11" y1="12" x2="13" y2="12" stroke="#C74634" stroke-width="1"/>
+      </svg>
+      <div style="font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:#C74634;letter-spacing:2px">ORACLE ASM (AUTOMATIC STORAGE MANAGEMENT)</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(199,70,52,0.7);margin-left:auto">Volume manager + File system for Oracle</div>
+    </div>
+
+    <!-- ASM Disk Groups -->
+    <div style="position:absolute;top:86px;left:16px;right:16px;display:flex;gap:14px;flex-wrap:wrap">
+      <!-- +DATA diskgroup -->
+      <div class="rac-asm-group" style="flex:1;min-width:280px;cursor:pointer" onclick="showInfo('rac_data_dg')">
+        <div style="font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:#2ECC71;letter-spacing:1px;margin-bottom:6px">+DATA (NORMAL REDUNDANCY)</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+          <div style="display:flex;flex-direction:column;align-items:center">
+            <div class="mt-mini-cyl" style="color:#2ECC71">
+              <div class="cyl-top" style="border-color:#2ECC71;width:28px;height:5px"></div>
+              <div class="cyl-body" style="border-color:#2ECC71;width:28px;height:16px"></div>
+              <div class="cyl-bot" style="border-color:#2ECC71;width:28px;height:5px"></div>
+            </div>
+            <div style="font-size:7px;font-family:monospace;color:#2ECC71;margin-top:2px">DATA FILES</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center">
+            <div class="mt-mini-cyl" style="color:var(--ckpt)">
+              <div class="cyl-top" style="border-color:var(--ckpt);width:28px;height:5px"></div>
+              <div class="cyl-body" style="border-color:var(--ckpt);width:28px;height:16px"></div>
+              <div class="cyl-bot" style="border-color:var(--ckpt);width:28px;height:5px"></div>
+            </div>
+            <div style="font-size:7px;font-family:monospace;color:var(--ckpt);margin-top:2px">CONTROL</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center">
+            <div class="mt-mini-cyl" style="color:#A855F7">
+              <div class="cyl-top" style="border-color:#A855F7;width:28px;height:5px"></div>
+              <div class="cyl-body" style="border-color:#A855F7;width:28px;height:16px"></div>
+              <div class="cyl-bot" style="border-color:#A855F7;width:28px;height:5px"></div>
+            </div>
+            <div style="font-size:7px;font-family:monospace;color:#A855F7;margin-top:2px">UNDO x2</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center">
+            <div class="mt-mini-cyl" style="color:#38BDF8">
+              <div class="cyl-top" style="border-color:#38BDF8;width:28px;height:5px"></div>
+              <div class="cyl-body" style="border-color:#38BDF8;width:28px;height:16px"></div>
+              <div class="cyl-bot" style="border-color:#38BDF8;width:28px;height:5px"></div>
+            </div>
+            <div style="font-size:7px;font-family:monospace;color:#38BDF8;margin-top:2px">TEMP</div>
+          </div>
+        </div>
+        <div style="font-family:monospace;font-size:7px;color:rgba(46,204,113,0.6);margin-top:6px;text-align:center">Both instances read/write · ASM mirrors across failure groups</div>
+      </div>
+
+      <!-- +FRA diskgroup -->
+      <div class="rac-asm-group" style="flex:1;min-width:280px;cursor:pointer" onclick="showInfo('rac_fra_dg')">
+        <div style="font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:var(--arcn);letter-spacing:1px;margin-bottom:6px">+FRA (FLASH RECOVERY AREA)</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+          <div style="display:flex;flex-direction:column;align-items:center">
+            <div class="mt-mini-cyl" style="color:var(--lgwr)">
+              <div class="cyl-top" style="border-color:var(--lgwr);width:28px;height:5px"></div>
+              <div class="cyl-body" style="border-color:var(--lgwr);width:28px;height:16px"></div>
+              <div class="cyl-bot" style="border-color:var(--lgwr);width:28px;height:5px"></div>
+            </div>
+            <div style="font-size:7px;font-family:monospace;color:var(--lgwr);margin-top:2px">REDO x2</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center">
+            <div class="mt-mini-cyl" style="color:var(--arcn)">
+              <div class="cyl-top" style="border-color:var(--arcn);width:28px;height:5px"></div>
+              <div class="cyl-body" style="border-color:var(--arcn);width:28px;height:16px"></div>
+              <div class="cyl-bot" style="border-color:var(--arcn);width:28px;height:5px"></div>
+            </div>
+            <div style="font-size:7px;font-family:monospace;color:var(--arcn);margin-top:2px">ARCHIVED</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center">
+            <div class="mt-mini-cyl" style="color:var(--pmon)">
+              <div class="cyl-top" style="border-color:var(--pmon);width:28px;height:5px"></div>
+              <div class="cyl-body" style="border-color:var(--pmon);width:28px;height:16px"></div>
+              <div class="cyl-bot" style="border-color:var(--pmon);width:28px;height:5px"></div>
+            </div>
+            <div style="font-size:7px;font-family:monospace;color:var(--pmon);margin-top:2px">BACKUPS</div>
+          </div>
+        </div>
+        <div style="font-family:monospace;font-size:7px;color:rgba(0,212,255,0.6);margin-top:6px;text-align:center">Per-instance redo threads · Shared archive destination</div>
+      </div>
+
+      <!-- Cluster Components -->
+      <div class="rac-asm-group" style="flex:1;min-width:250px;border-color:rgba(241,196,15,0.3);background:rgba(241,196,15,0.03);cursor:pointer" onclick="showInfo('rac_cluster')">
+        <div style="font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:#F1C40F;letter-spacing:1px;margin-bottom:6px">CLUSTER COMPONENTS</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:10px;height:10px;border-radius:50%;border:1.5px solid #F1C40F;background:rgba(241,196,15,0.2)"></div>
+            <div style="font-family:monospace;font-size:8px;color:#F1C40F;font-weight:700">VOTING DISK</div>
+            <div style="font-family:monospace;font-size:7px;color:rgba(241,196,15,0.6)">Node membership · Split-brain resolution</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:10px;height:10px;border-radius:50%;border:1.5px solid #FB923C;background:rgba(251,146,60,0.2)"></div>
+            <div style="font-family:monospace;font-size:8px;color:#FB923C;font-weight:700">OCR</div>
+            <div style="font-family:monospace;font-size:7px;color:rgba(251,146,60,0.6)">Oracle Cluster Registry · Cluster config</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:10px;height:10px;border-radius:50%;border:1.5px solid #2ECC71;background:rgba(46,204,113,0.2)"></div>
+            <div style="font-family:monospace;font-size:8px;color:#2ECC71;font-weight:700">CRS / GI</div>
+            <div style="font-family:monospace;font-size:7px;color:rgba(46,204,113,0.6)">Cluster Ready Services · Grid Infrastructure</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:10px;height:10px;border-radius:50%;border:1.5px solid #3B82F6;background:rgba(59,130,246,0.2)"></div>
+            <div style="font-family:monospace;font-size:8px;color:#3B82F6;font-weight:700">ASM INSTANCE</div>
+            <div style="font-family:monospace;font-size:7px;color:rgba(59,130,246,0.6)">+ASM1, +ASM2 · Manages disk groups</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key RAC concepts -->
+    <div style="position:absolute;bottom:12px;left:16px;right:16px;display:flex;gap:10px;flex-wrap:wrap">
+      <div style="padding:6px 12px;border-radius:5px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.3);font-family:'Share Tech Mono',monospace;font-size:8px;color:#A855F7">
+        gc cr request = Block shipped via Cache Fusion (consistent read)</div>
+      <div style="padding:6px 12px;border-radius:5px;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.3);font-family:'Share Tech Mono',monospace;font-size:8px;color:#3B82F6">
+        srvctl start instance -d ORCL -i ORCL2</div>
+      <div style="padding:6px 12px;border-radius:5px;background:rgba(46,204,113,0.08);border:1px solid rgba(46,204,113,0.3);font-family:'Share Tech Mono',monospace;font-size:8px;color:#2ECC71">
+        V$INSTANCE · GV$SESSION (global) · GV$SYSSTAT</div>
+    </div>
+  </div>
+
+  <!-- RAC SVG Flows -->
+  <svg id="rac-flows-svg" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="rac-arr-purple" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L0,10 L10,5 z" fill="#A855F7" opacity="0.8"/></marker>
+      <marker id="rac-arr-green" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L0,10 L10,5 z" fill="#2ECC71" opacity="0.8"/></marker>
+      <marker id="rac-arr-blue" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L0,10 L10,5 z" fill="#3B82F6" opacity="0.8"/></marker>
+    </defs>
+    <!-- Cache Fusion: Instance 1 → Instance 2 (block ship right) -->
+    <path class="flow-path rac-flow" d="M 680,300 C 720,300 740,480 760,490" stroke="#A855F7" stroke-dasharray="10,6" stroke-opacity="0.5" stroke-width="2.5" marker-end="url(#rac-arr-purple)"/>
+    <!-- Cache Fusion: Instance 2 → Instance 1 (block ship left) -->
+    <path class="flow-path rac-flow" d="M 840,300 C 800,300 780,480 760,510" stroke="#A855F7" stroke-dasharray="10,6" stroke-opacity="0.4" stroke-width="2"/>
+    <!-- Instance 1 → Shared Storage -->
+    <path class="flow-path rac-flow" d="M 350,460 L 350,500 L 350,570" stroke="#3B82F6" stroke-dasharray="8,5" stroke-opacity="0.4" stroke-width="2" marker-end="url(#rac-arr-blue)"/>
+    <!-- Instance 2 → Shared Storage -->
+    <path class="flow-path rac-flow" d="M 1170,460 L 1170,500 L 1170,570" stroke="#2ECC71" stroke-dasharray="8,5" stroke-opacity="0.4" stroke-width="2" marker-end="url(#rac-arr-green)"/>
+    <!-- SCAN → Instance 1 -->
+    <path class="flow-path" d="M 680,74 L 350,100" stroke="#F1C40F" stroke-dasharray="5,4" stroke-opacity="0.25" stroke-width="1.5"/>
+    <!-- SCAN → Instance 2 -->
+    <path class="flow-path" d="M 840,74 L 1170,100" stroke="#F1C40F" stroke-dasharray="5,4" stroke-opacity="0.25" stroke-width="1.5"/>
+  </svg>
+</div>
+
+</div><!-- end diagram -->
+</div><!-- end canvas -->
+
+<!-- INFO PANEL -->
+<div id="info-panel">
+  <button id="info-close" onclick="closeInfo()">×</button>
+  <div id="info-color-bar"></div>
+  <div id="info-title">Component</div>
+  <div id="info-subtitle">ORACLE DATABASE</div>
+  <div id="info-desc">Description loading...</div>
+  <div id="info-flows"></div>
+  <div id="info-trigger"></div>
+</div>
+
+<!-- LEGEND -->
+<div id="legend">
+  <div class="leg-item"><div class="leg-dot" style="background:var(--lgwr)"></div>LGWR — Log Writer</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--dbwn)"></div>DBWn — DB Writer</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--ckpt)"></div>CKPT — Checkpoint</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--arcn)"></div>ARCn — Archiver</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--smon)"></div>SMON — Sys Monitor</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--pmon)"></div>PMON — Proc Monitor</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--mmon)"></div>MMON — Manageability</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--mman)"></div>MMAN — Mem Manager</div>
+</div>
+
+<!-- ZOOM CONTROLS -->
+<div id="zoom-ctrl">
+  <button class="zoom-btn" onclick="zoom(1.15)">+</button>
+  <button class="zoom-btn" onclick="zoom(0.87)">−</button>
+  <button class="zoom-btn" onclick="resetZoom()" style="font-size:10px;font-family:monospace">FIT</button>
+</div>
+
+<!-- STATUS BAR -->
+<div id="statusbar">
+  <div class="status-tag" style="color:var(--ora);font-weight:700">ORACLE 19c/21c</div>
+  <div class="status-tag" id="status-scn">SCN: <span id="scn-val">9,842,118</span></div>
+  <div class="status-tag" id="status-mode">● ARCHIVELOG MODE</div>
+  <div class="status-tag" style="color:var(--txt-dim)">CHECKPOINT: <span id="ckpt-val">9,842,100</span></div>
+  <div class="status-tag" style="color:var(--txt-dim)">LOG SEQ: <span id="logseq-val">482</span></div>
+  <div class="status-tag" style="color:var(--dbwn)">DIRTY BUFS: <span id="dirty-val">4%</span></div>
+  <div class="status-tag" id="status-tip">← CLICK ANY COMPONENT FOR DETAILS</div>
+</div>
+
+<!-- DETAIL VIEW OVERLAY -->
+<div id="detail-overlay"></div>
+<button id="detail-back" onclick="closeDetailView()">&#x2190; BACK</button>
+<div class="esc-hint">PRESS ESC TO RETURN</div>
+
+</body>
+</html>
