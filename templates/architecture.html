@@ -1693,7 +1693,7 @@ body.viewer-mode .sec-section:hover {
     <div class="h-sub">PROCESS · MEMORY · DATA FLOW · STORAGE — CLICK ANY COMPONENT</div>
   </div>
   <div class="h-tabs">
-    <a href="/sql" class="h-tab" style="text-decoration:none;border-color:rgba(231,76,60,0.5);color:#E74C3C;border-bottom:3px solid rgba(231,76,60,0.5);">&#9672; SQL CONVERTER</a>
+    <a href="/sql" id="sql-converter-tab" class="h-tab" onclick="return checkSqlConverterAccess()" style="text-decoration:none;border-color:rgba(231,76,60,0.5);color:#E74C3C;border-bottom:3px solid rgba(231,76,60,0.5);">&#9672; SQL CONVERTER</a>
     <button class="h-tab active" onclick="switchView('standard')">STANDARD 1:1</button>
     <button class="h-tab" onclick="switchView('multitenant')">MULTITENANT</button>
     <button class="h-tab" onclick="switchView('dataguard')">DATA GUARD</button>
@@ -19729,17 +19729,18 @@ detailAnimStarters.net_encryption = function() {
 // ── TAB UNLOCK SYSTEM ─────────────────────────────────────────────────────
 var TAB_UNLOCK_KEY = 'oracle_tab_unlocks';
 var TAB_DEFS = [
-  {key:'standard',    label:'Standard 1:1',  always:true},
-  {key:'multitenant', label:'Multitenant CDB/PDB'},
-  {key:'dataguard',   label:'Data Guard'},
-  {key:'rac',         label:'RAC'},
-  {key:'rman',        label:'RMAN'},
-  {key:'datapump',    label:'Data Pump'},
-  {key:'security',    label:'Security'},
-  {key:'perftune',    label:'Performance Tuning'},
-  {key:'networking',  label:'Networking'},
-  {key:'reference',   label:'Cheatsheet (DBA+)'},
-  {key:'course',      label:'Course (All Roles)'}
+  {key:'standard',       label:'Standard 1:1',      always:true},
+  {key:'multitenant',    label:'Multitenant CDB/PDB'},
+  {key:'dataguard',      label:'Data Guard'},
+  {key:'rac',            label:'RAC'},
+  {key:'rman',           label:'RMAN'},
+  {key:'datapump',       label:'Data Pump'},
+  {key:'security',       label:'Security'},
+  {key:'perftune',       label:'Performance Tuning'},
+  {key:'networking',     label:'Networking'},
+  {key:'reference',      label:'Cheatsheet (DBA+)'},
+  {key:'course',         label:'Course (All Roles)'},
+  {key:'sql_converter',  label:'SQL Converter'}
 ];
 
 function getUnlockedTabs() {
@@ -19764,6 +19765,23 @@ function applyTabUnlocks(role) {
       btn.classList.add('tab-locked');
     }
   });
+  // Handle SQL Converter link tab separately (it's an <a>, not a switchView button)
+  var sqlTab = document.getElementById('sql-converter-tab');
+  if (sqlTab) {
+    if (role === 'admin' || unlocked.indexOf('sql_converter') >= 0) {
+      sqlTab.classList.remove('tab-locked');
+    } else {
+      sqlTab.classList.add('tab-locked');
+    }
+  }
+}
+
+function checkSqlConverterAccess() {
+  if (!window._currentRole || window._currentRole === 'admin') return true;
+  var unlocked = getUnlockedTabs();
+  if (unlocked.indexOf('sql_converter') >= 0) return true;
+  showAccessDenied('SQL Converter is locked — ask your administrator to unlock this section.');
+  return false;
 }
 
 function renderAdminTabPanel() {
