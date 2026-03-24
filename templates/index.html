@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL to Oracle Converter</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <div class="logo">
+                <span class="logo-icon">&#9672;</span>
+                <span class="logo-text">sql<strong>2oracle</strong></span>
+            </div>
+            <p class="tagline">Transpile SQL from any dialect into Oracle-compatible SQL</p>
+            <a href="/architecture" class="nav-link">Oracle Architecture &#8594;</a>
+        </div>
+    </header>
+
+    <main>
+        <div class="converter-grid">
+            <div class="panel panel-input">
+                <div class="panel-header">
+                    <label for="sql-input">Input SQL</label>
+                    <div class="panel-controls">
+                        <select id="source-dialect" title="Source dialect">
+                            <option value="">Loading dialects...</option>
+                        </select>
+                        <button class="btn btn-secondary" id="clear-btn">Clear</button>
+                        <button class="btn btn-secondary" id="example-btn">Example</button>
+                    </div>
+                </div>
+                <textarea
+                    id="sql-input"
+                    placeholder="Paste your SQL here..."
+                    spellcheck="false"
+                ></textarea>
+            </div>
+
+            <div class="panel-center">
+                <button class="btn btn-primary" id="convert-btn">
+                    Convert to Oracle &#8594;
+                </button>
+            </div>
+
+            <div class="panel panel-output">
+                <div class="panel-header">
+                    <label>Oracle SQL Output</label>
+                    <div class="panel-controls">
+                        <span id="stmt-count" class="stmt-badge" style="display:none"></span>
+                        <button class="btn btn-secondary" id="copy-btn" style="display:none">Copy</button>
+                    </div>
+                </div>
+                <div id="output-area" class="output-area">
+                    <span class="placeholder-text">Converted Oracle SQL will appear here...</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="error-banner" class="error-banner" style="display:none"></div>
+
+        <section class="info-section">
+            <h2>Supported Conversions</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>Data Types</h3>
+                    <ul>
+                        <li>VARCHAR / TEXT &#8594; VARCHAR2</li>
+                        <li>INT / INTEGER &#8594; NUMBER</li>
+                        <li>BOOLEAN &#8594; NUMBER(1)</li>
+                        <li>DATETIME &#8594; DATE / TIMESTAMP</li>
+                        <li>AUTO_INCREMENT &#8594; SEQUENCE pattern</li>
+                    </ul>
+                </div>
+                <div class="info-card">
+                    <h3>Functions</h3>
+                    <ul>
+                        <li>IFNULL / COALESCE &#8594; NVL</li>
+                        <li>NOW() &#8594; SYSDATE</li>
+                        <li>CONCAT &#8594; || operator</li>
+                        <li>LIMIT / TOP &#8594; ROWNUM / FETCH FIRST</li>
+                        <li>GROUP_CONCAT &#8594; LISTAGG</li>
+                    </ul>
+                </div>
+                <div class="info-card">
+                    <h3>Syntax</h3>
+                    <ul>
+                        <li>ILIKE &#8594; UPPER/LOWER LIKE</li>
+                        <li>EXCEPT &#8594; MINUS</li>
+                        <li>Backtick identifiers &#8594; double-quoted</li>
+                        <li>String escaping differences</li>
+                        <li>JOIN syntax normalization</li>
+                    </ul>
+                </div>
+                <div class="info-card">
+                    <h3>Source Dialects</h3>
+                    <ul>
+                        <li>MySQL / MariaDB</li>
+                        <li>PostgreSQL</li>
+                        <li>SQL Server (T-SQL)</li>
+                        <li>BigQuery, Snowflake, Redshift</li>
+                        <li>SQLite, Hive, Spark, Presto, Trino</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Powered by <a href="https://github.com/tobymao/sqlglot" target="_blank" rel="noopener">sqlglot</a> &mdash; open-source SQL parser &amp; transpiler</p>
+    </footer>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
