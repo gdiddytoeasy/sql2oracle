@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — Torch House Tech</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:100%; height:100%; overflow:hidden; }
+
+body {
+  font-family:'Rajdhani', sans-serif;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 15%, rgba(231,76,60,0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(59,130,246,0.06) 0%, transparent 70%),
+    #04080F;
+  display:flex; align-items:center; justify-content:center; min-height:100vh;
+}
+
+.auth-bg-grid {
+  position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size:40px 40px;
+}
+
+.auth-card {
+  position:relative; z-index:1;
+  width:420px;
+  background:rgba(10,18,32,0.92);
+  backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(231,76,60,0.3);
+  border-radius:16px;
+  padding:36px 40px 32px;
+  box-shadow:0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+  animation:auth-appear 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+
+@keyframes auth-appear {
+  from { opacity:0; transform:translateY(24px) scale(0.97); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+
+.auth-card.auth-shake {
+  animation:auth-shake 0.4s cubic-bezier(0.36,0.07,0.19,0.97);
+}
+@keyframes auth-shake {
+  0%,100%{transform:translateX(0);}
+  20%    {transform:translateX(-8px);}
+  40%    {transform:translateX(8px);}
+  60%    {transform:translateX(-5px);}
+  80%    {transform:translateX(5px);}
+}
+
+.auth-logo {
+  text-align:center;
+  margin-bottom:28px;
+}
+.auth-logo-img {
+  height:72px;
+  width:auto;
+  filter:drop-shadow(0 0 12px rgba(253,126,4,0.5));
+  margin-bottom:10px;
+}
+.auth-title {
+  font-family:'Orbitron', monospace;
+  font-size:16px; font-weight:700;
+  color:#E74C3C; letter-spacing:3px;
+  margin-bottom:4px;
+}
+.auth-subtitle {
+  font-family:'Share Tech Mono', monospace;
+  font-size:10px; color:rgba(255,255,255,0.3);
+  letter-spacing:1px;
+}
+
+.auth-field { margin-bottom:18px; }
+.auth-label {
+  display:block;
+  font-family:'Share Tech Mono', monospace;
+  font-size:10px; letter-spacing:2px;
+  color:rgba(255,255,255,0.4);
+  margin-bottom:6px;
+}
+.auth-input-wrap { position:relative; }
+.auth-input {
+  width:100%; padding:11px 14px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:7px;
+  color:#D1D9E6;
+  font-family:'Share Tech Mono', monospace;
+  font-size:13px;
+  outline:none;
+  transition:border-color 0.2s, box-shadow 0.2s;
+}
+.auth-input:focus {
+  border-color:rgba(231,76,60,0.6);
+  box-shadow:0 0 0 3px rgba(231,76,60,0.1);
+}
+.auth-input.has-toggle { padding-right:42px; }
+.auth-toggle {
+  position:absolute; right:10px; top:50%; transform:translateY(-50%);
+  background:none; border:none; cursor:pointer;
+  font-size:16px; color:rgba(255,255,255,0.35);
+  padding:4px; line-height:1;
+}
+.auth-toggle:hover { color:rgba(255,255,255,0.7); }
+
+.auth-btn {
+  width:100%; padding:13px;
+  background:linear-gradient(135deg, #E74C3C, #C0392B);
+  border:none; border-radius:8px;
+  color:#fff;
+  font-family:'Orbitron', monospace;
+  font-size:13px; font-weight:700; letter-spacing:2px;
+  cursor:pointer;
+  transition:opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow:0 4px 16px rgba(231,76,60,0.3);
+  margin-top:6px;
+}
+.auth-btn:hover:not(:disabled) {
+  opacity:0.9; transform:translateY(-1px);
+  box-shadow:0 6px 22px rgba(231,76,60,0.4);
+}
+.auth-btn:active { transform:translateY(0); }
+.auth-btn:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+
+.auth-error {
+  display:none;
+  margin-top:12px; padding:10px 12px;
+  background:rgba(231,76,60,0.1);
+  border:1px solid rgba(231,76,60,0.3);
+  border-radius:6px;
+  font-family:'Share Tech Mono', monospace;
+  font-size:11px; color:#F1948A;
+  text-align:center;
+}
+.auth-error.visible { display:block; }
+
+.auth-footer {
+  margin-top:20px;
+  font-family:'Share Tech Mono', monospace;
+  font-size:9.5px; color:rgba(255,255,255,0.2);
+  text-align:center; line-height:1.7;
+}
+</style>
+</head>
+<body>
+<div class="auth-bg-grid"></div>
+
+<div class="auth-card" id="auth-card">
+  <div class="auth-logo">
+    <img src="/static/logo.svg" alt="Torch House Tech" class="auth-logo-img"><br>
+    <div class="auth-title">ORACLE TRAINING</div>
+    <div class="auth-subtitle">SQL SERVER TO ORACLE DBA &mdash; INTERACTIVE COURSE</div>
+  </div>
+
+  <div class="auth-field">
+    <label class="auth-label" for="auth-username">USERNAME</label>
+    <div class="auth-input-wrap">
+      <input class="auth-input" id="auth-username" type="text"
+             placeholder="Enter your username"
+             autocomplete="username" spellcheck="false">
+    </div>
+  </div>
+
+  <div class="auth-field">
+    <label class="auth-label" for="auth-password">PASSWORD</label>
+    <div class="auth-input-wrap">
+      <input class="auth-input has-toggle" id="auth-password" type="password"
+             placeholder="Enter your password" autocomplete="current-password">
+      <button class="auth-toggle" id="auth-pw-toggle" type="button" tabindex="-1">&#128065;</button>
+    </div>
+  </div>
+
+  <button class="auth-btn" id="auth-submit" onclick="doLogin()">&#9654;&nbsp; SIGN IN</button>
+  <div class="auth-error" id="auth-error">Invalid username or password.</div>
+
+  <div class="auth-footer">
+    ORACLE DATABASE ARCHITECTURE &mdash; INTERACTIVE TRAINING PLATFORM<br>
+    ACCESS RESTRICTED TO AUTHORIZED USERS ONLY
+  </div>
+</div>
+
+<script>
+// ── Auth defaults (mirror those in architecture.html) ─────────────────────
+var AUTH_DEFAULTS = [
+  { username:'admin',   displayName:'Administrator', role:'admin',
+    hash:'25e91ff6c383f40010e295237e3c8a9ca91e163a162b2628dbc47aef69bac09a' },
+  { username:'dba1',    displayName:'DBA User 1',    role:'dba',
+    hash:'d1102a789f9523e9646134f293de4bb86246787eabb58a24c6d6730bf60a53d6' },
+  { username:'student', displayName:'Student',       role:'student',
+    hash:'d4538dbfb5b1741ead4640b9159dfdaaf05d01674f91db50c500a4001ed3b405' },
+  { username:'guest',   displayName:'Guest Viewer',  role:'viewer',
+    hash:'3ab35742c8b37b3395b233535928ac25c768cebf9183901cf92fb218b7cc6db1' }
+];
+
+// ── Redirect if already logged in ─────────────────────────────────────────
+(function() {
+  var s = sessionStorage.getItem('ora_auth_session_v2');
+  if (s) { window.location.replace('/architecture'); }
+})();
+
+// ── SHA-256 via Web Crypto API ─────────────────────────────────────────────
+async function sha256(str) {
+  var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(function(b) {
+    return b.toString(16).padStart(2, '0');
+  }).join('');
+}
+
+// ── Load users (merge defaults with any localStorage additions) ────────────
+function loadUsers() {
+  var stored = localStorage.getItem('ora_auth_users_v2');
+  var custom = stored ? JSON.parse(stored) : [];
+  var merged = AUTH_DEFAULTS.slice();
+  custom.forEach(function(cu) {
+    var idx = merged.findIndex(function(u) { return u.username === cu.username; });
+    if (idx >= 0) merged[idx] = cu; else merged.push(cu);
+  });
+  return merged;
+}
+
+// ── Login ──────────────────────────────────────────────────────────────────
+async function doLogin() {
+  var username = (document.getElementById('auth-username').value || '').trim().toLowerCase();
+  var password = document.getElementById('auth-password').value || '';
+
+  if (!username || !password) {
+    showError('Please enter your username and password.');
+    return;
+  }
+
+  var btn = document.getElementById('auth-submit');
+  btn.innerHTML = '&#9203;&nbsp; VERIFYING...';
+  btn.disabled = true;
+
+  var hash = await sha256(password);
+  var users = loadUsers();
+  var match = users.find(function(u) { return u.username === username && u.hash === hash; });
+
+  btn.innerHTML = '&#9654;&nbsp; SIGN IN';
+  btn.disabled = false;
+
+  if (match) {
+    document.getElementById('auth-error').classList.remove('visible');
+    sessionStorage.setItem('ora_auth_session_v2', JSON.stringify({
+      username: match.username,
+      displayName: match.displayName,
+      role: match.role
+    }));
+    window.location.href = '/architecture';
+  } else {
+    showError('Invalid username or password. Please try again.');
+  }
+}
+
+function showError(msg) {
+  var errEl = document.getElementById('auth-error');
+  var card  = document.getElementById('auth-card');
+  errEl.textContent = msg;
+  errEl.classList.add('visible');
+  card.classList.remove('auth-shake');
+  void card.offsetWidth;
+  card.classList.add('auth-shake');
+}
+
+// ── Password show/hide ─────────────────────────────────────────────────────
+document.getElementById('auth-pw-toggle').addEventListener('click', function() {
+  var inp = document.getElementById('auth-password');
+  var hidden = inp.type === 'password';
+  inp.type = hidden ? 'text' : 'password';
+  this.innerHTML = hidden ? '&#128584;' : '&#128065;';
+});
+
+// ── Enter key navigation ───────────────────────────────────────────────────
+document.getElementById('auth-username').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') document.getElementById('auth-password').focus();
+});
+document.getElementById('auth-password').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doLogin();
+});
+
+// Auto-focus username
+setTimeout(function() { document.getElementById('auth-username').focus(); }, 100);
+</script>
+</body>
+</html>
