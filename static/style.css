@@ -45,15 +45,17 @@ header {
 .logo {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     font-size: 22px;
     color: var(--text);
     white-space: nowrap;
 }
 
-.logo-icon {
-    color: var(--accent-light);
-    font-size: 20px;
+.logo-svg {
+    height: 52px;
+    width: auto;
+    filter: drop-shadow(0 0 8px rgba(253, 126, 4, 0.45));
+    flex-shrink: 0;
 }
 
 .logo-text strong {
