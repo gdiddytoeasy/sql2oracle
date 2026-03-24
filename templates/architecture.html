@@ -7688,6 +7688,62 @@ dbca -silent -createDatabase \
   -sysPassword Oracle1 -systemPassword Oracle1</div>
       </div>
     </div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 1 · M1</span> CONNECTION FLOW — CLIENT TO SERVER</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#00D4FF">HOW A CONNECTION WORKS</div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#2ECC71">1. Client</div><div class="ref-desc">App calls Oracle JDBC/OCI driver with connection string (host:port/service_name)</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#2ECC71">2. Listener</div><div class="ref-desc">TNS Listener (port 1521) receives request, looks up service name, hands off to server process or dispatcher</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#F1C40F">3. Server Process</div><div class="ref-desc">Dedicated server process (or shared server) is spawned/assigned for the session — has its own PGA</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#C74634">4. Session</div><div class="ref-desc">Session is authenticated, default schema set, NLS settings loaded — now connected to the instance/PDB</div></div>
+        <div class="crs-tip-box">SQL Server DBA comparison: In SQL Server, connections go through the VIA/TCP endpoint directly to sqlservr.exe threads. In Oracle, the Listener is a separate process that brokers connections — it does NOT handle SQL. After handoff, the Listener is no longer involved.</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#00D4FF">ORACLE NET — KEY CONCEPTS</div>
+        <div class="ref-row"><div class="ref-cmd">Easy Connect</div><div class="ref-desc">sqlplus hr/pass@host:1521/ORCL — no tnsnames.ora needed</div></div>
+        <div class="ref-row"><div class="ref-cmd">TNS Alias</div><div class="ref-desc">sqlplus hr/pass@ORCL — resolves via tnsnames.ora or LDAP</div></div>
+        <div class="ref-row"><div class="ref-cmd">Service Name</div><div class="ref-desc">Logical name for a database/PDB — one DB can have multiple services</div></div>
+        <div class="ref-row"><div class="ref-cmd">SID</div><div class="ref-desc">System Identifier — instance name (avoid using SID in modern connections; use service name)</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Test connection from client
+tnsping ORCL          -- test TNS resolution + listener
+sqlplus /@ORCL        -- OS auth via TNS alias
+sqlplus hr/pass@//dbhost:1521/ORCL  -- Easy Connect URL
+
+-- Check registered services on listener
+lsnrctl services
+
+-- Dynamic registration (from DB side)
+SELECT name, network_name FROM v$services;
+ALTER SYSTEM REGISTER;  -- force re-register with listener</div>
+      </div>
+    </div>
+
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 1 · M1</span> ORACLE MEMORY ARCHITECTURE — DEEP DIVE</div>
+    <div class="ref-grid-full">
+      <div class="ref-card">
+        <table class="crs-table">
+          <tr><th>Memory Area</th><th>Component</th><th>Purpose</th><th>Size Guidance</th></tr>
+          <tr><td class="c-blu" rowspan="4">SGA (Shared)</td><td class="c-org">Database Buffer Cache</td><td>Caches data blocks read from disk. Dirty buffers written by DBWn</td><td>~60-70% of SGA_TARGET</td></tr>
+          <tr><td class="c-pur">Shared Pool</td><td>Library Cache (parsed SQL), Dictionary Cache (metadata), Result Cache</td><td>~20-30% of SGA_TARGET</td></tr>
+          <tr><td class="c-red">Redo Log Buffer</td><td>Circular buffer for redo entries — LGWR flushes on COMMIT or when 1/3 full</td><td>Fixed; usually 16-64MB</td></tr>
+          <tr><td class="c-teal">Large Pool</td><td>RMAN buffers, UGA for shared server, parallel execution</td><td>Set if using RMAN/parallel</td></tr>
+          <tr><td class="c-grn" rowspan="3">PGA (Private)</td><td>Sort Area</td><td>ORDER BY, GROUP BY, DISTINCT operations</td><td>Governed by PGA_AGGREGATE_TARGET</td></tr>
+          <tr><td>Hash Area</td><td>Hash join operations</td><td>Auto-tuned by workarea_size_policy</td></tr>
+          <tr><td>Cursor/Session</td><td>Bind variables, cursor state, open cursor list</td><td>Per-session overhead</td></tr>
+        </table>
+        <div class="ref-code" style="margin-top:8px">-- Check SGA component sizes
+SELECT component, current_size/1048576 current_mb,
+       min_size/1048576 min_mb, max_size/1048576 max_mb
+FROM v$sga_dynamic_components
+ORDER BY current_size DESC;
+
+-- PGA usage by session
+SELECT s.username, s.sid, p.pga_used_mem/1048576 pga_used_mb
+FROM v$session s JOIN v$process p ON s.paddr = p.addr
+WHERE s.username IS NOT NULL
+ORDER BY p.pga_used_mem DESC FETCH FIRST 10 ROWS ONLY;</div>
+      </div>
+    </div>
   </div><!-- /crs-architecture -->
 
   <!-- ── STORAGE & CONFIG ──────────────────────────────────────── -->
@@ -7875,6 +7931,96 @@ sqlplus hr/Welcome1@dbserver:1521/ORCL
 tnsping ORCL</div>
       </div>
     </div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 2 · M7</span> ASM — AUTOMATIC STORAGE MANAGEMENT</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#FB923C">ASM CONCEPTS</div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#2ECC71">What is ASM?</div><div class="ref-desc">Oracle's built-in volume manager + filesystem — replaces OS LVM + filesystem for database files. Equivalent to Windows Storage Spaces but Oracle-aware</div></div>
+        <div class="ref-row"><div class="ref-cmd">Disk Group</div><div class="ref-desc">Logical storage pool containing one or more physical disks — like a RAID volume</div></div>
+        <div class="ref-row"><div class="ref-cmd">+DATA</div><div class="ref-desc">Conventional disk group name for datafiles (convention, not requirement)</div></div>
+        <div class="ref-row"><div class="ref-cmd">+FRA</div><div class="ref-desc">Fast Recovery Area disk group — holds backups, archive logs, flashback logs</div></div>
+        <div class="ref-row"><div class="ref-cmd">Redundancy</div><div class="ref-desc">EXTERNAL (no mirroring), NORMAL (2-way), HIGH (3-way) — built into ASM</div></div>
+        <div class="ref-row"><div class="ref-cmd">ASMCMD</div><div class="ref-desc">ASM command-line tool — like a shell for navigating ASM disk groups</div></div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#FB923C">ASM COMMANDS</div>
+        <div class="ref-code">-- Connect to ASM instance
+sqlplus / as sysasm   -- or: asmcmd
+
+-- List disk groups
+SELECT name, state, type,
+  ROUND(total_mb/1024,1) total_gb,
+  ROUND(free_mb/1024,1) free_gb
+FROM v$asm_diskgroup;
+
+-- List disks in a group
+SELECT group_number, disk_number, name,
+  path, state, total_mb, free_mb
+FROM v$asm_disk;
+
+-- ASMCMD basics (run from OS prompt as oracle/grid user)
+-- asmcmd
+-- ASMCMD> ls         -- list disk groups
+-- ASMCMD> cd +DATA   -- navigate
+-- ASMCMD> ls -l      -- list files with size
+-- ASMCMD> du         -- disk usage summary
+
+-- Create tablespace using ASM path
+CREATE TABLESPACE app_data
+  DATAFILE '+DATA' SIZE 500M AUTOEXTEND ON;
+-- ASM auto-names the file: +DATA/ORCL/DATAFILE/app_data.xxx.dbf</div>
+      </div>
+    </div>
+
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 2 · M7</span> UNDO MANAGEMENT — MVCC FOUNDATION</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#A855F7">UNDO vs REDO — THE KEY DIFFERENCE</div>
+        <table class="crs-table">
+          <tr><th>Concept</th><th>UNDO (Rollback)</th><th>REDO (Redo Log)</th></tr>
+          <tr><td>Purpose</td><td>Before-images — used for ROLLBACK and MVCC reads</td><td>After-images — used for crash recovery and Data Guard</td></tr>
+          <tr><td>Storage</td><td>UNDO tablespace (UNDOTBS1)</td><td>Online redo log files + archive logs</td></tr>
+          <tr><td>SQL Server equiv</td><td>tempdb version store</td><td>Transaction log (.ldf)</td></tr>
+          <tr><td>Managed by</td><td>Automatic Undo Management (AUM)</td><td>LGWR background process</td></tr>
+        </table>
+        <div class="ref-code" style="margin-top:8px">-- Check undo configuration
+SHOW PARAMETER undo;
+-- undo_management = AUTO (recommended)
+-- undo_tablespace = UNDOTBS1
+-- undo_retention = 900 (seconds = 15 minutes)
+
+-- Check undo usage and predict ORA-01555 risk
+SELECT TO_CHAR(begin_time,'HH24:MI') time,
+  undoblks, txncount, maxconcurrency,
+  ssolderrcnt  -- ORA-01555 count!
+FROM v$undostat
+ORDER BY begin_time DESC FETCH FIRST 12 ROWS ONLY;
+
+-- Increase retention to reduce ORA-01555
+ALTER SYSTEM SET UNDO_RETENTION=3600 SCOPE=BOTH;  -- 1 hour</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#A855F7">FAST RECOVERY AREA (FRA)</div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#2ECC71">DB_RECOVERY_FILE_DEST</div><div class="ref-desc">Location of FRA — can be ASM disk group (+FRA) or filesystem path</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#F1C40F">DB_RECOVERY_FILE_DEST_SIZE</div><div class="ref-desc">Maximum space Oracle will use in FRA — Oracle auto-deletes obsolete files</div></div>
+        <div class="ref-row"><div class="ref-cmd">Contents</div><div class="ref-desc">Archive logs, RMAN backups, flashback logs, control file/spfile auto-backups</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Configure FRA
+ALTER SYSTEM SET DB_RECOVERY_FILE_DEST='+FRA' SCOPE=BOTH;
+ALTER SYSTEM SET DB_RECOVERY_FILE_DEST_SIZE=100G SCOPE=BOTH;
+
+-- Check FRA usage
+SELECT name, space_limit/1073741824 limit_gb,
+  space_used/1073741824 used_gb,
+  space_reclaimable/1073741824 reclaimable_gb,
+  ROUND(space_used/space_limit*100,1) pct_used
+FROM v$recovery_file_dest;
+
+-- List FRA contents
+SELECT file_type, percent_space_used,
+  number_of_files, space_used/1048576 used_mb
+FROM v$recovery_area_usage;</div>
+      </div>
+    </div>
   </div><!-- /crs-storage -->
 
   <!-- ── SQL LANGUAGE ──────────────────────────────────────────── -->
@@ -8015,6 +8161,130 @@ WHEN NOT MATCHED THEN
         </div>
       </div>
     </div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 2 · M11</span> ANALYTICAL FUNCTIONS &amp; WINDOW FUNCTIONS</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#00D4FF">WINDOW FUNCTIONS — ORACLE vs T-SQL</div>
+        <table class="crs-table">
+          <tr><th>Function</th><th>SQL Server (T-SQL)</th><th>Oracle</th></tr>
+          <tr><td>Row number</td><td class="c-blu">ROW_NUMBER() OVER (ORDER BY ...)</td><td class="c-red">ROW_NUMBER() OVER (ORDER BY ...)</td></tr>
+          <tr><td>Ranking (with gaps)</td><td class="c-blu">RANK() OVER (...)</td><td class="c-red">RANK() OVER (...)</td></tr>
+          <tr><td>Dense ranking</td><td class="c-blu">DENSE_RANK() OVER (...)</td><td class="c-red">DENSE_RANK() OVER (...)</td></tr>
+          <tr><td>Running total</td><td class="c-blu">SUM(col) OVER (ORDER BY ...)</td><td class="c-red">SUM(col) OVER (ORDER BY ...)</td></tr>
+          <tr><td>Previous row value</td><td class="c-blu">LAG(col,1) OVER (ORDER BY ...)</td><td class="c-red">LAG(col,1) OVER (ORDER BY ...)</td></tr>
+          <tr><td>Next row value</td><td class="c-blu">LEAD(col,1) OVER (ORDER BY ...)</td><td class="c-red">LEAD(col,1) OVER (ORDER BY ...)</td></tr>
+          <tr><td>First value in partition</td><td class="c-blu">FIRST_VALUE(col) OVER (...)</td><td class="c-red">FIRST_VALUE(col) OVER (...)</td></tr>
+          <tr><td>Percentile rank</td><td class="c-blu">PERCENT_RANK() OVER (...)</td><td class="c-red">PERCENT_RANK() OVER (...) or PERCENTILE_CONT</td></tr>
+          <tr><td>Nth tile</td><td class="c-blu">NTILE(4) OVER (...)</td><td class="c-red">NTILE(4) OVER (...)</td></tr>
+          <tr><td>Ratio to total</td><td class="c-blu">col/SUM(col) OVER ()</td><td class="c-red">RATIO_TO_REPORT(col) OVER ()</td></tr>
+        </table>
+        <div class="crs-tip-box">Most ANSI window functions (ROW_NUMBER, RANK, LAG, LEAD, SUM OVER) work identically in Oracle and SQL Server. Oracle has additional functions: RATIO_TO_REPORT, LISTAGG, PERCENTILE_CONT, and PERCENTILE_DISC.</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#00D4FF">PRACTICAL WINDOW FUNCTION EXAMPLES</div>
+        <div class="ref-code">-- Running total salary by department
+SELECT dept_id, emp_id, salary,
+  SUM(salary) OVER (
+    PARTITION BY dept_id ORDER BY hire_date
+    ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+  ) running_total
+FROM employees;
+
+-- Rank employees by salary within dept
+SELECT dept_id, last_name, salary,
+  RANK() OVER (PARTITION BY dept_id ORDER BY salary DESC) rnk,
+  DENSE_RANK() OVER (PARTITION BY dept_id ORDER BY salary DESC) dense_rnk
+FROM employees;
+
+-- Compare salary to dept average
+SELECT last_name, salary, dept_id,
+  AVG(salary) OVER (PARTITION BY dept_id) dept_avg,
+  salary - AVG(salary) OVER (PARTITION BY dept_id) vs_avg
+FROM employees;
+
+-- LISTAGG — concatenate rows (like STRING_AGG in SQL Server 2017+)
+SELECT dept_id,
+  LISTAGG(last_name, ', ') WITHIN GROUP (ORDER BY last_name) emp_list
+FROM employees GROUP BY dept_id;</div>
+      </div>
+    </div>
+
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 2 · M11</span> CTEs, HIERARCHICAL QUERIES &amp; PIVOTING</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#00D4FF">CTEs (WITH CLAUSE)</div>
+        <div class="crs-code-2col">
+          <div>
+            <div class="crs-code-label crs-badge-ss">T-SQL CTE</div>
+            <div class="ref-code">WITH dept_totals AS (
+  SELECT dept_id,
+    SUM(salary) total_sal,
+    COUNT(*) headcount
+  FROM employees
+  GROUP BY dept_id
+)
+SELECT d.dept_name,
+  dt.total_sal, dt.headcount
+FROM dept_totals dt
+JOIN departments d
+  ON dt.dept_id = d.dept_id
+ORDER BY dt.total_sal DESC;</div>
+          </div>
+          <div>
+            <div class="crs-code-label crs-badge-ora">Oracle CTE (identical)</div>
+            <div class="ref-code">WITH dept_totals AS (
+  SELECT dept_id,
+    SUM(salary) total_sal,
+    COUNT(*) headcount
+  FROM employees
+  GROUP BY dept_id
+)
+SELECT d.dept_name,
+  dt.total_sal, dt.headcount
+FROM dept_totals dt
+JOIN departments d
+  ON dt.dept_id = d.dept_id
+ORDER BY dt.total_sal DESC;</div>
+          </div>
+        </div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#00D4FF">HIERARCHICAL QUERIES — ORACLE UNIQUE</div>
+        <div class="ref-note">Oracle has START WITH...CONNECT BY for tree traversal — SQL Server uses recursive CTEs</div>
+        <div class="crs-code-2col">
+          <div>
+            <div class="crs-code-label crs-badge-ss">T-SQL Recursive CTE</div>
+            <div class="ref-code">WITH emp_tree AS (
+  SELECT emp_id, name, mgr_id, 1 lvl
+  FROM employees WHERE mgr_id IS NULL
+  UNION ALL
+  SELECT e.emp_id, e.name,
+    e.mgr_id, et.lvl+1
+  FROM employees e
+  JOIN emp_tree et ON e.mgr_id=et.emp_id
+)
+SELECT REPLICATE('-',lvl)+name
+FROM emp_tree ORDER BY lvl;</div>
+          </div>
+          <div>
+            <div class="crs-code-label crs-badge-ora">Oracle CONNECT BY</div>
+            <div class="ref-code">SELECT LEVEL,
+  LPAD(' ', (LEVEL-1)*2) ||
+  last_name emp_name,
+  employee_id, manager_id
+FROM employees
+START WITH manager_id IS NULL
+CONNECT BY PRIOR employee_id
+         = manager_id
+ORDER SIBLINGS BY last_name;
+
+-- LEVEL = depth (1=root)
+-- PRIOR = parent row
+-- SYS_CONNECT_BY_PATH for full path</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div><!-- /crs-sqllang -->
 
   <!-- ── TRANSACTIONS ──────────────────────────────────────────── -->
@@ -8089,6 +8359,94 @@ ALTER SYSTEM KILL SESSION '55,1234' IMMEDIATE;
 -- SELECT FOR UPDATE (lock rows for update)
 SELECT * FROM accounts WHERE id = 1 FOR UPDATE;
 -- Release with COMMIT or ROLLBACK</div>
+      </div>
+    </div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 3 · M13</span> IMPLICIT vs EXPLICIT TRANSACTIONS</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#F1C40F">TRANSACTION RULES SIDE-BY-SIDE</div>
+        <table class="crs-table">
+          <tr><th>Rule</th><th>SQL Server</th><th>Oracle</th></tr>
+          <tr><td>DML auto-commits?</td><td class="c-grn">Yes (default AUTOCOMMIT ON)</td><td class="c-red">No — must COMMIT explicitly</td></tr>
+          <tr><td>DDL in transaction?</td><td class="c-grn">Yes — can ROLLBACK CREATE TABLE</td><td class="c-red">DDL causes implicit COMMIT of all pending DML</td></tr>
+          <tr><td>BEGIN TRANSACTION</td><td class="c-blu">BEGIN TRANSACTION or BEGIN TRAN</td><td class="c-red">Implicit — starts with first DML statement</td></tr>
+          <tr><td>Nested transactions</td><td class="c-blu">Supported (@@TRANCOUNT)</td><td class="c-red">Not supported — only one active transaction</td></tr>
+          <tr><td>SAVEPOINT</td><td class="c-blu">SAVE TRANSACTION sp_name</td><td class="c-red">SAVEPOINT sp_name (partial rollback)</td></tr>
+          <tr><td>Partial rollback</td><td class="c-blu">ROLLBACK TRANSACTION sp_name</td><td class="c-red">ROLLBACK TO SAVEPOINT sp_name</td></tr>
+          <tr><td>Distributed txn</td><td class="c-blu">MSDTC (BEGIN DISTRIBUTED TRANSACTION)</td><td class="c-red">Two-phase commit via database links</td></tr>
+        </table>
+        <div class="crs-warn-box">&#9888; Most critical migration issue: SQL Server developers assume DDL is transactional. In Oracle, issuing ALTER TABLE or CREATE INDEX mid-script auto-commits everything before it — there's no rollback!</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#F1C40F">AUTONOMOUS TRANSACTIONS</div>
+        <div class="ref-note">Oracle-unique feature: run a sub-transaction independently, committing/rolling back without affecting the parent transaction</div>
+        <div class="ref-code">-- Useful for: audit logging (must commit log even if main txn rolls back)
+CREATE OR REPLACE PROCEDURE log_action(
+  p_msg VARCHAR2
+) AS
+  PRAGMA AUTONOMOUS_TRANSACTION;  -- key directive!
+BEGIN
+  INSERT INTO audit_log(msg, log_time)
+  VALUES (p_msg, SYSDATE);
+  COMMIT;  -- commits ONLY the autonomous txn
+END;
+/
+
+-- Example: even if main transaction rolls back,
+-- the audit record persists
+BEGIN
+  INSERT INTO orders VALUES (999, 'PENDING');
+  log_action('Inserted order 999');  -- this COMMITS
+  ROLLBACK;  -- rolls back orders insert, NOT the audit log
+END;
+/</div>
+      </div>
+    </div>
+
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 3 · M14</span> DEADLOCKS &amp; WAIT ANALYSIS</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#F1C40F">ORACLE DEADLOCK HANDLING</div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#C74634">ORA-00060</div><div class="ref-desc">Deadlock detected. Unlike SQL Server which auto-detects and kills victim, Oracle raises ORA-00060 to the transaction that completes the cycle. DBA must investigate via alert log trace file.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Trace file</div><div class="ref-desc">Oracle writes deadlock trace to $ORACLE_BASE/diag/rdbms/SID/trace — shows which objects and rows were locked</div></div>
+        <div class="ref-row"><div class="ref-cmd">Prevention</div><div class="ref-desc">Access tables in consistent order; use SELECT FOR UPDATE to pre-lock; minimize lock hold time</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Find recent deadlock traces
+-- From OS:
+-- ls -lt $ORACLE_BASE/diag/rdbms/orcl/orcl/trace/*.trc | head -5
+-- grep -l "deadlock" $ORACLE_BASE/diag/rdbms/orcl/orcl/trace/*.trc
+
+-- Check for current lock contention
+SELECT DECODE(request,0,'Holding: ','Waiting: ') lock_type,
+  s.username, s.sid, s.serial#,
+  o.object_name, l.type, l.lmode, l.request
+FROM v$lock l
+JOIN v$session s ON l.sid = s.sid
+JOIN dba_objects o ON l.id1 = o.object_id
+WHERE l.block = 1 OR l.request > 0
+ORDER BY l.id1, l.id2;</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#F1C40F">SELECT FOR UPDATE — EXPLICIT ROW LOCKING</div>
+        <div class="ref-code">-- Lock specific rows before update (prevents lost updates)
+-- SQL Server: BEGIN TRAN + WITH(UPDLOCK, ROWLOCK)
+-- Oracle:
+SELECT account_id, balance
+FROM accounts
+WHERE account_id = 42
+FOR UPDATE;          -- locks the row
+
+-- NOWAIT: fail immediately if locked (don't wait)
+SELECT * FROM accounts WHERE account_id = 42
+FOR UPDATE NOWAIT;   -- raises ORA-00054 if locked
+
+-- WAIT n: wait up to n seconds
+SELECT * FROM accounts WHERE account_id = 42
+FOR UPDATE WAIT 5;   -- wait 5 seconds, then ORA-30006
+
+-- SKIP LOCKED: skip locked rows (queue processing)
+SELECT account_id FROM work_queue
+FOR UPDATE SKIP LOCKED
+FETCH FIRST 10 ROWS ONLY;</div>
       </div>
     </div>
   </div><!-- /crs-transactions -->
@@ -8307,6 +8665,139 @@ END;
         </div>
       </div>
     </div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 3 · M16</span> BULK OPERATIONS — BULK COLLECT &amp; FORALL</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#FF6B9D">BULK COLLECT — FETCH MANY ROWS AT ONCE</div>
+        <div class="ref-note">Avoids row-by-row context switching between PL/SQL and SQL engines — critical for performance</div>
+        <div class="ref-code">-- Without BULK COLLECT (slow — row-by-row)
+DECLARE
+  CURSOR c IS SELECT emp_id, salary FROM employees;
+  v_id  NUMBER; v_sal NUMBER;
+BEGIN
+  OPEN c;
+  LOOP
+    FETCH c INTO v_id, v_sal;
+    EXIT WHEN c%NOTFOUND;
+    -- process each row (context switch per row!)
+  END LOOP;
+END;
+/
+
+-- With BULK COLLECT (fast — one SQL round-trip)
+DECLARE
+  TYPE t_ids  IS TABLE OF employees.emp_id%TYPE;
+  TYPE t_sals IS TABLE OF employees.salary%TYPE;
+  v_ids  t_ids;
+  v_sals t_sals;
+BEGIN
+  SELECT emp_id, salary
+  BULK COLLECT INTO v_ids, v_sals
+  FROM employees WHERE dept_id = 10
+  LIMIT 1000;  -- LIMIT avoids OOM on large tables
+
+  FOR i IN 1..v_ids.COUNT LOOP
+    DBMS_OUTPUT.PUT_LINE(v_ids(i)||': '||v_sals(i));
+  END LOOP;
+END;
+/</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#FF6B9D">FORALL — BULK DML</div>
+        <div class="ref-code">-- FORALL: send array of DML in one batch (like SqlBulkCopy)
+DECLARE
+  TYPE t_ids  IS TABLE OF NUMBER;
+  TYPE t_sals IS TABLE OF NUMBER;
+  v_ids  t_ids  := t_ids(101,102,103,104);
+  v_sals t_sals := t_sals(50000,55000,60000,45000);
+BEGIN
+  -- Single SQL call for all 4 rows
+  FORALL i IN 1..v_ids.COUNT
+    UPDATE employees SET salary = v_sals(i)
+    WHERE emp_id = v_ids(i);
+
+  DBMS_OUTPUT.PUT_LINE(SQL%ROWCOUNT||' rows updated');
+  COMMIT;
+END;
+/
+
+-- SAVE EXCEPTIONS: continue on error, collect errors at end
+FORALL i IN 1..v_ids.COUNT SAVE EXCEPTIONS
+  INSERT INTO target_table VALUES (v_ids(i), v_sals(i));
+-- Check errors:
+-- FOR i IN 1..SQL%BULK_EXCEPTIONS.COUNT LOOP
+--   DBMS_OUTPUT.PUT_LINE('Error at '||SQL%BULK_EXCEPTIONS(i).ERROR_INDEX
+--     ||': '||SQLERRM(-SQL%BULK_EXCEPTIONS(i).ERROR_CODE));
+-- END LOOP;</div>
+      </div>
+    </div>
+
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 3 · M16</span> COLLECTIONS &amp; RECORD TYPES</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#FF6B9D">PL/SQL COLLECTION TYPES</div>
+        <table class="crs-table">
+          <tr><th>Type</th><th>Description</th><th>T-SQL Nearest</th></tr>
+          <tr><td class="c-pur">Associative Array (Index-By)</td><td>Key-value store; key can be VARCHAR2 or PLS_INTEGER; sparse</td><td>Dictionary / hashtable variable</td></tr>
+          <tr><td class="c-pur">Nested Table</td><td>Unordered collection; can be NULL; can be stored in DB column</td><td>Table variable</td></tr>
+          <tr><td class="c-pur">VARRAY</td><td>Fixed max size ordered array; stored inline in DB column</td><td>Fixed-size array</td></tr>
+        </table>
+        <div class="ref-code" style="margin-top:8px">-- Associative array (most common in PL/SQL)
+DECLARE
+  TYPE t_name_map IS TABLE OF VARCHAR2(100)
+    INDEX BY PLS_INTEGER;
+  v_map t_name_map;
+BEGIN
+  v_map(1) := 'Alice';
+  v_map(2) := 'Bob';
+  v_map(999) := 'Charlie';  -- sparse OK
+  -- Iterate:
+  DECLARE k PLS_INTEGER := v_map.FIRST;
+  BEGIN
+    WHILE k IS NOT NULL LOOP
+      DBMS_OUTPUT.PUT_LINE(k||'='||v_map(k));
+      k := v_map.NEXT(k);
+    END LOOP;
+  END;
+END;
+/</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#FF6B9D">%TYPE and %ROWTYPE</div>
+        <div class="ref-code">-- %TYPE: variable matches column datatype (no hardcoding)
+DECLARE
+  v_name employees.last_name%TYPE;    -- same type as the column
+  v_sal  employees.salary%TYPE;
+BEGIN
+  SELECT last_name, salary INTO v_name, v_sal
+  FROM employees WHERE emp_id = 100;
+  DBMS_OUTPUT.PUT_LINE(v_name||': '||v_sal);
+END;
+/
+
+-- %ROWTYPE: variable matches entire row structure
+DECLARE
+  v_emp employees%ROWTYPE;
+BEGIN
+  SELECT * INTO v_emp FROM employees WHERE emp_id = 100;
+  DBMS_OUTPUT.PUT_LINE(v_emp.last_name||' dept:'||v_emp.dept_id);
+END;
+/
+
+-- Record type (custom structure like a struct)
+DECLARE
+  TYPE t_emp_rec IS RECORD (
+    id   employees.emp_id%TYPE,
+    name employees.last_name%TYPE,
+    sal  NUMBER
+  );
+  v_rec t_emp_rec;
+BEGIN
+  v_rec.id := 101; v_rec.name := 'Smith'; v_rec.sal := 75000;
+END;
+/</div>
+      </div>
+    </div>
   </div><!-- /crs-plsql -->
 
   <!-- ── SECURITY ──────────────────────────────────────────────── -->
@@ -8398,6 +8889,139 @@ SELECT dbusername, action_name, object_name,
 FROM unified_audit_trail
 WHERE event_timestamp > SYSDATE - 1
 ORDER BY event_timestamp DESC;</div>
+      </div>
+    </div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 3 · M18</span> VIRTUAL PRIVATE DATABASE (VPD) &amp; ROW-LEVEL SECURITY</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#C74634">VPD — ORACLE ROW-LEVEL SECURITY</div>
+        <div class="ref-note">Automatically appends WHERE clauses to queries — transparent to the application. SQL Server equivalent: Row-Level Security (2016+)</div>
+        <div class="ref-code">-- Create a policy function that returns a WHERE predicate
+CREATE OR REPLACE FUNCTION emp_sec_policy(
+  schema_name VARCHAR2,
+  table_name  VARCHAR2
+) RETURN VARCHAR2 AS
+BEGIN
+  -- Only show rows matching the user's dept
+  RETURN 'dept_id = SYS_CONTEXT(''MYAPP'',''USER_DEPT'')';
+END;
+/
+
+-- Apply VPD policy to the table
+BEGIN
+  DBMS_RLS.ADD_POLICY(
+    object_schema   => 'HR',
+    object_name     => 'EMPLOYEES',
+    policy_name     => 'EMP_DEPT_POLICY',
+    function_schema => 'HR',
+    policy_function => 'EMP_SEC_POLICY',
+    statement_types => 'SELECT,INSERT,UPDATE,DELETE'
+  );
+END;
+/
+-- Now: SELECT * FROM hr.employees
+-- Auto-becomes: SELECT * FROM hr.employees WHERE dept_id = &lt;user_dept&gt;</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#C74634">TDE — TRANSPARENT DATA ENCRYPTION</div>
+        <div class="ref-note">Encrypts data at-rest without application changes. SQL Server equivalent: TDE (same concept)</div>
+        <div class="ref-code">-- Create/open encryption wallet (keystore)
+-- In sqlnet.ora: ENCRYPTION_WALLET_LOCATION = (SOURCE=(METHOD=FILE)...)
+
+-- Open wallet (12c+)
+ADMINISTER KEY MANAGEMENT SET KEYSTORE OPEN
+  IDENTIFIED BY WalletPassword1;
+
+-- Create master encryption key
+ADMINISTER KEY MANAGEMENT SET KEY
+  IDENTIFIED BY WalletPassword1
+  WITH BACKUP USING 'key_backup';
+
+-- Enable TDE on a tablespace
+ALTER TABLESPACE app_data
+  ENCRYPTION USING AES256 ENCRYPT;
+
+-- Encrypt existing unencrypted tablespace online
+ALTER TABLESPACE users ENCRYPTION ONLINE
+  USING AES256 ENCRYPT;
+
+-- Encrypt a single column (column-level TDE)
+ALTER TABLE employees MODIFY (
+  ssn VARCHAR2(11) ENCRYPT USING AES256 NO SALT
+);
+
+-- Check encrypted objects
+SELECT tablespace_name, encrypted FROM dba_tablespaces;
+SELECT owner, table_name, column_name, encryption_alg
+FROM dba_encrypted_columns;</div>
+      </div>
+    </div>
+
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 3 · M18</span> DATABASE VAULT &amp; PRIVILEGE ANALYSIS</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#C74634">LEAST-PRIVILEGE ANALYSIS</div>
+        <div class="ref-code">-- Find users with excessive DBA role (like finding sysadmin overuse)
+SELECT grantee, granted_role, admin_option, default_role
+FROM dba_role_privs
+WHERE granted_role = 'DBA'
+ORDER BY grantee;
+
+-- Find system privileges granted directly (not via role)
+SELECT grantee, privilege, admin_option
+FROM dba_sys_privs
+WHERE grantee NOT IN (SELECT role FROM dba_roles)
+ORDER BY grantee, privilege;
+
+-- Privilege Analysis: find privileges actually used (19c+)
+BEGIN
+  DBMS_PRIVILEGE_CAPTURE.CREATE_CAPTURE(
+    name => 'all_priv_capture',
+    type => DBMS_PRIVILEGE_CAPTURE.G_DATABASE
+  );
+  DBMS_PRIVILEGE_CAPTURE.ENABLE_CAPTURE('all_priv_capture');
+END;
+/
+-- (wait some time for normal workload)
+BEGIN
+  DBMS_PRIVILEGE_CAPTURE.DISABLE_CAPTURE('all_priv_capture');
+  DBMS_PRIVILEGE_CAPTURE.GENERATE_RESULT('all_priv_capture');
+END;
+/
+-- Report: which privileges were NEVER used
+SELECT username, used_role, used_priv
+FROM dba_used_privs WHERE capture = 'all_priv_capture';</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#C74634">CONTEXT &amp; APPLICATION SECURITY</div>
+        <div class="ref-code">-- Application Context: store session-level attributes
+-- Used with VPD to drive row-level security
+
+-- Create context namespace
+CREATE OR REPLACE CONTEXT myapp
+  USING myapp_ctx_pkg;
+
+-- Package to set context values (trusted code)
+CREATE OR REPLACE PACKAGE myapp_ctx_pkg AS
+  PROCEDURE set_context;
+END;
+/
+CREATE OR REPLACE PACKAGE BODY myapp_ctx_pkg AS
+  PROCEDURE set_context AS
+    v_dept NUMBER;
+  BEGIN
+    SELECT dept_id INTO v_dept
+    FROM employees WHERE username = SYS_CONTEXT('USERENV','SESSION_USER');
+    DBMS_SESSION.SET_CONTEXT('MYAPP','USER_DEPT', v_dept);
+  EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+  END;
+END;
+/
+
+-- Read context value
+SELECT SYS_CONTEXT('MYAPP','USER_DEPT') FROM DUAL;
+SELECT SYS_CONTEXT('USERENV','SESSION_USER') FROM DUAL; -- current user
+SELECT SYS_CONTEXT('USERENV','IP_ADDRESS') FROM DUAL;   -- client IP</div>
       </div>
     </div>
   </div><!-- /crs-security -->
@@ -8548,6 +9172,134 @@ impdp hr/pwd TABLES=employees
 -- Network mode (no dump file — direct DB-to-DB)
 impdp system/pwd NETWORK_LINK=source_db
   SCHEMAS=hr REMAP_SCHEMA=hr:hr_new</div>
+      </div>
+    </div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 4 · M19</span> RMAN — ADVANCED SCRIPTS &amp; AUTOMATION</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#2ECC71">RMAN BACKUP SCRIPT — PRODUCTION STANDARD</div>
+        <div class="ref-code">-- Full RMAN backup script (save as /dba/scripts/full_backup.rcv)
+RUN {
+  ALLOCATE CHANNEL ch1 DEVICE TYPE DISK
+    FORMAT '/backup/%d_%T_%s_%p.bkp'
+    MAXPIECESIZE 5G;
+  ALLOCATE CHANNEL ch2 DEVICE TYPE DISK
+    FORMAT '/backup/%d_%T_%s_%p.bkp'
+    MAXPIECESIZE 5G;
+
+  BACKUP AS COMPRESSED BACKUPSET
+    INCREMENTAL LEVEL 0
+    DATABASE
+    PLUS ARCHIVELOG DELETE INPUT;
+
+  BACKUP CURRENT CONTROLFILE;
+  BACKUP SPFILE;
+
+  DELETE NOPROMPT OBSOLETE;
+  RELEASE CHANNEL ch1;
+  RELEASE CHANNEL ch2;
+}
+
+-- Run from OS:
+-- rman target / @/dba/scripts/full_backup.rcv LOG=/backup/logs/full_$(date +%Y%m%d).log
+
+-- Schedule via DBMS_SCHEDULER:
+-- job_action => 'BEGIN EXECUTE IMMEDIATE
+--   ''ALTER SYSTEM ARCHIVE LOG CURRENT''; END;'</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#2ECC71">RMAN CATALOG &amp; RECOVERY BEST PRACTICES</div>
+        <div class="ref-code">-- Connect with recovery catalog (recommended for enterprise)
+rman target sys@ORCL catalog rman/rman@CATDB
+
+-- Register database in catalog
+REGISTER DATABASE;
+RESYNC CATALOG;
+
+-- List all backups with status
+LIST BACKUP SUMMARY;
+LIST EXPIRED BACKUP;
+
+-- CROSSCHECK: verify backups still physically exist
+CROSSCHECK BACKUP;
+CROSSCHECK ARCHIVELOG ALL;
+
+-- DELETE EXPIRED: remove metadata for missing backups
+DELETE EXPIRED BACKUP;
+DELETE EXPIRED ARCHIVELOG ALL;
+
+-- RESTORE PREVIEW: what would be needed for recovery
+RESTORE DATABASE PREVIEW SUMMARY;
+
+-- Datafile recovery (specific file only)
+-- Useful when only one datafile is corrupted:
+STARTUP MOUNT;
+RESTORE DATAFILE '/u01/oradata/ORCL/users01.dbf';
+RECOVER DATAFILE '/u01/oradata/ORCL/users01.dbf';
+ALTER DATABASE OPEN;</div>
+      </div>
+    </div>
+
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 4 · M22</span> SQL*LOADER — BULK DATA LOADING</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#2ECC71">SQL*LOADER CONTROL FILE</div>
+        <div class="ref-note">SQL*Loader = Oracle's equivalent of BCP / BULK INSERT in SQL Server. Loads flat files into Oracle tables at high speed.</div>
+        <div class="ref-code">-- Control file: employees.ctl
+LOAD DATA
+INFILE '/data/employees.csv'
+BADFILE '/data/employees.bad'
+DISCARDFILE '/data/employees.dsc'
+APPEND INTO TABLE employees
+FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
+TRAILING NULLCOLS
+(
+  emp_id     INTEGER EXTERNAL,
+  last_name  CHAR,
+  hire_date  DATE "YYYY-MM-DD",
+  salary     DECIMAL EXTERNAL,
+  dept_id    INTEGER EXTERNAL
+)
+
+-- Run from OS:
+sqlldr userid=hr/pass control=employees.ctl log=employees.log
+
+-- Direct path load (faster — bypasses buffer cache)
+sqlldr userid=hr/pass control=employees.ctl DIRECT=Y
+
+-- Parallel load (multiple streams)
+sqlldr userid=hr/pass control=employees.ctl DIRECT=Y PARALLEL=Y</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#2ECC71">EXTERNAL TABLES &amp; SQL*LOADER vs ALTERNATIVES</div>
+        <div class="ref-code">-- External Table: query a flat file like a table (no load step)
+-- Equivalent to SQL Server OPENROWSET with flat file
+CREATE TABLE emp_external (
+  emp_id    NUMBER,
+  last_name VARCHAR2(50),
+  hire_date DATE,
+  salary    NUMBER
+)
+ORGANIZATION EXTERNAL (
+  TYPE ORACLE_LOADER
+  DEFAULT DIRECTORY dp_dir
+  ACCESS PARAMETERS (
+    RECORDS DELIMITED BY NEWLINE
+    FIELDS TERMINATED BY ','
+    (emp_id, last_name,
+     hire_date CHAR DATE_FORMAT DATE MASK "YYYY-MM-DD",
+     salary)
+  )
+  LOCATION ('employees.csv')
+)
+REJECT LIMIT UNLIMITED;
+
+-- Query the external file directly
+SELECT * FROM emp_external WHERE salary > 50000;
+
+-- Load from external table into real table
+INSERT /*+ APPEND */ INTO employees
+SELECT * FROM emp_external;</div>
       </div>
     </div>
   </div><!-- /crs-backup -->
@@ -8701,6 +9453,139 @@ SELECT * FROM sales PARTITION (p_before_2026);
 
 -- Partition pruning (optimizer skips irrelevant partitions)
 SELECT * FROM sales WHERE sale_date = DATE '2026-03-01';</div>
+      </div>
+    </div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 4 · M23</span> OPTIMIZER STATISTICS — DBMS_STATS</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#34D399">STATISTICS GATHERING</div>
+        <div class="ref-note">Oracle CBO (Cost-Based Optimizer) requires up-to-date statistics — equivalent to UPDATE STATISTICS in SQL Server</div>
+        <div class="ref-code">-- Gather stats for one table
+EXEC DBMS_STATS.GATHER_TABLE_STATS('HR', 'EMPLOYEES');
+
+-- Gather schema stats (auto-samples by default)
+EXEC DBMS_STATS.GATHER_SCHEMA_STATS('HR');
+
+-- Gather database stats (all schemas)
+EXEC DBMS_STATS.GATHER_DATABASE_STATS;
+
+-- Gather with options
+EXEC DBMS_STATS.GATHER_TABLE_STATS(
+  ownname     => 'HR',
+  tabname     => 'SALES',
+  estimate_percent => 30,       -- sample 30% (100=full scan)
+  method_opt  => 'FOR ALL COLUMNS SIZE AUTO',
+  cascade     => TRUE,          -- include indexes
+  no_invalidate => FALSE        -- immediately invalidate cursors
+);
+
+-- Auto-stats: Oracle 11g+ runs GATHER_STATS_JOB nightly
+SELECT client_name, status FROM dba_autotask_client
+WHERE client_name = 'auto optimizer stats collection';
+
+-- Check when stats were last gathered
+SELECT table_name, num_rows, last_analyzed
+FROM dba_tables WHERE owner = 'HR'
+ORDER BY last_analyzed NULLS FIRST;</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#34D399">SQL TUNING ADVISOR</div>
+        <div class="ref-note">Automated query tuning — equivalent to Database Engine Tuning Advisor in SQL Server</div>
+        <div class="ref-code">-- Run SQL Tuning Advisor on a specific SQL_ID
+DECLARE
+  v_task VARCHAR2(100);
+BEGIN
+  v_task := DBMS_SQLTUNE.CREATE_TUNING_TASK(
+    sql_id      => 'abc12def3ghij',
+    scope       => DBMS_SQLTUNE.SCOPE_COMPREHENSIVE,
+    time_limit  => 60,
+    task_name   => 'tune_bad_query',
+    description => 'Tuning the slow HR report query'
+  );
+  DBMS_SQLTUNE.EXECUTE_TUNING_TASK('tune_bad_query');
+END;
+/
+
+-- Get recommendations
+SELECT DBMS_SQLTUNE.REPORT_TUNING_TASK('tune_bad_query')
+FROM DUAL;
+
+-- Accept SQL Profile recommendation (permanent hint injection)
+EXEC DBMS_SQLTUNE.ACCEPT_SQL_PROFILE(
+  task_name => 'tune_bad_query',
+  force_match => TRUE
+);
+
+-- Find SQL_ID for a query
+SELECT sql_id, substr(sql_text,1,80)
+FROM v$sqlarea
+WHERE sql_text LIKE '%FROM hr.employees%'
+AND sql_text NOT LIKE '%v$sqlarea%';</div>
+      </div>
+    </div>
+
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 5 · M25</span> STATISTICS HISTOGRAM &amp; PLAN STABILITY</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#34D399">HISTOGRAMS &amp; COLUMN STATISTICS</div>
+        <div class="ref-code">-- Check column statistics and histogram type
+SELECT column_name, num_distinct, num_nulls,
+  histogram, num_buckets, last_analyzed
+FROM dba_tab_col_statistics
+WHERE owner = 'HR' AND table_name = 'EMPLOYEES'
+ORDER BY column_name;
+
+-- Histogram types:
+-- NONE: no histogram (uniform distribution assumed)
+-- FREQUENCY: for low-cardinality columns (e.g., STATUS)
+-- HEIGHT BALANCED: for high-cardinality with skew
+-- HYBRID: 12c+ combines frequency + height balanced
+
+-- Force histogram on a skewed column
+EXEC DBMS_STATS.GATHER_TABLE_STATS(
+  'HR','SALES',
+  method_opt => 'FOR COLUMNS SIZE 254 REGION_CODE'
+);
+
+-- Delete stats (force full scan temporarily)
+EXEC DBMS_STATS.DELETE_TABLE_STATS('HR','EMPLOYEES');
+-- Restore from stats history
+EXEC DBMS_STATS.RESTORE_TABLE_STATS('HR','EMPLOYEES',
+  SYSDATE - 1);</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#34D399">SQL PLAN BASELINES (SPM)</div>
+        <div class="ref-note">SQL Plan Management — freeze a good execution plan. SQL Server equivalent: Plan Guide + Query Store Force Plan</div>
+        <div class="ref-code">-- Enable automatic plan capture
+ALTER SYSTEM SET OPTIMIZER_CAPTURE_SQL_PLAN_BASELINES=TRUE;
+
+-- Load plan from cursor cache into baseline
+DECLARE
+  v_cnt NUMBER;
+BEGIN
+  v_cnt := DBMS_SPM.LOAD_PLANS_FROM_CURSOR_CACHE(
+    sql_id => 'abc12def3ghij'
+  );
+  DBMS_OUTPUT.PUT_LINE(v_cnt||' plan(s) loaded');
+END;
+/
+
+-- List baselines for a SQL
+SELECT sql_handle, plan_name, enabled, accepted,
+  fixed, origin, created
+FROM dba_sql_plan_baselines
+WHERE sql_text LIKE '%employees%';
+
+-- Force a specific plan (fix the plan permanently)
+BEGIN
+  DBMS_SPM.ALTER_SQL_PLAN_BASELINE(
+    sql_handle => 'SQL_abc123...',
+    plan_name  => 'SQL_PLAN_abc123...',
+    attribute_name  => 'fixed',
+    attribute_value => 'YES'
+  );
+END;
+/</div>
       </div>
     </div>
   </div><!-- /crs-performance -->
