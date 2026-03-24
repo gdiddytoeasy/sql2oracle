@@ -1676,8 +1676,8 @@ body.viewer-mode .sec-section:hover {
 
       <hr class="um-divider">
       <div class="um-add-title" style="color:rgba(253,126,4,0.7)">&#9632; TAB ACCESS CONTROL</div>
-      <div class="um-tab-desc">Unlock architecture tabs to make them visible for all non-admin users</div>
-      <div class="um-tab-grid" id="um-tab-grid"><!-- rendered by JS --></div>
+      <div class="um-tab-desc">Select a user to unlock or lock individual tabs for that specific user</div>
+      <div id="um-tab-section"><!-- rendered by JS --></div>
     </div>
   </div>
 </div>
@@ -10877,12 +10877,10 @@ function switchView(v) {
     }
   }
   // Tab unlock gate: non-admin can only access unlocked tabs
-  if (v !== 'standard' && window._currentRole && window._currentRole !== 'admin') {
-    var unlocked = (function() {
-      try { var raw = localStorage.getItem('oracle_tab_unlocks'); return raw ? JSON.parse(raw) : ['standard']; }
-      catch(e) { return ['standard']; }
-    })();
-    if (unlocked.indexOf(v) < 0) {
+  if (v !== 'standard' && window._currentRole && window._currentRole !== 'admin' && window._currentRole !== 'manager') {
+    var _sv_session = getSession();
+    var _sv_unlocked = getUnlockedTabsForUser(_sv_session ? _sv_session.username : '');
+    if (_sv_unlocked.indexOf(v) < 0) {
       showAccessDenied('Tab locked — ask your administrator to unlock this section.');
       return;
     }
@@ -21556,8 +21554,8 @@ detailAnimStarters.net_encryption = function() {
 //    guest   / Guest@View1    (role: viewer)
 // ══════════════════════════════════════════════════════════════════════════
 
-// ── TAB UNLOCK SYSTEM ─────────────────────────────────────────────────────
-var TAB_UNLOCK_KEY = 'oracle_tab_unlocks';
+// ── TAB UNLOCK SYSTEM (per-user) ──────────────────────────────────────────
+var TAB_UNLOCK_KEY = 'oracle_tab_unlocks_v2'; // { username: [tab_keys] }
 var TAB_DEFS = [
   {key:'standard',       label:'Standard 1:1',      always:true},
   {key:'multitenant',    label:'Multitenant CDB/PDB'},
@@ -21573,16 +21571,25 @@ var TAB_DEFS = [
   {key:'sql_converter',  label:'SQL Converter'}
 ];
 
-function getUnlockedTabs() {
-  try { var raw = localStorage.getItem(TAB_UNLOCK_KEY); return raw ? JSON.parse(raw) : ['standard']; }
-  catch(e) { return ['standard']; }
+// State for which user is being edited in the admin tab panel
+var _adminTabEditUser = null;
+
+function getAllUserUnlocks() {
+  try { var raw = localStorage.getItem(TAB_UNLOCK_KEY); return raw ? JSON.parse(raw) : {}; }
+  catch(e) { return {}; }
 }
-function setUnlockedTabs(arr) {
-  localStorage.setItem(TAB_UNLOCK_KEY, JSON.stringify(arr));
+function getUnlockedTabsForUser(username) {
+  var all = getAllUserUnlocks();
+  return all[username] || ['standard'];
+}
+function setUnlockedTabsForUser(username, arr) {
+  var all = getAllUserUnlocks();
+  all[username] = arr;
+  localStorage.setItem(TAB_UNLOCK_KEY, JSON.stringify(all));
 }
 
-function applyTabUnlocks(role) {
-  var unlocked = getUnlockedTabs();
+function applyTabUnlocks(role, username) {
+  var unlocked = (role === 'admin' || role === 'manager') ? null : getUnlockedTabsForUser(username || '');
   document.querySelectorAll('.h-tab').forEach(function(btn) {
     var m = (btn.getAttribute('onclick') || '').match(/switchView\('(\w+)'\)/);
     if (!m) return;
@@ -21598,7 +21605,7 @@ function applyTabUnlocks(role) {
   // Handle SQL Converter link tab separately (it's an <a>, not a switchView button)
   var sqlTab = document.getElementById('sql-converter-tab');
   if (sqlTab) {
-    if (role === 'admin' || role === 'manager' || unlocked.indexOf('sql_converter') >= 0) {
+    if (role === 'admin' || role === 'manager' || (unlocked && unlocked.indexOf('sql_converter') >= 0)) {
       sqlTab.classList.remove('tab-locked');
     } else {
       sqlTab.classList.add('tab-locked');
@@ -21608,16 +21615,47 @@ function applyTabUnlocks(role) {
 
 function checkSqlConverterAccess() {
   if (!window._currentRole || window._currentRole === 'admin' || window._currentRole === 'manager') return true;
-  var unlocked = getUnlockedTabs();
+  var s = getSession();
+  var unlocked = getUnlockedTabsForUser(s ? s.username : '');
   if (unlocked.indexOf('sql_converter') >= 0) return true;
   showAccessDenied('SQL Converter is locked — ask your administrator to unlock this section.');
   return false;
 }
 
 function renderAdminTabPanel() {
+  var container = document.getElementById('um-tab-section');
+  if (!container) return;
+
+  // Build user selector (exclude admin and manager — they always have full access)
+  var users = loadUsers().filter(function(u) { return u.role !== 'admin' && u.role !== 'manager'; });
+  if (!_adminTabEditUser || !users.some(function(u) { return u.username === _adminTabEditUser; })) {
+    _adminTabEditUser = users.length ? users[0].username : null;
+  }
+
+  var selectorHtml = '<div style="margin-bottom:12px;display:flex;align-items:center;gap:10px">' +
+    '<span style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:1px;flex-shrink:0">USER:</span>' +
+    '<select class="um-select" id="um-tab-user-select" onchange="onAdminTabUserChange(this.value)" style="flex:1;padding:6px 10px">';
+  users.forEach(function(u) {
+    var rm = ROLE_META[u.role] || ROLE_META.viewer;
+    selectorHtml += '<option value="' + escHtml(u.username) + '"' + (u.username === _adminTabEditUser ? ' selected' : '') + '>' +
+      escHtml(u.displayName || u.username) + ' [' + rm.label + ']' +
+    '</option>';
+  });
+  selectorHtml += '</select></div>';
+
+  var gridHtml = '<div class="um-tab-grid" id="um-tab-grid"></div>';
+  container.innerHTML = selectorHtml + gridHtml;
+  renderTabGridForUser(_adminTabEditUser);
+}
+
+function renderTabGridForUser(username) {
   var grid = document.getElementById('um-tab-grid');
   if (!grid) return;
-  var unlocked = getUnlockedTabs();
+  if (!username) {
+    grid.innerHTML = '<div style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:rgba(255,255,255,0.3);padding:8px 0">No non-admin users found.</div>';
+    return;
+  }
+  var unlocked = getUnlockedTabsForUser(username);
   var html = TAB_DEFS.map(function(tab) {
     if (tab.always) {
       return '<div class="um-tab-card um-tab-unlocked">' +
@@ -21628,7 +21666,7 @@ function renderAdminTabPanel() {
     var isOn = unlocked.indexOf(tab.key) >= 0;
     return '<div class="um-tab-card ' + (isOn ? 'um-tab-unlocked' : 'um-tab-locked') + '">' +
       '<span class="um-tab-name">' + (isOn ? '&#128275;' : '&#128274;') + ' ' + tab.label + '</span>' +
-      '<button class="um-tab-toggle" onclick="adminToggleTab(\'' + tab.key + '\')">' +
+      '<button class="um-tab-toggle" onclick="adminToggleTab(\'' + escHtml(username) + '\',\'' + tab.key + '\')">' +
         (isOn ? 'LOCK' : 'UNLOCK') +
       '</button>' +
     '</div>';
@@ -21636,13 +21674,22 @@ function renderAdminTabPanel() {
   grid.innerHTML = html;
 }
 
-function adminToggleTab(key) {
-  var unlocked = getUnlockedTabs();
+function onAdminTabUserChange(username) {
+  _adminTabEditUser = username;
+  renderTabGridForUser(username);
+}
+
+function adminToggleTab(username, key) {
+  var unlocked = getUnlockedTabsForUser(username);
   var idx = unlocked.indexOf(key);
   if (idx >= 0) { unlocked.splice(idx, 1); } else { unlocked.push(key); }
-  setUnlockedTabs(unlocked);
-  renderAdminTabPanel();
-  applyTabUnlocks(window._currentRole);
+  setUnlockedTabsForUser(username, unlocked);
+  renderTabGridForUser(username);
+  // If this affects the currently logged-in user, refresh their tab state
+  var s = getSession();
+  if (s && s.username === username) {
+    applyTabUnlocks(window._currentRole, username);
+  }
 }
 
 // ── AUTH DEFAULTS ──────────────────────────────────────────────────────────
@@ -21724,6 +21771,7 @@ function applySession(user) {
   document.getElementById('auth-overlay').classList.add('auth-hidden');
   // Apply role-based UI restrictions
   applyRoleRestrictions(user.role);
+  applyTabUnlocks(user.role, user.username);
 }
 
 // ── Initialize auth on page load ─────────────────────────────────────────
@@ -21882,6 +21930,8 @@ async function addUser() {
   users.push(newUser);
   saveUsers(users);
   renderUserList();
+  _adminTabEditUser = (role !== 'admin' && role !== 'manager') ? username : _adminTabEditUser;
+  renderAdminTabPanel();
   document.getElementById('um-new-username').value    = '';
   document.getElementById('um-new-displayname').value = '';
   document.getElementById('um-new-password').value    = '';
@@ -21898,7 +21948,13 @@ function deleteUser(username) {
   if (!confirm('Remove user "' + username + '"?\nThis cannot be undone.')) return;
   var users = loadUsers();
   saveUsers(users.filter(function(u) { return u.username !== username; }));
+  // Also clear any stored tab unlocks for the removed user
+  var all = getAllUserUnlocks();
+  delete all[username];
+  localStorage.setItem(TAB_UNLOCK_KEY, JSON.stringify(all));
+  if (_adminTabEditUser === username) _adminTabEditUser = null;
   renderUserList();
+  renderAdminTabPanel();
   showUmMsg('User "' + escHtml(username) + '" removed.', 'ok');
 }
 
@@ -21978,7 +22034,8 @@ function applyRoleRestrictions(role) {
   }
 
   // ── 6. Apply tab unlock state to header buttons ───────────────────────
-  applyTabUnlocks(role);
+  var _s = getSession();
+  applyTabUnlocks(role, _s ? _s.username : '');
 }
 
 // Kick off auth
