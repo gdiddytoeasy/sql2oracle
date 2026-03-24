@@ -1665,6 +1665,7 @@ body.viewer-mode .sec-section:hover {
         <input class="um-input" id="um-new-password" type="password" placeholder="Password (min 6 chars)" />
         <select class="um-select" id="um-new-role">
           <option value="admin">Admin</option>
+          <option value="manager">Manager</option>
           <option value="dba" selected>DBA</option>
           <option value="student">Student</option>
           <option value="viewer">Viewer</option>
@@ -21586,7 +21587,7 @@ function applyTabUnlocks(role) {
     var m = (btn.getAttribute('onclick') || '').match(/switchView\('(\w+)'\)/);
     if (!m) return;
     var key = m[1];
-    if (role === 'admin') { btn.classList.remove('tab-locked'); return; }
+    if (role === 'admin' || role === 'manager') { btn.classList.remove('tab-locked'); return; }
     if (key === 'reference') return; // existing RBAC handles visibility for student/viewer
     if (unlocked.indexOf(key) >= 0) {
       btn.classList.remove('tab-locked');
@@ -21597,7 +21598,7 @@ function applyTabUnlocks(role) {
   // Handle SQL Converter link tab separately (it's an <a>, not a switchView button)
   var sqlTab = document.getElementById('sql-converter-tab');
   if (sqlTab) {
-    if (role === 'admin' || unlocked.indexOf('sql_converter') >= 0) {
+    if (role === 'admin' || role === 'manager' || unlocked.indexOf('sql_converter') >= 0) {
       sqlTab.classList.remove('tab-locked');
     } else {
       sqlTab.classList.add('tab-locked');
@@ -21606,7 +21607,7 @@ function applyTabUnlocks(role) {
 }
 
 function checkSqlConverterAccess() {
-  if (!window._currentRole || window._currentRole === 'admin') return true;
+  if (!window._currentRole || window._currentRole === 'admin' || window._currentRole === 'manager') return true;
   var unlocked = getUnlockedTabs();
   if (unlocked.indexOf('sql_converter') >= 0) return true;
   showAccessDenied('SQL Converter is locked — ask your administrator to unlock this section.');
@@ -21648,6 +21649,8 @@ function adminToggleTab(key) {
 var AUTH_DEFAULTS = [
   { username:'admin',   displayName:'Administrator', role:'admin',
     hash:'25e91ff6c383f40010e295237e3c8a9ca91e163a162b2628dbc47aef69bac09a' },
+  { username:'manager', displayName:'Manager',       role:'manager',
+    hash:'866485796cfa8d7c0cf7111640205b83076433547577511d81f8030ae99ecea5' },
   { username:'dba1',    displayName:'DBA User 1',    role:'dba',
     hash:'d1102a789f9523e9646134f293de4bb86246787eabb58a24c6d6730bf60a53d6' },
   { username:'student', displayName:'Student',       role:'student',
@@ -21658,6 +21661,7 @@ var AUTH_DEFAULTS = [
 
 var ROLE_META = {
   admin:   { label:'ADMIN',   color:'#E74C3C', bg:'rgba(231,76,60,0.15)',   border:'rgba(231,76,60,0.35)'   },
+  manager: { label:'MANAGER', color:'#FB923C', bg:'rgba(251,146,60,0.15)',  border:'rgba(251,146,60,0.35)'  },
   dba:     { label:'DBA',     color:'#3B82F6', bg:'rgba(59,130,246,0.15)',  border:'rgba(59,130,246,0.35)'  },
   student: { label:'STUDENT', color:'#10B981', bg:'rgba(16,185,129,0.15)',  border:'rgba(16,185,129,0.35)'  },
   viewer:  { label:'VIEWER',  color:'#94A3B8', bg:'rgba(148,163,184,0.15)', border:'rgba(148,163,184,0.35)' }
@@ -21931,10 +21935,10 @@ function applyRoleRestrictions(role) {
   window._currentRole = role;
   var body = document.body;
 
-  // ── 1. CHEATSHEET tab: visible only for admin + dba ──────────────────
+  // ── 1. CHEATSHEET tab: visible only for admin + manager + dba ───────
   document.querySelectorAll('.h-tab').forEach(function(btn) {
     if (btn.textContent.indexOf('CHEATSHEET') >= 0) {
-      btn.style.display = (role === 'admin' || role === 'dba') ? '' : 'none';
+      btn.style.display = (role === 'admin' || role === 'manager' || role === 'dba') ? '' : 'none';
     }
   });
 
