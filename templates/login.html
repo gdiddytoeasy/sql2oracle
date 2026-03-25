@@ -373,16 +373,33 @@ async function doLogin() {
   btn.innerHTML = '&#9203;&nbsp; VERIFYING...';
   btn.disabled = true;
 
-  var hash = await sha256(password);
+  var hash;
+  try {
+    hash = await sha256(password);
+  } catch(e) {
+    btn.innerHTML = '&#9654;&nbsp; SIGN IN';
+    btn.disabled = false;
+    showError('Crypto error — ensure you are using HTTPS.');
+    return;
+  }
+
   var match = null;
+  var errMsg = 'Invalid username or password. Please try again.';
   try {
     var res = await fetch('/api/users/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: username, hash: hash })
     });
-    if (res.ok) match = await res.json();
-  } catch(e) {}
+    if (res.ok) {
+      match = await res.json();
+    } else {
+      var errData = await res.json().catch(function() { return {}; });
+      errMsg = errData.error || ('Server error (' + res.status + ')');
+    }
+  } catch(e) {
+    errMsg = 'Network error — cannot reach server.';
+  }
 
   btn.innerHTML = '&#9654;&nbsp; SIGN IN';
   btn.disabled = false;
@@ -400,7 +417,7 @@ async function doLogin() {
     document.getElementById('auth-card').style.transform = 'translateY(-10px) scale(0.98)';
     setTimeout(function() { window.location.href = '/architecture'; }, 300);
   } else {
-    showError('Invalid username or password. Please try again.');
+    showError(errMsg);
   }
 }
 
