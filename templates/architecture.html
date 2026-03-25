@@ -309,8 +309,12 @@ body {
 @keyframes dash-flow {
   to { stroke-dashoffset:-28; }
 }
+@keyframes flow-glow {
+  0%, 100% { filter:drop-shadow(0 0 3px currentColor); stroke-width:2.5; }
+  50%      { filter:drop-shadow(0 0 8px currentColor); stroke-width:3; }
+}
 .flow-path[stroke-dasharray] {
-  animation:dash-flow 1.5s linear infinite;
+  animation:dash-flow 1.2s linear infinite, flow-glow 3s ease-in-out infinite;
 }
 .path-lgwr { stroke:var(--lgwr); }
 .path-dbwn { stroke:var(--dbwn); }
@@ -1319,13 +1323,19 @@ body {
   position:fixed; inset:0; z-index:2000;
   background:#04080F;
   overflow-y:auto;
-  display:none;
-  animation:modFadeIn 0.25s ease;
+  opacity:0; pointer-events:none;
+  transform:translateY(20px);
+  transition:opacity 0.35s cubic-bezier(0.16,1,0.3,1), transform 0.35s cubic-bezier(0.16,1,0.3,1);
 }
-#module-overlay.mod-open { display:block; }
-@keyframes modFadeIn {
-  from { opacity:0; transform:translateY(18px); }
-  to   { opacity:1; transform:translateY(0); }
+#module-overlay.mod-open { opacity:1; pointer-events:auto; transform:translateY(0); }
+#module-overlay.mod-closing { opacity:0; transform:translateY(12px); pointer-events:none; }
+
+/* ── Scroll progress bar ── */
+#mod-scroll-progress {
+  position:fixed; top:0; left:0; height:3px; z-index:2001;
+  background:linear-gradient(90deg, #E74C3C, #FB923C, #F1C40F);
+  width:0%; transition:width 0.1s linear;
+  box-shadow:0 0 8px rgba(231,76,60,0.5);
 }
 .mod-header {
   position:sticky; top:0; z-index:10;
@@ -1385,8 +1395,21 @@ body {
 .mod-objectives li::marker { color:#A855F7; }
 .mod-diagram {
   background:rgba(7,13,24,0.8); border:1px solid rgba(255,255,255,0.08);
-  border-radius:12px; padding:20px; margin:16px 0; overflow-x:auto;
+  border-radius:12px; padding:20px; margin:16px 0; overflow:hidden;
+  position:relative; cursor:grab;
 }
+.mod-diagram:active { cursor:grabbing; }
+.mod-diagram .panzoom-controls {
+  position:absolute; top:8px; right:8px; display:flex; gap:4px; z-index:5;
+}
+.mod-diagram .pz-btn {
+  width:28px; height:28px; border-radius:6px;
+  background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15);
+  color:rgba(255,255,255,0.6); font-size:14px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:all 0.15s; font-family:'Share Tech Mono',monospace;
+}
+.mod-diagram .pz-btn:hover { background:rgba(255,255,255,0.15); color:#fff; }
 /* Quiz */
 .mod-quiz-wrap { margin:12px 0; }
 .mod-quiz-q {
@@ -1704,6 +1727,7 @@ body.viewer-mode .sec-section:hover {
 }
 #access-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 </style>
+<script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
 </head>
 <body>
 <script>
@@ -11097,6 +11121,7 @@ ORDER BY bytes DESC FETCH FIRST 20 ROWS ONLY;</div>
 <!-- ═══════════════════════════════════════════════════════════════
      MODULE OVERLAY — shell + shared SVG defs
      ═══════════════════════════════════════════════════════════════ -->
+<div id="mod-scroll-progress" style="display:none"></div>
 <div id="module-overlay">
   <div class="mod-header" id="mod-header-bar">
     <button class="mod-back-btn" onclick="closeModule()">&#8592; BACK</button>
@@ -12283,6 +12308,7 @@ var MOD_META = {
   m30: {num:'M30', title:'Comprehensive Review',                 week:'Week 5', dur:'1.5h', color:'#00D4FF'}
 };
 
+var _panzoomInstances = [];
 function openModule(id) {
   var meta = MOD_META[id];
   if (!meta) return;
@@ -12302,13 +12328,73 @@ function openModule(id) {
   weekEl.style.color = meta.color;
   durEl.textContent = meta.dur;
   document.getElementById('mod-body-content').innerHTML = buildModuleHTML(id);
+  overlay.classList.remove('mod-closing');
   overlay.classList.add('mod-open');
   overlay.scrollTop = 0;
   document.body.style.overflow = 'hidden';
+  // Show scroll progress bar
+  var prog = document.getElementById('mod-scroll-progress');
+  if (prog) prog.style.display = 'block';
+  // Init Panzoom on diagrams
+  _initDiagramPanzoom();
 }
 function closeModule() {
-  document.getElementById('module-overlay').classList.remove('mod-open');
-  document.body.style.overflow = '';
+  var overlay = document.getElementById('module-overlay');
+  overlay.classList.add('mod-closing');
+  var prog = document.getElementById('mod-scroll-progress');
+  if (prog) { prog.style.width = '0%'; prog.style.display = 'none'; }
+  // Cleanup panzoom instances
+  _panzoomInstances.forEach(function(pz) { try { pz.destroy(); } catch(e){} });
+  _panzoomInstances = [];
+  setTimeout(function() {
+    overlay.classList.remove('mod-open');
+    overlay.classList.remove('mod-closing');
+    document.body.style.overflow = '';
+  }, 350);
+}
+// ── Scroll progress tracking ──
+(function() {
+  var overlay = document.getElementById('module-overlay');
+  if (overlay) {
+    overlay.addEventListener('scroll', function() {
+      var prog = document.getElementById('mod-scroll-progress');
+      if (!prog || !overlay.classList.contains('mod-open')) return;
+      var scrollTop = overlay.scrollTop;
+      var scrollHeight = overlay.scrollHeight - overlay.clientHeight;
+      var pct = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+      prog.style.width = pct + '%';
+    });
+  }
+})();
+// ── Init Panzoom on .mod-diagram SVGs ──
+function _initDiagramPanzoom() {
+  if (typeof Panzoom === 'undefined') return;
+  _panzoomInstances.forEach(function(pz) { try { pz.destroy(); } catch(e){} });
+  _panzoomInstances = [];
+  var diagrams = document.querySelectorAll('#mod-body-content .mod-diagram svg');
+  diagrams.forEach(function(svg) {
+    var container = svg.closest('.mod-diagram');
+    // Add zoom controls if not present
+    if (!container.querySelector('.panzoom-controls')) {
+      var controls = document.createElement('div');
+      controls.className = 'panzoom-controls';
+      controls.innerHTML = '<button class="pz-btn" data-pz="in">+</button><button class="pz-btn" data-pz="out">&minus;</button><button class="pz-btn" data-pz="reset">&#8634;</button>';
+      container.appendChild(controls);
+    }
+    var pz = Panzoom(svg, { maxScale:3, minScale:0.5, contain:'outside', cursor:'grab' });
+    container.addEventListener('wheel', function(e) { pz.zoomWithWheel(e); });
+    var btns = container.querySelectorAll('.pz-btn');
+    btns.forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var action = btn.dataset.pz;
+        if (action === 'in') pz.zoomIn();
+        else if (action === 'out') pz.zoomOut();
+        else pz.reset();
+      });
+    });
+    _panzoomInstances.push(pz);
+  });
 }
 function hexToRgb(hex) {
   var r = parseInt(hex.slice(1,3),16);
