@@ -21,7 +21,7 @@ def _get_db():
 
 
 def _init_db():
-    """Create tables if they don't exist."""
+    """Create tables and seed default users if they don't exist."""
     conn = _get_db()
     cur = conn.cursor()
     cur.execute("""
@@ -38,6 +38,20 @@ def _init_db():
             tabs JSONB NOT NULL DEFAULT '["standard"]'::jsonb
         )
     """)
+    # Seed default accounts if the table is empty
+    cur.execute("SELECT COUNT(*) FROM users")
+    if cur.fetchone()[0] == 0:
+        defaults = [
+            ('admin',   'Administrator', 'admin',   '1e67a4eeb5a014031b0686d14438b922072db3d572696778abcb6ce3257897c2'),
+            ('dba1',    'DBA Student',   'dba',     'afdb5173eade6c2f4d471709828049f97eaa493f37ded5f7ea7ba715b1232fc9'),
+            ('student', 'Student',       'student', 'f5016f9973ff8e485d4f85090bfd451f97cef471ed95a5f81578058f1342bf2a'),
+            ('guest',   'Guest Viewer',  'viewer',  '9594fb14922df9ed9ef4a03fbbea976e27cde7e1ebe0460c6ccfcda2da074281'),
+        ]
+        for username, display_name, role, hash_ in defaults:
+            cur.execute(
+                "INSERT INTO users (username, display_name, role, hash) VALUES (%s, %s, %s, %s) ON CONFLICT DO NOTHING",
+                (username, display_name, role, hash_)
+            )
     cur.close()
     conn.close()
 
