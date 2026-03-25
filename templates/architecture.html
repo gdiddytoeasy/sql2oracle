@@ -7543,6 +7543,46 @@ yum-config-manager --disable ol8_latest</div>
         </table>
       </div>
     </div>
+    <div class="crs-section-title"><span class="crs-module-tag">EXAM PREP</span> KEY EXAM POINTS — WHAT EVERY MODULE TESTS</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#A855F7">WEEK 1 — MUST KNOW</div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#C74634">M1 Architecture</div><div class="ref-desc">SGA vs PGA. What each background process does (LGWR, DBWn, CKPT, SMON, PMON, ARCn). What data is stored in each SGA component. LGWR flushes on COMMIT.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#C74634">M2 Multitenant</div><div class="ref-desc">CDB$ROOT vs PDB. Common users start with C##. ALTER SESSION SET CONTAINER. One SGA serves all PDBs. PDB$SEED is read-only template.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#C74634">M3 Installation</div><div class="ref-desc">ORACLE_HOME, ORACLE_BASE, ORACLE_SID env vars. OFA directory layout. DBCA for database creation. Alert log location: V$DIAG_INFO.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#C74634">M4 Parameters</div><div class="ref-desc">PFILE=text (init.ora), SPFILE=binary server-side. SCOPE=MEMORY/SPFILE/BOTH. Static params need restart. DB_BLOCK_SIZE immutable after creation.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#C74634">M5 Startup/Shutdown</div><div class="ref-desc">4 stages: SHUTDOWN→NOMOUNT→MOUNT→OPEN. NOMOUNT reads SPFILE, starts SGA+processes. MOUNT reads control file. OPEN opens datafiles. SHUTDOWN IMMEDIATE = most common. ABORT = no rollback, recovery at restart.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#C74634">M6 Network</div><div class="ref-desc">listener.ora = server-side. tnsnames.ora = client-side aliases. Easy Connect: host:port/service. lsnrctl status/start/stop. Dynamic registration via LREG process.</div></div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#3B82F6">WEEK 2 — MUST KNOW</div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#3B82F6">M7 Storage</div><div class="ref-desc">Hierarchy: Database→Tablespace→Datafile→Segment→Extent→Block. System tablespaces: SYSTEM (dict), SYSAUX (AWR), UNDOTBS1 (undo), TEMP (sorts), USERS (user objects). ASM disk groups. AUTOEXTEND ON.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#3B82F6">M8 Redo Logs</div><div class="ref-desc">Circular groups with members. LGWR writes to all members of current group. Log switch when group fills. ARCn archives filled group. ARCHIVELOG mode required for PITR. V$LOG shows STATUS (CURRENT/ACTIVE/INACTIVE).</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#3B82F6">M9 Control Files</div><div class="ref-desc">Binary. Tracks DB structure, SCN, datafile locations. Multiplex to 2-3 copies. Loss = DB down. RMAN CONTROLFILE AUTOBACKUP ON is essential.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#3B82F6">M10 Data Types</div><div class="ref-desc">Oracle DATE includes TIME. VARCHAR2 (not VARCHAR). NUMBER for all numerics. NULL = '' (empty string). TIMESTAMP for fractional seconds.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#3B82F6">M11 SQL Syntax</div><div class="ref-desc">SYSDATE not GETDATE(). NVL not ISNULL. || not +. FETCH FIRST not TOP. FROM DUAL. No auto-commit. Empty string IS NULL.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#3B82F6">M12 DDL/DML</div><div class="ref-desc">SEQUENCE.NEXTVAL for IDs (pre-12c). IDENTITY columns (12c+). INSERT ALL for multi-table insert. MERGE syntax. DDL auto-commits in Oracle.</div></div>
+      </div>
+    </div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#FB923C">WEEK 3 — MUST KNOW</div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#FB923C">M13 Transactions</div><div class="ref-desc">No auto-commit — must explicitly COMMIT or ROLLBACK. DDL implicitly commits. SAVEPOINT for partial rollback. Transaction ends at: COMMIT, ROLLBACK, DDL, session disconnect.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#FB923C">M14 Concurrency</div><div class="ref-desc">MVCC: readers don't block writers, writers don't block readers. ORA-01555 = undo expired. Row-level locking (TX). Deadlock: Oracle rolls back one STATEMENT (not transaction), writes ORA-00060 to alert log.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#FB923C">M15-16 PL/SQL</div><div class="ref-desc">Block structure: DECLARE/BEGIN/EXCEPTION/END. Packages: spec (public) + body (private). %TYPE, %ROWTYPE. Implicit cursor: SQL%ROWCOUNT, SQL%FOUND. Cursor FOR loop auto-opens/fetches/closes.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#FB923C">M17 Triggers</div><div class="ref-desc">:NEW and :OLD pseudo-records. INSTEAD OF triggers on views. Compound triggers avoid mutating table (ORA-04091). DDL triggers audit schema changes. BEFORE ROW for default values.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#FB923C">M18 Security</div><div class="ref-desc">User = Schema in Oracle. CREATE USER, GRANT, REVOKE. WITH ADMIN OPTION (system, non-cascading). WITH GRANT OPTION (object, cascading). Profiles for password/resource limits. Unified Auditing in 12c.</div></div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#2ECC71">WEEKS 4–5 — MUST KNOW</div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#2ECC71">M19-20 RMAN</div><div class="ref-desc">Level 0 = full baseline. Level 1 = incremental. PLUS ARCHIVELOG backs up archive logs. Block change tracking speeds incrementals. Data Recovery Advisor: LIST FAILURE → ADVISE → REPAIR. OPEN RESETLOGS after incomplete recovery.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#2ECC71">M21 Flashback</div><div class="ref-desc">AS OF TIMESTAMP/SCN (query). FLASHBACK TABLE (needs ROW MOVEMENT). FLASHBACK TABLE TO BEFORE DROP (Recycle Bin). FLASHBACK DATABASE (needs flashback logging). Flashback Data Archive = long-term history.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#2ECC71">M22 Data Pump</div><div class="ref-desc">expdp/impdp. REMAP_SCHEMA, REMAP_TABLESPACE. PARALLEL + multiple dump files (%U). TABLE_EXISTS_ACTION. NETWORK_LINK for direct DB-to-DB transfer. DIRECTORY object required.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#2ECC71">M23-24 Performance</div><div class="ref-desc">EXPLAIN PLAN + DBMS_XPLAN.DISPLAY. AWR = snapshots (MMON, every 60min). ASH = per-second session sampling. ADDM = auto analysis of AWR. DBMS_STATS for fresh statistics.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#2ECC71">M25 Indexes</div><div class="ref-desc">B-tree for high cardinality. Bitmap for low cardinality OLAP — row lock=block lock, bad for OLTP. Function-based for expression search. Partition pruning eliminates partitions from scan.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#2ECC71">M26-27 HA</div><div class="ref-desc">Data Guard: physical standby, redo shipping (ASYNC/SYNC). Protection modes: PERFORMANCE/AVAILABILITY/PROTECTION. Switchover=planned (no data loss). Failover=unplanned. RAC: Cache Fusion via interconnect. SCAN listener for client connections.</div></div>
+      </div>
+    </div>
   </div><!-- /crs-overview -->
 
   <!-- ── ARCHITECTURE ──────────────────────────────────────────── -->
@@ -7743,6 +7783,132 @@ SELECT s.username, s.sid, p.pga_used_mem/1048576 pga_used_mb
 FROM v$session s JOIN v$process p ON s.paddr = p.addr
 WHERE s.username IS NOT NULL
 ORDER BY p.pga_used_mem DESC FETCH FIRST 10 ROWS ONLY;</div>
+      </div>
+    </div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 1 · M1 — DEEP NOTES</span> ORACLE ARCHITECTURE — EXAM-LEVEL DETAIL</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#C74634">SGA — COMPONENT DETAIL</div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#FB923C">Database Buffer Cache</div><div class="ref-desc">Stores copies of data blocks. Uses LRU algorithm. Dirty blocks written by DBWn. Buffer state: FREE, CLEAN, DIRTY. Default pool + KEEP pool + RECYCLE pool. Size: DB_CACHE_SIZE.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#A855F7">Library Cache</div><div class="ref-desc">Part of Shared Pool. Stores parsed SQL statements and execution plans. Shared cursors eliminate re-parsing (soft parse). When full, LRU eviction occurs (hard parse spike). Monitor via V$LIBRARYCACHE.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#A855F7">Dictionary Cache (Row Cache)</div><div class="ref-desc">Part of Shared Pool. Caches data dictionary rows (table definitions, user privileges, datafile locations). Reduces recursive SQL overhead.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#2ECC71">Redo Log Buffer</div><div class="ref-desc">Circular buffer. LGWR flushes when: COMMIT occurs, buffer is 1/3 full, 3 seconds elapse, or DBWn needs to write. Size: LOG_BUFFER parameter (default 16MB, max 512MB).</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#00D4FF">Large Pool</div><div class="ref-desc">Optional. Set LARGE_POOL_SIZE. Used by: RMAN backup/restore I/O, shared server UGA (User Global Area), parallel query message buffers. Reduces shared pool fragmentation.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#F1C40F">Result Cache</div><div class="ref-desc">Caches query result sets in SGA. Reuses results for identical queries. Enabled with RESULT_CACHE hint or RESULT_CACHE_MODE parameter. Invalided automatically on DML to referenced tables.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Key SGA sizing views
+SELECT name, bytes/1048576 mb FROM v$sgainfo WHERE name IN
+  ('Fixed SGA Size','Redo Buffers','Buffer Cache Size',
+   'Shared Pool Size','Large Pool Size');
+
+-- Shared pool hit ratio (should be >99%)
+SELECT (1 - (phy.value / (cur.value + pins.value))) * 100 ratio
+FROM v$sysstat cur, v$sysstat phy, v$sysstat pins
+WHERE cur.name='parse count (total)'
+  AND phy.name='parse count (hard)'
+  AND pins.name='execute count';
+
+-- Buffer cache hit ratio (should be >95%)
+SELECT ROUND((1 - (phys.value/(gets.value+con.value)))*100,2) hit_pct
+FROM v$sysstat phys, v$sysstat gets, v$sysstat con
+WHERE phys.name='physical reads'
+  AND gets.name='db block gets'
+  AND con.name='consistent gets';</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#3B82F6">BACKGROUND PROCESSES — EXAM DETAIL</div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#FF4757">LGWR triggers</div><div class="ref-desc">LGWR writes redo on: (1) COMMIT, (2) redo buffer 1/3 full, (3) DBWn requests it before writing dirty buffers, (4) every 3 seconds. This guarantees committed data is on disk.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#2ECC71">DBWn writes when</div><div class="ref-desc">(1) Dirty buffer threshold reached, (2) server process cannot find free buffer after timeout, (3) checkpoint signal from CKPT, (4) tablespace OFFLINE/READ ONLY/BEGIN BACKUP. Multiple DBWn processes (DBW0–DBW9, DBWa–DBWj) for parallelism.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#F1C40F">CKPT signals</div><div class="ref-desc">Checkpoint = signal DBWn to write all dirty buffers up to a specific SCN, then update datafile headers and control file with checkpoint SCN. Full checkpoint: shutdown or ALTER SYSTEM CHECKPOINT. Incremental: every 3 seconds by default.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#00D4FF">LREG (12c)</div><div class="ref-desc">Listener Registration process. Registers instance services with the listener dynamically. Replaced the PMON listener registration role in 12c. Forces re-registration: ALTER SYSTEM REGISTER.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#A855F7">SMON duties</div><div class="ref-desc">(1) Instance recovery at startup (applying redo, rolling back uncommitted), (2) cleaning up temporary segments after crash, (3) coalescing adjacent free extents in SYSTEM tablespace.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#FB923C">PMON duties</div><div class="ref-desc">(1) Process recovery: detects failed user processes, rolls back their transactions, releases locks, frees resources. (2) Cleans up dead dispatcher processes.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- View all background processes
+SELECT name, description FROM v$bgprocess
+WHERE paddr != '00' ORDER BY name;
+
+-- Check if ARCn is running (ARCHIVELOG mode)
+SELECT process, status, sequence# FROM v$managed_standby;
+-- Or simpler:
+ARCHIVE LOG LIST;</div>
+      </div>
+    </div>
+
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 1 · M2 — DEEP NOTES</span> MULTITENANT — CDB/PDB INTERNALS</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#C74634">CDB ARCHITECTURE INTERNALS</div>
+        <div class="ref-row"><div class="ref-cmd">Shared vs local data dict</div><div class="ref-desc">CDB$ROOT holds the base data dictionary (common objects). Each PDB has its own local data dictionary layer. Common users (C##prefix) exist in ROOT and all PDBs. Local users exist only in their PDB.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Container context</div><div class="ref-desc">V$CON_ID shows current container. Query from ROOT with CONTAINERS() clause to span all PDBs. DBA_ views show only current container. CDB_ views span all containers when in ROOT.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Resource isolation</div><div class="ref-desc">Use Resource Manager PDB plans to limit CPU/memory per PDB. DB_RESOURCE_MANAGER_PLAN at CDB level controls distribution. MAX_IOPS and MAX_MBPS per PDB in 12c R2+.</div></div>
+        <div class="ref-row"><div class="ref-cmd">PDB lifecycle</div><div class="ref-desc">CREATE (from seed or clone), OPEN (READ WRITE / READ ONLY), CLOSE, UNPLUG (export to XML manifest), PLUG (from XML + datafiles), DROP.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Check if running as CDB
+SELECT cdb, con_id, name FROM v$database;
+
+-- View all PDBs and their status
+SELECT con_id, name, open_mode, restricted FROM v$pdbs;
+
+-- Connect to specific PDB (from CDB$ROOT as SYSDBA)
+ALTER SESSION SET CONTAINER = ORCLPDB;
+
+-- Common user (exists across all PDBs)
+CREATE USER c##dba_monitor IDENTIFIED BY pass CONTAINER=ALL;
+GRANT CREATE SESSION TO c##dba_monitor CONTAINER=ALL;
+
+-- Query all PDBs for tablespace usage (from ROOT)
+SELECT p.name pdb, t.tablespace_name, t.status
+FROM cdb_tablespaces t JOIN v$pdbs p ON t.con_id = p.con_id
+ORDER BY p.name, t.tablespace_name;</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#3B82F6">NON-CDB vs CDB — WHEN TO USE WHICH</div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#2ECC71">Non-CDB</div><div class="ref-desc">Traditional architecture. One instance, one database. Being deprecated in Oracle 21c+ — use CDB going forward for all new deployments.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#C74634">CDB (Multitenant)</div><div class="ref-desc">Required from Oracle 21c. Consolidates multiple PDBs into one set of background processes and SGA — resource sharing. Individual PDB backup/restore, clone, and relocation.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Max PDBs</div><div class="ref-desc">Standard Edition: 3 PDBs. Enterprise Edition: 252 PDBs per CDB. Oracle Multitenant option required for &gt;1 PDB (before 21c).</div></div>
+        <div class="ref-row"><div class="ref-cmd">PDB cloning</div><div class="ref-desc">CREATE PLUGGABLE DATABASE pdb2 FROM pdb1 — fast clone for dev/test. Hot clone in 12c R2: source stays open during clone. Useful for refreshing test environments from production.</div></div>
+        <div class="crs-tip-box">SQL Server DBA analogy: Think of the CDB as the SQL Server instance, and each PDB as a contained database. CDB$ROOT ≈ master/msdb. Each PDB has its own users, schemas, tablespaces, and data — fully isolated.</div>
+      </div>
+    </div>
+
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 1 · M3 — DEEP NOTES</span> INSTALLATION, DBCA &amp; OFA STANDARD</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#2ECC71">OFA — OPTIMAL FLEXIBLE ARCHITECTURE</div>
+        <div class="ref-row"><div class="ref-cmd">ORACLE_BASE</div><div class="ref-desc">/u01/app/oracle — root of all Oracle software and admin files. Separates software from OS and data.</div></div>
+        <div class="ref-row"><div class="ref-cmd">ORACLE_HOME</div><div class="ref-desc">/u01/app/oracle/product/19.3.0/dbhome_1 — binary software. Multiple homes can coexist for version upgrades.</div></div>
+        <div class="ref-row"><div class="ref-cmd">oradata</div><div class="ref-desc">/u01/oradata/ORCL/ — database files (datafiles, redo logs, control files). Should be on separate disk from software.</div></div>
+        <div class="ref-row"><div class="ref-cmd">ADR Base</div><div class="ref-desc">/u01/app/oracle/diag/rdbms/orcl/ORCL/ — Automatic Diagnostic Repository. Contains: alert/, trace/, incident/, cdump/</div></div>
+        <div class="ref-row"><div class="ref-cmd">fast_recovery_area</div><div class="ref-desc">/u01/app/oracle/fast_recovery_area/ — FRA for RMAN backups and archive logs. Should be on different disk from oradata.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Find all key paths from SQL*Plus
+SELECT name, value FROM v$diag_info;
+-- Shows: ADR Base, ADR Home, Diag Trace, Diag Alert, etc.
+
+-- OS pre-install check (as root):
+-- /sbin/sysctl -a | grep shmmax
+-- ulimit -a | grep open
+-- id oracle  -- verify oracle user/groups
+
+-- Key OS groups for Oracle install:
+-- oinstall: inventory group (required)
+-- dba:      SYSDBA privilege
+-- oper:     SYSOPER privilege
+-- backupdba, dgdba, kmdba: optional role separation</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#2ECC71">EM DATABASE EXPRESS (12c)</div>
+        <div class="ref-row"><div class="ref-cmd">URL</div><div class="ref-desc">https://host:5500/em — port configured per PDB. Default port: 5500 (CDB) or per PDB assignment.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Configure port</div><div class="ref-desc">EXEC DBMS_XDB_CONFIG.SETHTTPSPORT(5500); — sets HTTPS port for EM Express on current PDB/CDB.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Limitations</div><div class="ref-desc">EM Express manages ONE database per browser session. It cannot manage multiple databases simultaneously (unlike EM Cloud Control). No job scheduling, no patching.</div></div>
+        <div class="ref-row"><div class="ref-cmd">SQL Developer</div><div class="ref-desc">Free GUI (download from oracle.com). Create connection: host + port + service name + credentials. Equivalent to SSMS. Includes DBA panel for administration.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Enable EM Express HTTP (non-SSL, easier for lab)
+EXEC DBMS_XDB_CONFIG.SETHTTPPORT(8080);
+
+-- Find current EM Express port
+SELECT dbms_xdb_config.gethttpsport() https,
+       dbms_xdb_config.gethttpport() http FROM DUAL;
+
+-- SQL*Plus shortcut: connect as SYSDBA
+sqlplus / as sysdba          -- OS auth (local)
+sqlplus sys/pass@ORCL as sysdba  -- password auth</div>
       </div>
     </div>
   </div><!-- /crs-architecture -->
@@ -8022,6 +8188,142 @@ SELECT file_type, percent_space_used,
 FROM v$recovery_area_usage;</div>
       </div>
     </div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 1–2 DEEP NOTES</span> STORAGE, PARAMETERS &amp; NETWORK — EXAM DETAIL</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#FB923C">TABLESPACE TYPES &amp; MANAGEMENT</div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#2ECC71">PERMANENT</div><div class="ref-desc">Stores persistent schema objects (tables, indexes). DEFAULT TABLESPACE for users. Use AUTOEXTEND ON for auto-growth. Multiple datafiles for performance (spread across disks).</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#F1C40F">TEMPORARY</div><div class="ref-desc">Stores sort/hash temporary segments. Contents lost on instance restart. Uses TEMPFILE (not DATAFILE). Assign: ALTER USER u TEMPORARY TABLESPACE temp. Multiple temp tablespaces per DB.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#C74634">UNDO</div><div class="ref-desc">Automatic Undo Management (AUM). One active undo tablespace per instance (UNDO_TABLESPACE param). Stores before-images for MVCC reads and ROLLBACK. Switch: ALTER SYSTEM SET UNDO_TABLESPACE=undotbs2.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#A855F7">BIGFILE</div><div class="ref-desc">Single very large datafile (up to 128TB with 32K blocks). Traditional = SMALLFILE (up to 32 datafiles of 128GB each). Bigfile simpler to manage but less flexible for striping.</div></div>
+        <div class="ref-row"><div class="ref-cmd">OFFLINE/READ ONLY</div><div class="ref-desc">ALTER TABLESPACE ts OFFLINE — makes it inaccessible. ALTER TABLESPACE ts READ ONLY — allows queries, blocks DML. Use READ ONLY for static reference data tablespaces (reduces redo generation).</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Resize a datafile
+ALTER DATABASE DATAFILE '/u01/oradata/ORCL/users01.dbf' RESIZE 2G;
+
+-- Move a datafile online (12c+) — no outage needed
+ALTER DATABASE MOVE DATAFILE '/old/path/file.dbf' TO '/new/path/file.dbf';
+
+-- Drop a tablespace completely
+DROP TABLESPACE app_old INCLUDING CONTENTS AND DATAFILES;
+
+-- Check segment sizes in a tablespace
+SELECT owner, segment_name, segment_type,
+  ROUND(bytes/1048576,1) mb
+FROM dba_segments
+WHERE tablespace_name = 'USERS'
+ORDER BY bytes DESC FETCH FIRST 20 ROWS ONLY;</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#2ECC71">REDO LOG — EXAM DETAIL</div>
+        <div class="ref-row"><div class="ref-cmd">Groups &amp; Members</div><div class="ref-desc">Each redo log GROUP can have multiple MEMBERS (copies on different disks). LGWR writes to ALL members simultaneously. Minimum: 2 groups with 2 members each. Recommended: 3+ groups.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Log switch / Sequence#</div><div class="ref-desc">When LGWR fills a group, it switches to next (log switch). ARCn archives the old group. Log sequence# increments. Archived log file name includes sequence#.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Sizing redo logs</div><div class="ref-desc">Too small = frequent log switches = performance hit. Rule: log switch every 15-30 minutes in production. Check: V$LOG_HISTORY for frequency.</div></div>
+        <div class="ref-row"><div class="ref-cmd">UNARCHIVED warning</div><div class="ref-desc">If ARCn falls behind and ALL redo groups are ACTIVE, database STALLS waiting for a log to be archived. Monitor V$LOG.STATUS = 'ACTIVE' count.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Add a redo log group with 2 members
+ALTER DATABASE ADD LOGFILE GROUP 4
+  ('/disk1/redo04a.log', '/disk2/redo04b.log') SIZE 200M;
+
+-- Add member to existing group
+ALTER DATABASE ADD LOGFILE MEMBER '/disk3/redo01c.log' TO GROUP 1;
+
+-- Drop a log group (must be INACTIVE, not CURRENT)
+ALTER DATABASE DROP LOGFILE GROUP 4;
+
+-- Monitor log switch frequency
+SELECT first_time, next_time, blocks*512/1048576 mb
+FROM v$archived_log WHERE dest_id=1
+ORDER BY first_time DESC FETCH FIRST 10 ROWS ONLY;</div>
+      </div>
+    </div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#A855F7">CONTROL FILE — EXAM DETAIL</div>
+        <div class="ref-row"><div class="ref-cmd">Contents</div><div class="ref-desc">Database name, DBID, creation timestamp, datafile locations, redo log locations, current log sequence#, checkpoint info, RMAN backup catalog metadata, archive log history.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Multiplexing</div><div class="ref-desc">Always have 2-3 copies. Set CONTROL_FILES parameter in SPFILE. Copies maintained identically by CKPT process. If ALL copies lost = database cannot open.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Cold backup</div><div class="ref-desc">Shut down DB, copy control files manually, update CONTROL_FILES parameter. OR use RMAN (BACKUP CURRENT CONTROLFILE) — included in CONTROLFILE AUTOBACKUP.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Recreating</div><div class="ref-desc">If control file lost: restore from RMAN, OR trace the control file and re-execute (ALTER DATABASE BACKUP CONTROLFILE TO TRACE). Requires NOMOUNT stage.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Backup control file to trace (SQL script)
+ALTER DATABASE BACKUP CONTROLFILE TO TRACE
+  AS '/tmp/recreate_cf.sql';
+
+-- Enable autobackup (essential!)
+RMAN> CONFIGURE CONTROLFILE AUTOBACKUP ON;
+RMAN> CONFIGURE CONTROLFILE AUTOBACKUP FORMAT
+      FOR DEVICE TYPE DISK TO '/backup/%F';
+
+-- List control file records
+SELECT type, record_size, records_total, records_used
+FROM v$controlfile_record_section ORDER BY type;</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#00D4FF">ALERT LOG &amp; ADR STRUCTURE</div>
+        <div class="ref-row"><div class="ref-cmd">Alert log location</div><div class="ref-desc">$ORACLE_BASE/diag/rdbms/&lt;dbname&gt;/&lt;SID&gt;/trace/alert_&lt;SID&gt;.log — text format. XML version in alert/ subdirectory. View with tail -f or ADRCI.</div></div>
+        <div class="ref-row"><div class="ref-cmd">What's logged</div><div class="ref-desc">All startup/shutdown events, ORA- errors, parameter changes, log switches, checkpoint info, tablespace operations, DDL on critical objects. Essential for troubleshooting.</div></div>
+        <div class="ref-row"><div class="ref-cmd">ADRCI tool</div><div class="ref-desc">ADR Command Interface. Use: adrci → show alert → show incident → ips create package. Packages diagnostic data for Oracle Support.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Incident vs Problem</div><div class="ref-desc">Problem = a unique error condition (e.g., ORA-00600 with same signature). Incident = one occurrence of a problem. ADR groups incidents by problem for cleaner SR submission.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Find alert log location
+SELECT value FROM v$diag_info WHERE name='Diag Trace';
+
+-- View alert log from SQL (12c+)
+SELECT originating_timestamp, message_text
+FROM v$diag_alert_ext
+WHERE message_text LIKE '%ORA-%'
+  AND originating_timestamp > SYSDATE-1
+ORDER BY originating_timestamp DESC;
+
+-- ADRCI — show last 50 alert entries
+-- adrci
+-- ADRCI> show alert -tail 50
+-- ADRCI> show incident -mode detail</div>
+      </div>
+    </div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#FB923C">INIT PARAMETERS — DYNAMIC vs STATIC</div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#2ECC71">Dynamic (SCOPE=MEMORY)</div><div class="ref-desc">Takes effect immediately, lost on restart. Example: ALTER SYSTEM SET OPEN_CURSORS=500 SCOPE=MEMORY. Use for testing or emergency changes.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#F1C40F">Dynamic (SCOPE=BOTH)</div><div class="ref-desc">Takes effect immediately AND persisted in SPFILE. Standard approach for most parameters. Example: ALTER SYSTEM SET SGA_TARGET=4G SCOPE=BOTH.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#C74634">Static (SCOPE=SPFILE)</div><div class="ref-desc">Cannot change in running instance — requires restart. Example: PROCESSES, DB_BLOCK_SIZE. DB_BLOCK_SIZE is set at database creation and never changed.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Session-level</div><div class="ref-desc">ALTER SESSION SET parameter — overrides for current session only. Example: ALTER SESSION SET NLS_DATE_FORMAT='YYYY-MM-DD'. Useful for per-session formatting.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Reset to default</div><div class="ref-desc">ALTER SYSTEM RESET param SCOPE=BOTH SID='*' — removes from SPFILE, reverts to default. SID='*' means all instances in RAC.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- View parameter source (SPFILE vs default)
+SELECT name, value, isdefault, ismodified, issys_modifiable
+FROM v$parameter WHERE name IN
+  ('sga_target','pga_aggregate_target','processes',
+   'open_cursors','undo_retention');
+
+-- Check if SPFILE is being used
+SELECT name, value FROM v$spparameter
+WHERE value IS NOT NULL ORDER BY name;
+
+-- Critical: hidden parameters (underscore params)
+-- Never change _hidden params without Oracle Support guidance
+SELECT ksppinm name, ksppstvl value, ksppdesc desc
+FROM x$ksppi JOIN x$ksppcv USING(indx)
+WHERE ksppinm LIKE '\_%' ESCAPE '\' AND rownum<=20;</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#00D4FF">NETWORK CONFIG — EXAM DETAIL</div>
+        <div class="ref-row"><div class="ref-cmd">sqlnet.ora</div><div class="ref-desc">Client/server-side security and trace settings. Key params: SQLNET.AUTHENTICATION_SERVICES (OS auth), SQLNET.EXPIRE_TIME (dead connection detection), NAMES.DIRECTORY_PATH (resolution order: TNSNAMES, LDAP, EZCONNECT).</div></div>
+        <div class="ref-row"><div class="ref-cmd">Shared Server (MTS)</div><div class="ref-desc">Dispatcher processes handle connections, shared server processes execute SQL. Fewer server processes for many concurrent users. Configure: DISPATCHERS, SHARED_SERVERS. Rarely used in modern deployments.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Connection Pooling</div><div class="ref-desc">Application-level: JDBC connection pool, OCI Session Pool, DRCP (Database Resident Connection Pooling). DRCP: pool of server processes in DB, shared across app servers. Enable: DBMS_CONNECTION_POOL.START_POOL().</div></div>
+        <div class="ref-row"><div class="ref-cmd">Oracle Net trace</div><div class="ref-desc">Enable client trace: sqlnet.ora → TRACE_LEVEL_CLIENT=USER, TRACE_DIRECTORY_CLIENT=/tmp. Helps diagnose ORA-12xxx connection errors.</div></div>
+        <div class="ref-code" style="margin-top:8px">## sqlnet.ora — key settings
+SQLNET.AUTHENTICATION_SERVICES = (NTS)  -- OS auth (Windows)
+SQLNET.EXPIRE_TIME = 10                  -- dead conn detection (min)
+NAMES.DIRECTORY_PATH = (TNSNAMES, EZCONNECT)
+TCP.CONNECT_TIMEOUT = 30                 -- connection timeout (sec)
+
+## listener.ora — add static registration (for startup)
+SID_LIST_LISTENER =
+  (SID_LIST =
+    (SID_DESC =
+      (GLOBAL_DBNAME = ORCL)
+      (ORACLE_HOME = /u01/app/oracle/product/19c/dbhome_1)
+      (SID_NAME = ORCL)
+    )
+  )</div>
+      </div>
+    </div>
   </div><!-- /crs-storage -->
 
   <!-- ── SQL LANGUAGE ──────────────────────────────────────────── -->
@@ -8286,6 +8588,107 @@ ORDER SIBLINGS BY last_name;
         </div>
       </div>
     </div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 2 DEEP NOTES</span> SQL LANGUAGE — ADVANCED ORACLE SQL FEATURES</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#00D4FF">ORACLE-SPECIFIC DATE &amp; CONVERSION FUNCTIONS</div>
+        <div class="ref-row"><div class="ref-cmd">ADD_MONTHS(d, n)</div><div class="ref-desc">Add n months to date d. Example: ADD_MONTHS(SYSDATE, 6) — no SQL Server equivalent (must use DATEADD).</div></div>
+        <div class="ref-row"><div class="ref-cmd">MONTHS_BETWEEN(d1,d2)</div><div class="ref-desc">Number of months between two dates (fractional). SQL Server: DATEDIFF(MONTH,...) — integer only.</div></div>
+        <div class="ref-row"><div class="ref-cmd">LAST_DAY(d)</div><div class="ref-desc">Returns last day of the month containing date d. Common for month-end processing.</div></div>
+        <div class="ref-row"><div class="ref-cmd">NEXT_DAY(d, 'MONDAY')</div><div class="ref-desc">First weekday after date d. Useful for scheduling logic.</div></div>
+        <div class="ref-row"><div class="ref-cmd">TRUNC(d, 'MM')</div><div class="ref-desc">Truncate date to month boundary. TRUNC(SYSDATE) = midnight today. TRUNC(d,'YYYY') = Jan 1.</div></div>
+        <div class="ref-row"><div class="ref-cmd">ROUND(d, 'MM')</div><div class="ref-desc">Rounds date to nearest month boundary (rounds up if past midpoint).</div></div>
+        <div class="ref-row"><div class="ref-cmd">TO_CHAR(d,'FMDay')</div><div class="ref-desc">FM prefix removes padding. Format masks: YYYY-MM-DD HH24:MI:SS, MON, DY, Q (quarter), WW (week).</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Date arithmetic examples (SQL Server DBAs note!)
+SELECT SYSDATE,                           -- date+time
+       SYSDATE + 1,                       -- tomorrow
+       SYSDATE - 7,                       -- 7 days ago
+       SYSDATE + 1/24,                    -- +1 hour
+       TRUNC(SYSDATE),                    -- midnight today
+       TRUNC(SYSDATE, 'MM'),              -- first of month
+       ADD_MONTHS(SYSDATE, -3),           -- 3 months ago
+       TO_CHAR(SYSDATE,'YYYY-MM-DD HH24:MI:SS') fmt
+FROM DUAL;
+
+-- Interval arithmetic (cleaner for hours/minutes)
+SELECT SYSDATE + INTERVAL '2' HOUR,
+       SYSDATE + INTERVAL '30' MINUTE,
+       SYSDATE + INTERVAL '1-6' YEAR TO MONTH   -- 1yr 6mo
+FROM DUAL;</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#2ECC71">SCHEMA OBJECTS — SEQUENCES &amp; VIEWS</div>
+        <div class="ref-row"><div class="ref-cmd">SEQUENCE</div><div class="ref-desc">Database object generating sequential numbers. Pre-12c mandatory for surrogate keys. Options: START WITH, INCREMENT BY, MAXVALUE, CYCLE, CACHE (default 20). CURRVAL only valid after NEXTVAL in same session.</div></div>
+        <div class="ref-row"><div class="ref-cmd">IDENTITY columns (12c+)</div><div class="ref-desc">GENERATED ALWAYS AS IDENTITY — Oracle manages a hidden sequence. GENERATED BY DEFAULT — user can also specify a value. Equivalent to SQL Server IDENTITY(1,1).</div></div>
+        <div class="ref-row"><div class="ref-cmd">VIEW</div><div class="ref-desc">Stored query. WITH READ ONLY prevents DML through view. WITH CHECK OPTION enforces WHERE clause on DML. DML through a view is possible if view is "simple" (single base table, no DISTINCT, GROUP BY, etc.).</div></div>
+        <div class="ref-row"><div class="ref-cmd">MATERIALIZED VIEW</div><div class="ref-desc">Pre-computed query result stored physically. Refresh: ON COMMIT, ON DEMAND (DBMS_MVIEW.REFRESH), or scheduled. FAST refresh uses materialized view logs. Used for query rewrite and replication.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Sequence examples
+CREATE SEQUENCE emp_seq START WITH 1000 INCREMENT BY 1 CACHE 50;
+INSERT INTO employees (emp_id, last_name)
+VALUES (emp_seq.NEXTVAL, 'Smith');
+SELECT emp_seq.CURRVAL FROM DUAL;  -- current value this session
+
+-- Materialized view with fast refresh
+CREATE MATERIALIZED VIEW LOG ON employees
+  WITH ROWID, SEQUENCE (dept_id, salary) INCLUDING NEW VALUES;
+CREATE MATERIALIZED VIEW dept_salary_mv
+  REFRESH FAST ON COMMIT AS
+  SELECT dept_id, SUM(salary) total_sal, COUNT(*) cnt
+  FROM employees GROUP BY dept_id;
+
+-- View with check option
+CREATE VIEW active_emps AS
+  SELECT * FROM employees WHERE status = 'ACTIVE'
+  WITH CHECK OPTION CONSTRAINT active_emps_chk;</div>
+      </div>
+    </div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#A855F7">CONSTRAINTS — STATES &amp; DEFERRABLE</div>
+        <div class="ref-row"><div class="ref-cmd">ENABLE VALIDATE (default)</div><div class="ref-desc">Constraint active, existing data must comply. Standard mode.</div></div>
+        <div class="ref-row"><div class="ref-cmd">ENABLE NOVALIDATE</div><div class="ref-desc">New rows must comply, existing rows not checked. Useful for enabling constraints on large existing tables (faster than VALIDATE).</div></div>
+        <div class="ref-row"><div class="ref-cmd">DISABLE NOVALIDATE</div><td class="ref-desc">Constraint exists in metadata but not enforced. Optimizer may still use for query rewrite.</div></div>
+        <div class="ref-row"><div class="ref-cmd">DEFERRABLE INITIALLY DEFERRED</div><div class="ref-desc">Check constraint only at COMMIT, not at each DML statement. Useful for circular FK relationships. Must explicitly declare DEFERRABLE at creation.</div></div>
+        <div class="ref-row"><div class="ref-cmd">RELY</div><div class="ref-desc">Disabled constraint marked as trusted for optimizer. Example: RELY DISABLE NOVALIDATE on data warehouse tables for query optimization without enforcement.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Enable constraint without validating existing rows
+ALTER TABLE orders ENABLE NOVALIDATE CONSTRAINT orders_fk;
+
+-- Defer constraint check to commit (for circular FK)
+SET CONSTRAINTS ALL DEFERRED;
+  INSERT INTO a VALUES (1, 2);  -- FK references b
+  INSERT INTO b VALUES (2, 1);  -- FK references a
+COMMIT;  -- both checked here, both satisfied
+
+-- Find constraint violations before enabling
+SELECT count(*) FROM employees e
+WHERE NOT EXISTS (SELECT 1 FROM departments d
+                  WHERE d.dept_id = e.dept_id);</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#F1C40F">ORACLE SQL FUNCTIONS QUICK REFERENCE</div>
+        <table class="crs-table">
+          <tr><th>Category</th><th>SQL Server</th><th>Oracle</th></tr>
+          <tr><td>Null handling</td><td class="c-blu">ISNULL, NULLIF</td><td class="c-red">NVL, NVL2, NULLIF, COALESCE</td></tr>
+          <tr><td>String</td><td class="c-blu">LEFT/RIGHT, CHARINDEX, REPLICATE</td><td class="c-red">SUBSTR, INSTR, LPAD/RPAD</td></tr>
+          <tr><td>Number</td><td class="c-blu">ROUND, FLOOR, CEILING, ABS</td><td class="c-red">ROUND, FLOOR, CEIL, ABS, TRUNC</td></tr>
+          <tr><td>Conditional</td><td class="c-blu">IIF(cond,t,f), CHOOSE</td><td class="c-red">DECODE(col,val,res,...,else), CASE</td></tr>
+          <tr><td>Aggregate</td><td class="c-blu">STRING_AGG, STDEV, VAR</td><td class="c-red">LISTAGG(col,',' ORDER BY col WITHIN GROUP (ORDER BY)), STDDEV, VARIANCE</td></tr>
+          <tr><td>Analytic</td><td class="c-blu">ROW_NUMBER, RANK, LEAD/LAG</td><td class="c-red">ROW_NUMBER, RANK, DENSE_RANK, LEAD, LAG (all ANSI)</td></tr>
+          <tr><td>Regex</td><td class="c-blu">LIKE (simple only)</td><td class="c-red">REGEXP_LIKE, REGEXP_SUBSTR, REGEXP_REPLACE, REGEXP_COUNT</td></tr>
+        </table>
+        <div class="ref-code" style="margin-top:8px">-- LISTAGG — pivot rows to comma-separated string
+SELECT dept_id,
+  LISTAGG(last_name, ', ') WITHIN GROUP (ORDER BY last_name) names
+FROM employees GROUP BY dept_id;
+
+-- REGEXP example — validate email format
+SELECT email FROM employees
+WHERE NOT REGEXP_LIKE(email,'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$');
+
+-- DECODE — Oracle-specific CASE shorthand
+SELECT DECODE(status, 'A','Active','I','Inactive','Unknown') FROM employees;</div>
+      </div>
+    </div>
   </div><!-- /crs-sqllang -->
 
   <!-- ── TRANSACTIONS ──────────────────────────────────────────── -->
@@ -8448,6 +8851,56 @@ FOR UPDATE WAIT 5;   -- wait 5 seconds, then ORA-30006
 SELECT account_id FROM work_queue
 FOR UPDATE SKIP LOCKED
 FETCH FIRST 10 ROWS ONLY;</div>
+      </div>
+    </div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 3 DEEP NOTES</span> TRANSACTIONS, MVCC &amp; CONCURRENCY — EXAM DETAIL</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#2ECC71">MVCC — HOW ORACLE ACHIEVES READ CONSISTENCY</div>
+        <div class="ref-row"><div class="ref-cmd">Read Consistent View</div><div class="ref-desc">Every query sees data as it was at the moment the query STARTED (not when the row is read). This is achieved using undo segments — Oracle reconstructs the old version of a block using undo data.</div></div>
+        <div class="ref-row"><div class="ref-cmd">SCN (System Change Number)</div><div class="ref-desc">Oracle's transaction timestamp. Every commit gets a new SCN. Queries use their start-time SCN to find consistent block versions. V$DATABASE.CURRENT_SCN; DBMS_FLASHBACK.GET_SYSTEM_CHANGE_NUMBER.</div></div>
+        <div class="ref-row"><div class="ref-cmd">No dirty reads</div><div class="ref-desc">Readers NEVER block writers. Writers NEVER block readers. Only writers block other writers on the same row. This is fundamentally different from SQL Server's default READ COMMITTED with page locks.</div></div>
+        <div class="ref-row"><div class="ref-cmd">ORA-01555 cause</div><div class="ref-desc">"Snapshot too old" — undo data needed to reconstruct old block version was overwritten. Occurs when: UNDO_RETENTION too short, undo tablespace too small, long-running queries. Fix: increase UNDO_RETENTION, add undo space, enable RETENTION GUARANTEE.</div></div>
+        <div class="ref-row"><div class="ref-cmd">RETENTION GUARANTEE</div><div class="ref-desc">ALTER TABLESPACE undotbs1 RETENTION GUARANTEE — Oracle will NOT overwrite undo even if space is needed (may cause ORA-30036: unable to extend undo). Trade-off: prevents ORA-01555 but risks undo full.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Check current SCN
+SELECT current_scn FROM v$database;
+
+-- Flashback query uses SCN for MVCC
+SELECT * FROM employees AS OF SCN 123456789;
+SELECT * FROM employees AS OF TIMESTAMP (SYSDATE - INTERVAL '1' HOUR);
+
+-- Monitor undo health
+SELECT TO_CHAR(begin_time,'HH24:MI') tm,
+  undoblks blks, txncount txns,
+  maxconcurrency max_concurrent,
+  ssolderrcnt ora_01555_count,
+  nospaceerrcnt no_space_errors
+FROM v$undostat ORDER BY begin_time DESC FETCH FIRST 6 ROWS ONLY;</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#C74634">LOCKING MECHANISMS — DETAIL</div>
+        <div class="ref-row"><div class="ref-cmd">TX locks (row-level)</div><div class="ref-desc">Transaction locks. Row level — only locks the specific rows modified. Stored in the row itself (ITL — Interested Transaction List in block header). No separate lock table. FREELISTS and INITRANS control concurrent row locks per block.</div></div>
+        <div class="ref-row"><div class="ref-cmd">TM locks (table-level)</div><div class="ref-desc">Table-level DDL protection. Modes: RS (Row Share), RX (Row Exclusive), S (Share), SX (Share Row Exclusive), X (Exclusive). DML acquires RX on table — allows concurrent DML. DDL requires X — blocks all DML.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Enqueue locks</div><div class="ref-desc">Named resources: HW (high water mark), ST (space transaction), CF (controlfile), TX (transaction). Seen in V$LOCK and V$SESSION_WAIT.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Deadlock detection</div><div class="ref-desc">Oracle automatically detects deadlocks and rolls back ONE statement (not the whole transaction) in the deadlock. ORA-00060 is written to alert log with trace file. The rolled-back statement's session receives the error.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Find blocking sessions
+SELECT blocker.sid blocker_sid, blocker.username blocker_user,
+       waiter.sid waiter_sid, waiter.username waiter_user,
+       waiter.sql_id waiting_sql
+FROM v$session waiter JOIN v$session blocker
+  ON waiter.blocking_session = blocker.sid
+WHERE waiter.blocking_session IS NOT NULL;
+
+-- Kill a blocking session
+ALTER SYSTEM KILL SESSION 'sid,serial#' IMMEDIATE;
+-- Or OS level: orakill SID spid (Windows) / kill -9 spid (Linux)
+
+-- Lock details
+SELECT s.sid, s.username, l.type, l.lmode, l.request,
+  o.object_name, o.object_type
+FROM v$lock l JOIN v$session s ON l.sid=s.sid
+LEFT JOIN dba_objects o ON l.id1=o.object_id
+WHERE l.block=1 OR l.request>0;</div>
       </div>
     </div>
   </div><!-- /crs-transactions -->
@@ -8799,6 +9252,133 @@ END;
 /</div>
       </div>
     </div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 3 DEEP NOTES</span> PL/SQL — ADVANCED PATTERNS &amp; EXAM DETAIL</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#C74634">PACKAGES — ORACLE'S MODULE SYSTEM</div>
+        <div class="ref-row"><div class="ref-cmd">Package Spec</div><div class="ref-desc">Public interface — declares types, constants, procedures, functions, cursors visible to callers. Like a C header file or Java interface. Compiled independently from body.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Package Body</div><div class="ref-desc">Private implementation — contains logic. Can have private subprograms invisible to callers. Recompiling the body does NOT invalidate dependent objects (only spec changes do).</div></div>
+        <div class="ref-row"><div class="ref-cmd">Package state</div><div class="ref-desc">Package variables persist for the session lifetime (not just the call). Useful for caching. But each session gets its own copy — not shared across sessions.</div></div>
+        <div class="ref-row"><div class="ref-cmd">SERIALLY_REUSABLE</div><div class="ref-desc">PRAGMA SERIALLY_REUSABLE — package state reset after each call. Reduces PGA usage when package state not needed between calls.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Package with state (session-scoped cache)
+CREATE OR REPLACE PACKAGE emp_cache AS
+  g_dept_name VARCHAR2(100);  -- session-level variable
+  PROCEDURE load_dept(p_id NUMBER);
+  FUNCTION get_dept RETURN VARCHAR2;
+END emp_cache;
+/
+CREATE OR REPLACE PACKAGE BODY emp_cache AS
+  PROCEDURE load_dept(p_id NUMBER) IS
+  BEGIN
+    SELECT dept_name INTO g_dept_name FROM departments WHERE dept_id=p_id;
+  END;
+  FUNCTION get_dept RETURN VARCHAR2 IS
+  BEGIN RETURN g_dept_name; END;
+END emp_cache;
+/
+-- Usage (same session):
+EXEC emp_cache.load_dept(10);
+SELECT emp_cache.get_dept() FROM DUAL;</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#3B82F6">DYNAMIC SQL IN PL/SQL</div>
+        <div class="ref-row"><div class="ref-cmd">EXECUTE IMMEDIATE</div><div class="ref-desc">Run any SQL or PL/SQL block as a string. DDL must use EXECUTE IMMEDIATE (cannot use static DDL in PL/SQL). Use bind variables (:b1) to prevent SQL injection and enable cursor sharing.</div></div>
+        <div class="ref-row"><div class="ref-cmd">DBMS_SQL</div><div class="ref-desc">Lower-level dynamic SQL API. Supports: unknown number of bind variables at compile time, describe result set columns, array fetching. More complex but more powerful than EXECUTE IMMEDIATE.</div></div>
+        <div class="ref-row"><div class="ref-cmd">SQL injection risk</div><div class="ref-desc">NEVER concatenate user input into dynamic SQL strings. ALWAYS use bind variables. Use DBMS_ASSERT.SQL_OBJECT_NAME for identifiers (table/column names cannot be bound).</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Safe dynamic SQL with bind variables
+CREATE OR REPLACE PROCEDURE update_salary(
+  p_emp_id NUMBER, p_pct NUMBER) IS
+BEGIN
+  EXECUTE IMMEDIATE
+    'UPDATE employees SET salary = salary * (1 + :pct/100) WHERE emp_id = :id'
+    USING p_pct, p_emp_id;
+  DBMS_OUTPUT.PUT_LINE('Rows updated: ' || SQL%ROWCOUNT);
+END;
+/
+
+-- Dynamic DDL (CREATE TABLE at runtime)
+BEGIN
+  EXECUTE IMMEDIATE 'CREATE TABLE audit_' || TO_CHAR(SYSDATE,'YYYYMM')
+    || ' AS SELECT * FROM audit_current WHERE 1=0';
+END;
+/
+
+-- OPEN cursor FOR dynamic SELECT
+OPEN l_cursor FOR
+  'SELECT emp_id, last_name FROM employees WHERE dept_id = :d'
+  USING p_dept;
+LOOP
+  FETCH l_cursor INTO v_id, v_name;
+  EXIT WHEN l_cursor%NOTFOUND;
+END LOOP;
+CLOSE l_cursor;</div>
+      </div>
+    </div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#2ECC71">BULK OPERATIONS — PERFORMANCE PATTERNS</div>
+        <div class="ref-row"><div class="ref-cmd">BULK COLLECT</div><div class="ref-desc">Fetch multiple rows into a PL/SQL collection in one round-trip to SQL engine. LIMIT clause controls batch size to avoid excessive PGA. Without LIMIT: fetches all rows (risk: OOM for large tables).</div></div>
+        <div class="ref-row"><div class="ref-cmd">FORALL</div><div class="ref-desc">Sends DML in bulk from PL/SQL array to SQL engine — one context switch for all rows. Much faster than row-by-row loop. SAVE EXCEPTIONS clause continues on errors, populates SQL%BULK_EXCEPTIONS.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Context switch cost</div><div class="ref-desc">Every PL/SQL ↔ SQL switch has overhead. Row-by-row DML in a loop = N context switches. FORALL = 1 context switch. Rule: always use BULK for processing more than ~100 rows.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Bulk collect with limit + forall update
+DECLARE
+  TYPE t_id IS TABLE OF employees.emp_id%TYPE;
+  TYPE t_sal IS TABLE OF employees.salary%TYPE;
+  l_ids  t_id;
+  l_sals t_sal;
+  CURSOR c IS SELECT emp_id, salary*1.1 FROM employees WHERE dept_id=10;
+BEGIN
+  OPEN c;
+  LOOP
+    FETCH c BULK COLLECT INTO l_ids, l_sals LIMIT 500;
+    EXIT WHEN l_ids.COUNT = 0;
+    FORALL i IN 1..l_ids.COUNT SAVE EXCEPTIONS
+      UPDATE employees SET salary=l_sals(i) WHERE emp_id=l_ids(i);
+    COMMIT;  -- commit each batch
+  END LOOP;
+  CLOSE c;
+EXCEPTION
+  WHEN OTHERS THEN
+    FOR i IN 1..SQL%BULK_EXCEPTIONS.COUNT LOOP
+      DBMS_OUTPUT.PUT_LINE('Error at row '||SQL%BULK_EXCEPTIONS(i).ERROR_INDEX
+        ||': '||SQLERRM(-SQL%BULK_EXCEPTIONS(i).ERROR_CODE));
+    END LOOP;
+END;
+/</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#FB923C">TRIGGERS — TYPES &amp; EXAM DETAIL</div>
+        <table class="crs-table">
+          <tr><th>Type</th><th>Fires</th><th>Use Case</th></tr>
+          <tr><td class="c-red">BEFORE ROW</td><td>Before each row DML</td><td>Default values, data validation, ID from sequence (pre-12c)</td></tr>
+          <tr><td class="c-org">AFTER ROW</td><td>After each row DML</td><td>Audit logging with :NEW/:OLD values</td></tr>
+          <tr><td class="c-yel">BEFORE STATEMENT</td><td>Once before any DML</td><td>Permission checks, session context setting</td></tr>
+          <tr><td class="c-grn">AFTER STATEMENT</td><td>Once after all rows processed</td><td>Summary updates, notifications</td></tr>
+          <tr><td class="c-blu">INSTEAD OF</td><td>On DML against a view</td><td>Make non-updatable views writable</td></tr>
+          <tr><td class="c-pur">DDL Trigger</td><td>On CREATE/ALTER/DROP</td><td>Audit DDL changes, prevent schema changes</td></tr>
+          <tr><td class="c-teal">LOGON/LOGOFF</td><td>On session events</td><td>Connection auditing, set session context</td></tr>
+        </table>
+        <div class="crs-tip-box">Mutating table error (ORA-04091): a row trigger cannot query or modify the table that caused the trigger to fire. Solution: use compound triggers (12c) or package-level arrays to defer the operation to the statement-level trigger.</div>
+        <div class="ref-code" style="margin-top:8px">-- Compound trigger (avoids mutating table error)
+CREATE OR REPLACE TRIGGER emp_audit_trg
+FOR INSERT OR UPDATE OR DELETE ON employees
+COMPOUND TRIGGER
+  TYPE t_row IS RECORD (emp_id NUMBER, action VARCHAR2(10), ts TIMESTAMP);
+  TYPE t_tab IS TABLE OF t_row INDEX BY PLS_INTEGER;
+  g_rows t_tab;
+  AFTER EACH ROW IS BEGIN
+    g_rows(g_rows.COUNT+1).emp_id := :NEW.emp_id;
+    g_rows(g_rows.COUNT).action := ORA_SYSEVENT;
+    g_rows(g_rows.COUNT).ts := SYSTIMESTAMP;
+  END AFTER EACH ROW;
+  AFTER STATEMENT IS BEGIN
+    FORALL i IN 1..g_rows.COUNT
+      INSERT INTO emp_audit VALUES g_rows(i);
+  END AFTER STATEMENT;
+END emp_audit_trg;
+/</div>
+      </div>
+    </div>
   </div><!-- /crs-plsql -->
 
   <!-- ── SECURITY ──────────────────────────────────────────────── -->
@@ -9023,6 +9603,125 @@ END;
 SELECT SYS_CONTEXT('MYAPP','USER_DEPT') FROM DUAL;
 SELECT SYS_CONTEXT('USERENV','SESSION_USER') FROM DUAL; -- current user
 SELECT SYS_CONTEXT('USERENV','IP_ADDRESS') FROM DUAL;   -- client IP</div>
+      </div>
+    </div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 3 DEEP NOTES</span> SECURITY — PRIVILEGES, PROFILES &amp; AUDITING DETAIL</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#C74634">SYSTEM &amp; OBJECT PRIVILEGES — DETAIL</div>
+        <div class="ref-row"><div class="ref-cmd">System privileges</div><div class="ref-desc">Allow performing an action on ANY object of a type or the database itself. Examples: CREATE TABLE (own schema), CREATE ANY TABLE (any schema), ALTER SYSTEM, CREATE SESSION. ~200 system privileges exist.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Object privileges</div><div class="ref-desc">Allow specific operation on a specific object. SELECT, INSERT, UPDATE(col), DELETE, EXECUTE (procedures), REFERENCES (FK). Granted by the object owner or someone WITH GRANT OPTION.</div></div>
+        <div class="ref-row"><div class="ref-cmd">WITH ADMIN OPTION</div><div class="ref-desc">System privilege with re-grant capability. If revoked from A, B (who got it from A) retains the privilege. Non-cascading revoke — different from WITH GRANT OPTION.</div></div>
+        <div class="ref-row"><div class="ref-cmd">WITH GRANT OPTION</div><div class="ref-desc">Object privilege with re-grant capability. CASCADING revoke — revoking from A also revokes from anyone A granted to. Choose carefully.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Principle of least privilege</div><div class="ref-desc">Grant only what is needed. Use roles to bundle privileges. Never grant DBA to application users. Use CREATE SESSION + object privileges only.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Audit who has DBA role (security concern!)
+SELECT grantee, granted_role, admin_option, default_role
+FROM dba_role_privs WHERE granted_role='DBA'
+ORDER BY grantee;
+
+-- Find all privileges for a user (direct + role-inherited)
+-- System privs:
+SELECT privilege, admin_option FROM dba_sys_privs WHERE grantee='HR'
+UNION ALL
+SELECT rp.privilege, rp.admin_option
+FROM dba_role_privs rp JOIN dba_sys_privs sp ON rp.granted_role=sp.grantee
+WHERE rp.grantee='HR';
+
+-- Privilege analysis (12c) — find unused privileges
+EXEC DBMS_PRIVILEGE_CAPTURE.CREATE_CAPTURE(name=>'APP_PRIVS',
+  type=>DBMS_PRIVILEGE_CAPTURE.G_DATABASE);
+EXEC DBMS_PRIVILEGE_CAPTURE.ENABLE_CAPTURE('APP_PRIVS');
+-- ... run application workload ...
+EXEC DBMS_PRIVILEGE_CAPTURE.DISABLE_CAPTURE('APP_PRIVS');
+EXEC DBMS_PRIVILEGE_CAPTURE.GENERATE_RESULT('APP_PRIVS');
+SELECT * FROM DBA_UNUSED_PRIVS;</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#3B82F6">PROFILES — PASSWORD &amp; RESOURCE LIMITS</div>
+        <div class="ref-row"><div class="ref-cmd">Password limits</div><div class="ref-desc">FAILED_LOGIN_ATTEMPTS (lockout after n failures), PASSWORD_LIFE_TIME (days until expiry), PASSWORD_REUSE_TIME (days before reuse), PASSWORD_REUSE_MAX (# reuses), PASSWORD_LOCK_TIME (days locked), PASSWORD_GRACE_TIME (warning period).</div></div>
+        <div class="ref-row"><div class="ref-cmd">Resource limits</div><div class="ref-desc">SESSIONS_PER_USER, CPU_PER_SESSION, CPU_PER_CALL, LOGICAL_READS_PER_SESSION, CONNECT_TIME (minutes), IDLE_TIME (minutes). Resource limits only enforced when RESOURCE_LIMIT=TRUE parameter set.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Password verify function</div><div class="ref-desc">Custom PL/SQL function that validates new passwords (complexity rules). Assign to profile: PASSWORD_VERIFY_FUNCTION my_verify_fn. Oracle provides ora12c_strong_verify_function built-in.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Create a secure profile
+CREATE PROFILE app_user_profile LIMIT
+  FAILED_LOGIN_ATTEMPTS   5
+  PASSWORD_LOCK_TIME      1/24        -- 1 hour (fraction of day)
+  PASSWORD_LIFE_TIME      90          -- 90 days
+  PASSWORD_GRACE_TIME     7           -- 7-day warning
+  PASSWORD_REUSE_TIME     365         -- can't reuse within 1 year
+  PASSWORD_REUSE_MAX      10          -- or 10 previous passwords
+  PASSWORD_VERIFY_FUNCTION ora12c_strong_verify_function
+  SESSIONS_PER_USER       5
+  IDLE_TIME               60          -- disconnect after 60 min idle
+  CONNECT_TIME            480;        -- max 8 hour session
+
+-- Assign profile to user
+ALTER USER hr_app PROFILE app_user_profile;
+
+-- Check locked accounts
+SELECT username, account_status, lock_date, expiry_date, profile
+FROM dba_users WHERE account_status != 'OPEN'
+ORDER BY account_status, username;</div>
+      </div>
+    </div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#2ECC71">UNIFIED AUDITING — 12c DETAIL</div>
+        <div class="ref-row"><div class="ref-cmd">Unified Audit Trail</div><div class="ref-desc">12c replaces old OS/DB auditing with a single, centralized trail in UNIFIED_AUDIT_TRAIL (in AUDSYS schema, SYSAUX tablespace). Cannot be deleted by DBA — requires AUDIT_ADMIN role and DBMS_AUDIT_MGMT.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Policy types</div><div class="ref-desc">ACTIONS (specific SQL), PRIVILEGES (system privileges), ROLES (all actions granted via a role), CONDITIONS (context-based filtering), WHEN (SUCCESSFUL/UNSUCCESSFUL/ALL).</div></div>
+        <div class="ref-row"><div class="ref-cmd">Predefined policies</div><div class="ref-desc">ORA_SECURECONFIG: audits secure configuration changes. ORA_LOGIN_LOGOUT: session events. ORA_RAS_POLICY_MGMT, ORA_DATABASE_PARAMETER: parameter changes. Enable with AUDIT POLICY policy_name.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Create and enable audit policies
+-- Audit all logins (successful and failed)
+CREATE AUDIT POLICY login_policy ACTIONS LOGON;
+AUDIT POLICY login_policy;
+
+-- Audit sensitive table access by non-owners
+CREATE AUDIT POLICY hr_table_audit
+  ACTIONS SELECT, INSERT, UPDATE, DELETE ON hr.employees
+  WHEN 'SYS_CONTEXT(''USERENV'',''SESSION_USER'') != ''HR'''
+  EVALUATE PER SESSION;
+AUDIT POLICY hr_table_audit;
+
+-- View recent audit records
+SELECT event_timestamp, db_username, action_name,
+  object_schema, object_name, sql_text, return_code
+FROM unified_audit_trail
+WHERE event_timestamp > SYSDATE - 1
+ORDER BY event_timestamp DESC FETCH FIRST 50 ROWS ONLY;
+
+-- Manage audit trail size
+EXEC DBMS_AUDIT_MGMT.INIT_CLEANUP(
+  audit_trail_type => DBMS_AUDIT_MGMT.AUDIT_TRAIL_UNIFIED,
+  default_cleanup_interval => 12);  -- hours
+EXEC DBMS_AUDIT_MGMT.CREATE_PURGE_JOB(
+  audit_trail_type => DBMS_AUDIT_MGMT.AUDIT_TRAIL_UNIFIED,
+  audit_trail_purge_interval => 24,
+  audit_trail_purge_name => 'daily_purge',
+  last_archive_timestamp => SYSTIMESTAMP - 30);</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#A855F7">TDE — TRANSPARENT DATA ENCRYPTION</div>
+        <div class="ref-row"><div class="ref-cmd">What TDE encrypts</div><div class="ref-desc">Data at rest only — in datafiles, backups, exports. Data is decrypted transparently when read into buffer cache. Application code needs no changes.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Keystore (Wallet)</div><div class="ref-desc">Master encryption key stored in Oracle wallet or HSM (Hardware Security Module). Must be open for encrypted data to be accessible. Location: ENCRYPTION_WALLET_LOCATION in sqlnet.ora.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Column-level TDE</div><div class="ref-desc">Encrypt specific columns: salary NUMBER ENCRYPT USING 'AES256'. Indexes on encrypted columns work normally. Column-level TDE encrypts at row insertion — lighter than tablespace TDE.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Tablespace-level TDE</div><div class="ref-desc">CREATE TABLESPACE sensitive_ts ... ENCRYPTION USING 'AES256' DEFAULT STORAGE (ENCRYPT) — all segments in the tablespace encrypted. Best for compliance requirements (PCI, HIPAA).</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Set up TDE keystore (12c)
+-- 1. Configure wallet location in sqlnet.ora:
+-- ENCRYPTION_WALLET_LOCATION=(SOURCE=(METHOD=FILE)(METHOD_DATA=
+--   (DIRECTORY=/u01/app/oracle/wallet/$ORACLE_SID/)))
+-- 2. Create and open wallet:
+ADMINISTER KEY MANAGEMENT CREATE KEYSTORE '/u01/app/oracle/wallet/ORCL'
+  IDENTIFIED BY wallet_password;
+ADMINISTER KEY MANAGEMENT SET KEYSTORE OPEN
+  IDENTIFIED BY wallet_password;
+ADMINISTER KEY MANAGEMENT SET KEY
+  IDENTIFIED BY wallet_password WITH BACKUP;
+
+-- Encrypt existing tablespace (online, 12c R2+)
+ALTER TABLESPACE users ENCRYPTION ONLINE USING 'AES256' ENCRYPT;
+
+-- Column encryption
+ALTER TABLE employees MODIFY (salary ENCRYPT USING 'AES256' NO SALT);
+-- NO SALT allows equality comparisons and index use</div>
       </div>
     </div>
   </div><!-- /crs-security -->
@@ -9301,6 +10000,126 @@ SELECT * FROM emp_external WHERE salary > 50000;
 -- Load from external table into real table
 INSERT /*+ APPEND */ INTO employees
 SELECT * FROM emp_external;</div>
+      </div>
+    </div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 4 DEEP NOTES</span> RMAN, RECOVERY &amp; FLASHBACK — EXAM DETAIL</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#2ECC71">RMAN ARCHITECTURE &amp; CATALOG</div>
+        <div class="ref-row"><div class="ref-cmd">RMAN components</div><div class="ref-desc">RMAN client executable + target database (being backed up) + optional recovery catalog (separate DB storing backup metadata). Without catalog, metadata stored in target DB control file (limited history).</div></div>
+        <div class="ref-row"><div class="ref-cmd">Recovery Catalog</div><div class="ref-desc">Separate Oracle database storing extended RMAN backup history, scripts, stored scripts. Register: RMAN TARGET / CATALOG rman/pass@catdb. REGISTER DATABASE. Survives control file loss — critical for large environments.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Incremental strategy</div><div class="ref-desc">Level 0 = full baseline (like SQL Server FULL backup). Level 1 DIFFERENTIAL = changed blocks since last Level 0 or 1. Level 1 CUMULATIVE = changed blocks since last Level 0 only. Cumulative = faster recovery, more space. Differential = less space, slower recovery.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Block change tracking</div><div class="ref-desc">ALTER DATABASE ENABLE BLOCK CHANGE TRACKING USING FILE '/path/change_tracking.ctf' — Oracle tracks which blocks changed. Makes incremental backups MUCH faster (reads only changed blocks instead of scanning entire database).</div></div>
+        <div class="ref-row"><div class="ref-cmd">FRA integration</div><div class="ref-desc">RMAN automatically manages files in FRA. Old backups deleted when no longer needed per retention policy. DB_RECOVERY_FILE_DEST + DB_RECOVERY_FILE_DEST_SIZE must be set.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Production backup script
+RMAN TARGET /
+RUN {
+  ALLOCATE CHANNEL d1 DEVICE TYPE DISK
+    FORMAT '/backup/%d_%T_%U';
+  ALLOCATE CHANNEL d2 DEVICE TYPE DISK
+    FORMAT '/backup/%d_%T_%U';
+  BACKUP INCREMENTAL LEVEL 0
+    DATABASE PLUS ARCHIVELOG
+    DELETE INPUT;  -- delete archive logs after backup
+  BACKUP CURRENT CONTROLFILE;
+  BACKUP SPFILE;
+  RELEASE CHANNEL d1;
+  RELEASE CHANNEL d2;
+}
+-- %d=dbname, %T=date YYYYMMDD, %U=unique name, %s=set#, %p=piece#
+
+-- Verify backup integrity (no restore needed)
+BACKUP VALIDATE DATABASE;
+RESTORE DATABASE VALIDATE;</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#00D4FF">RECOVERY SCENARIOS — STEP BY STEP</div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#2ECC71">Complete Recovery</div><div class="ref-desc">All committed transactions recovered. No data loss. Requires: all archive logs from backup SCN to current. Database returns to state at time of failure.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#F1C40F">PITR — Point-in-Time</div><div class="ref-desc">Recover to a specific time/SCN/log sequence. Incomplete recovery — data loss from recovery point to failure. Requires OPEN RESETLOGS after — starts new redo log sequence.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#C74634">Tablespace PITR</div><div class="ref-desc">Recover one tablespace to a different point in time while rest of DB stays current. Requires TSPITR (RMAN) or Transportable Tablespace approach. Most complex recovery scenario.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Complete recovery (datafile lost, DB open)
+RMAN> RESTORE DATAFILE '/u01/oradata/users01.dbf';
+RMAN> RECOVER DATAFILE '/u01/oradata/users01.dbf';
+-- No restart needed if tablespace was taken offline
+
+-- PITR (recover to specific time)
+RMAN> SHUTDOWN IMMEDIATE;
+RMAN> STARTUP MOUNT;
+RMAN> RUN {
+  SET UNTIL TIME "TO_DATE('2026-03-24 08:00:00','YYYY-MM-DD HH24:MI:SS')";
+  RESTORE DATABASE;
+  RECOVER DATABASE;
+}
+RMAN> ALTER DATABASE OPEN RESETLOGS;
+
+-- Data Recovery Advisor (automated)
+RMAN> LIST FAILURE;
+RMAN> ADVISE FAILURE;
+RMAN> REPAIR FAILURE PREVIEW;  -- show what it will do
+RMAN> REPAIR FAILURE;          -- execute
+
+-- After RESETLOGS — reset catalog
+RMAN> RESET DATABASE TO INCARNATION 3;</div>
+      </div>
+    </div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#A855F7">FLASHBACK TECHNOLOGIES — COMPLETE GUIDE</div>
+        <table class="crs-table">
+          <tr><th>Technology</th><th>What it does</th><th>Requirement</th><th>SQL Server equivalent</th></tr>
+          <tr><td class="c-pur">Flashback Query</td><td>AS OF TIMESTAMP/SCN — query old data</td><td>Undo data available</td><td>Temporal tables (2016+) or transaction log query</td></tr>
+          <tr><td class="c-pur">Flashback Versions Query</td><td>VERSIONS BETWEEN — see all row versions</td><td>Undo data available</td><td>Temporal tables</td></tr>
+          <tr><td class="c-pur">Flashback Table</td><td>FLASHBACK TABLE t TO TIMESTAMP/SCN</td><td>Undo + row movement enabled</td><td>RESTORE TABLE (Enterprise)</td></tr>
+          <tr><td class="c-pur">Flashback Drop</td><td>FLASHBACK TABLE t TO BEFORE DROP</td><td>Table in Recycle Bin</td><td>No direct equivalent</td></tr>
+          <tr><td class="c-pur">Flashback Database</td><td>Rewind entire database to past SCN</td><td>Flashback logging enabled</td><td>Restore + Recovery</td></tr>
+          <tr><td class="c-pur">Flashback Data Archive</td><td>Retain row history for years (Total Recall)</td><td>Flashback Archive setup</td><td>Temporal tables (2016+)</td></tr>
+        </table>
+        <div class="ref-code" style="margin-top:8px">-- Enable Flashback Database (requires MOUNT stage)
+ALTER SYSTEM SET DB_FLASHBACK_RETENTION_TARGET=1440;  -- 24 hours in minutes
+ALTER DATABASE FLASHBACK ON;
+SELECT flashback_on FROM v$database;
+
+-- Flashback Database to 1 hour ago
+SHUTDOWN IMMEDIATE;
+STARTUP MOUNT;
+FLASHBACK DATABASE TO TIMESTAMP (SYSDATE - 1/24);
+ALTER DATABASE OPEN RESETLOGS;
+
+-- Flashback Table (no shutdown needed)
+ALTER TABLE employees ENABLE ROW MOVEMENT;
+FLASHBACK TABLE employees TO TIMESTAMP (SYSDATE - INTERVAL '1' HOUR);
+
+-- Versions query — see all changes to a row
+SELECT versions_starttime, versions_endtime,
+  versions_operation, salary
+FROM employees VERSIONS BETWEEN TIMESTAMP MINVALUE AND MAXVALUE
+WHERE emp_id = 101 ORDER BY versions_starttime;</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#FB923C">DATA PUMP — ADVANCED OPTIONS</div>
+        <div class="ref-row"><div class="ref-cmd">Parallel export</div><div class="ref-desc">expdp ... PARALLEL=4 DUMPFILE=exp%U.dmp — creates 4 dump files (exp01.dmp through exp04.dmp). PARALLEL= workers must match number of dump files (use %U wildcard). Dramatically speeds up large exports.</div></div>
+        <div class="ref-row"><div class="ref-cmd">COMPRESSION</div><div class="ref-desc">COMPRESSION=ALL — compress metadata + data. Requires Advanced Compression option (licensed). COMPRESSION=METADATA_ONLY is free and compresses only DDL.</div></div>
+        <div class="ref-row"><div class="ref-cmd">ENCRYPTION</div><div class="ref-desc">ENCRYPTION=ALL ENCRYPTION_PASSWORD=secret — encrypts dump file. Essential for sensitive data transport.</div></div>
+        <div class="ref-row"><div class="ref-cmd">NETWORK_LINK</div><div class="ref-desc">expdp ... NETWORK_LINK=source_db — pulls data directly from remote DB without creating a dump file. Used for direct database-to-database migration.</div></div>
+        <div class="ref-row"><div class="ref-cmd">REMAP options</div><div class="ref-desc">REMAP_SCHEMA=hr:new_hr (rename schema), REMAP_TABLESPACE=users:new_users (move to different tablespace), REMAP_TABLE=hr.emp:employees (rename table). Essential for migrating to different environments.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Full database export with compression and parallel
+expdp system/pass FULL=Y DUMPFILE=full_%U.dmp LOGFILE=full_exp.log
+  DIRECTORY=DATA_PUMP_DIR PARALLEL=4 COMPRESSION=METADATA_ONLY
+  EXCLUDE=STATISTICS
+
+-- Schema-level import with remapping
+impdp system/pass SCHEMAS=HR
+  DUMPFILE=hr_exp.dmp LOGFILE=hr_imp.log
+  DIRECTORY=DATA_PUMP_DIR
+  REMAP_SCHEMA=HR:HR_DEV
+  REMAP_TABLESPACE=USERS:USERS_DEV
+  TABLE_EXISTS_ACTION=REPLACE  -- SKIP|APPEND|TRUNCATE|REPLACE
+
+-- Monitor running job (from another session)
+SELECT job_name, state, degree, percent_done, message
+FROM dba_datapump_jobs;
+-- Attach to running job:
+impdp system ATTACH=SYS_IMPORT_SCHEMA_01</div>
       </div>
     </div>
   </div><!-- /crs-backup -->
@@ -9587,6 +10406,154 @@ BEGIN
   );
 END;
 /</div>
+      </div>
+    </div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 4–5 DEEP NOTES</span> PERFORMANCE — OPTIMIZER, STATISTICS &amp; TUNING DETAIL</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#2ECC71">ORACLE OPTIMIZER — HOW IT WORKS</div>
+        <div class="ref-row"><div class="ref-cmd">Cost-Based Optimizer (CBO)</div><div class="ref-desc">Oracle uses CBO exclusively (since 9i). Estimates the cost (I/O + CPU) of each possible execution plan using statistics. Chooses lowest-cost plan. Statistics must be current for good plans.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Adaptive Query Optimization (12c)</div><div class="ref-desc">Optimizer can change plan mid-execution based on actual vs. estimated row counts. Adaptive joins: Hash Join ↔ Nested Loop switch. Adaptive parallel: adjusts DOP at runtime. Controlled by OPTIMIZER_ADAPTIVE_FEATURES.</div></div>
+        <div class="ref-row"><div class="ref-cmd">SQL Plan Directives (12c)</div><div class="ref-desc">When optimizer misestimates, it creates a directive stored in SYSAUX. Future executions use extended statistics or dynamic sampling automatically. V$SQL_PLAN_DIRECTIVES. Can cause plan instability — monitor.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Cardinality feedback</div><div class="ref-desc">After first execution, optimizer stores actual row counts. On re-execution, if actual differs significantly from estimate, a new plan is generated. Visible in V$SQL.USE_FEEDBACK_STATS.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Bind peeking</div><div class="ref-desc">Optimizer peeks at bind variable values on first hard parse to choose plan. Subsequent executions use that plan regardless of bind values. Problem: skewed data with range queries. Solution: Adaptive Cursor Sharing (ACS).</div></div>
+        <div class="ref-code" style="margin-top:8px">-- View execution plan with actual statistics
+EXPLAIN PLAN FOR SELECT * FROM employees WHERE dept_id=10;
+SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY(FORMAT=>'ALL'));
+
+-- Real-time plan with actual vs estimated rows
+SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY_CURSOR(
+  sql_id => '&sql_id', format => 'ALLSTATS LAST'));
+-- A-ROWS=actual rows, E-ROWS=estimated rows
+-- Large discrepancy = stale stats or histogram needed
+
+-- Gather fresh stats with histograms
+EXEC DBMS_STATS.GATHER_TABLE_STATS('HR','EMPLOYEES',
+  method_opt=>'FOR ALL COLUMNS SIZE AUTO',
+  degree=>4, cascade=>TRUE, no_invalidate=>FALSE);
+
+-- Check when stats were last gathered
+SELECT table_name, last_analyzed, num_rows, blocks
+FROM dba_tables WHERE owner='HR' ORDER BY last_analyzed;</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#00D4FF">AWR — AUTOMATIC WORKLOAD REPOSITORY</div>
+        <div class="ref-row"><div class="ref-cmd">Snapshots</div><div class="ref-desc">MMON takes automatic snapshots every 60 minutes (default). Stored in SYSAUX tablespace. Retention: 8 days default. Change: DBMS_WORKLOAD_REPOSITORY.MODIFY_SNAPSHOT_SETTINGS(retention=>43200, interval=>30).</div></div>
+        <div class="ref-row"><div class="ref-cmd">AWR Report</div><div class="ref-desc">HTML or text report comparing two snapshots. Key sections: Top 5 Timed Events (where time was spent), Top SQL (by elapsed time, CPU, I/O), Wait event histograms, DB statistics. Run: @$ORACLE_HOME/rdbms/admin/awrrpt.sql</div></div>
+        <div class="ref-row"><div class="ref-cmd">Baselines</div><div class="ref-desc">Capture "normal" snapshot range as baseline. AWR reports can compare current period to baseline. DBMS_WORKLOAD_REPOSITORY.CREATE_BASELINE. Useful for comparing post-change performance.</div></div>
+        <div class="ref-row"><div class="ref-cmd">ASH (Active Session History)</div><div class="ref-desc">Every second, Oracle samples all active sessions. Data in V$ACTIVE_SESSION_HISTORY (in-memory, 1hr). Flushed to DBA_HIST_ACTIVE_SESS_HISTORY every 10 sec. Use for: finding what was running at a specific time, wait event breakdown.</div></div>
+        <div class="ref-row"><div class="ref-cmd">ADDM (Auto Database Diagnostic Monitor)</div><div class="ref-desc">Automatically analyzes AWR snapshots and generates findings + recommendations. Runs automatically after each AWR snapshot. View: SELECT * FROM DBA_ADDM_FINDINGS. Focus on top findings first.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Top SQL by elapsed time from AWR
+SELECT sql_id, executions, elapsed_time/1000000 elapsed_sec,
+  ROUND(elapsed_time/NULLIF(executions,0)/1000000,3) avg_sec,
+  buffer_gets, disk_reads
+FROM dba_hist_sqlstat
+WHERE snap_id BETWEEN 100 AND 110  -- snapshot range
+ORDER BY elapsed_time DESC FETCH FIRST 10 ROWS ONLY;
+
+-- ASH: what was running 1 hour ago?
+SELECT sql_id, event, COUNT(*) samples,
+  ROUND(COUNT(*)/SUM(COUNT(*)) OVER()*100,1) pct
+FROM v$active_session_history
+WHERE sample_time BETWEEN SYSDATE-1/24 AND SYSDATE-55/1440
+  AND session_state = 'WAITING'
+GROUP BY sql_id, event ORDER BY samples DESC FETCH FIRST 10 ROWS ONLY;
+
+-- Manual AWR snapshot
+EXEC DBMS_WORKLOAD_REPOSITORY.CREATE_SNAPSHOT();
+-- List recent snapshots
+SELECT snap_id, begin_interval_time, end_interval_time
+FROM dba_hist_snapshot ORDER BY snap_id DESC FETCH FIRST 10 ROWS ONLY;</div>
+      </div>
+    </div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#A855F7">INDEX TYPES — WHEN TO USE EACH</div>
+        <table class="crs-table">
+          <tr><th>Index Type</th><th>Best For</th><th>Avoid When</th></tr>
+          <tr><td class="c-pur">B-tree (default)</td><td>High-cardinality columns, range scans, equality predicates, most use cases</td><td>Very low cardinality (use bitmap)</td></tr>
+          <tr><td class="c-pur">Bitmap</td><td>Very low cardinality (gender, status, flag), data warehouse, multi-column AND/OR queries</td><td>OLTP with frequent DML — row lock = block lock for bitmap</td></tr>
+          <tr><td class="c-pur">Function-Based</td><td>UPPER(name) searches, computed expressions, case-insensitive queries</td><td>Rarely updated functions</td></tr>
+          <tr><td class="c-pur">Index-Organized Table (IOT)</td><td>Table always accessed by PK, small reference tables, no need for ROWID</td><td>Tables requiring frequent full scans or secondary index access</td></tr>
+          <tr><td class="c-pur">Reverse Key</td><td>RAC environments to reduce right-side index contention on sequences</td><td>Range scans (reverse key disables range scan)</td></tr>
+          <tr><td class="c-pur">Composite</td><td>Multi-column WHERE clauses; leading column must match for index use</td><td>If leading column never in predicate alone</td></tr>
+          <tr><td class="c-pur">Invisible Index</td><td>Testing index without affecting production queries; gradual rollout</td><td>N/A — it's a testing feature, invisible to optimizer by default</td></tr>
+        </table>
+        <div class="ref-code" style="margin-top:8px">-- Function-based index for case-insensitive search
+CREATE INDEX emp_name_upper ON employees (UPPER(last_name));
+SELECT * FROM employees WHERE UPPER(last_name) = 'SMITH';  -- uses index
+
+-- Invisible index (test before making visible)
+CREATE INDEX emp_dept_idx ON employees(dept_id) INVISIBLE;
+-- Test in your session:
+ALTER SESSION SET OPTIMIZER_USE_INVISIBLE_INDEXES=TRUE;
+-- Make visible when ready:
+ALTER INDEX emp_dept_idx VISIBLE;
+
+-- Monitor index usage (12c tracks automatically)
+SELECT index_name, table_name, last_used, visibility
+FROM dba_indexes WHERE owner='HR' ORDER BY last_used NULLS LAST;
+
+-- Find unused indexes (candidates for removal)
+SELECT index_name FROM dba_indexes WHERE owner='HR'
+  AND index_name NOT IN (SELECT object_name FROM v$object_usage
+                         WHERE used='YES');</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#F1C40F">PARTITIONING STRATEGIES — EXAM DETAIL</div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#2ECC71">RANGE</div><div class="ref-desc">Partition by value ranges. Best for date-based data (partition by month/year). Enables partition pruning for date range queries. INTERVAL extension auto-creates partitions.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#3B82F6">LIST</div><div class="ref-desc">Partition by discrete values (region='EAST', 'WEST'). Default partition for unknown values. Good for data that maps to specific categorical values.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#FB923C">HASH</div><div class="ref-desc">Even distribution across N partitions based on hash of key. Use when no natural range/list partitioning key. Good for reducing contention on high-insert tables.</div></div>
+        <div class="ref-row"><div class="ref-cmd" style="color:#A855F7">COMPOSITE</div><div class="ref-desc">RANGE-LIST, RANGE-HASH, LIST-LIST, etc. Sub-partition within partition. Complex but powerful for data warehouse fact tables.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Partition pruning</div><div class="ref-desc">Optimizer skips irrelevant partitions based on WHERE clause. SELECT * FROM sales WHERE sale_date BETWEEN '2025-01-01' AND '2025-03-31' — only reads 3 partitions. EXPLAIN PLAN shows Pstart/Pstop columns.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- INTERVAL partitioning (auto-creates monthly partitions)
+CREATE TABLE sales (
+  sale_id   NUMBER, sale_date DATE, amount NUMBER)
+PARTITION BY RANGE (sale_date)
+INTERVAL (NUMTOYMINTERVAL(1,'MONTH'))
+(PARTITION p_old VALUES LESS THAN (DATE '2024-01-01'));
+-- New partitions created automatically as data arrives
+
+-- Add partition to LIST-partitioned table
+ALTER TABLE customers ADD PARTITION p_south
+  VALUES ('TX','FL','GA','SC','NC');
+
+-- Exchange partition with staging table (fast load)
+ALTER TABLE sales EXCHANGE PARTITION p_202501
+  WITH TABLE sales_staging_jan2025 INCLUDING INDEXES;
+-- Swap is metadata-only — instant!
+
+-- View partition details
+SELECT partition_name, high_value, num_rows, blocks
+FROM dba_tab_partitions WHERE table_owner='HR' AND table_name='SALES'
+ORDER BY partition_position;</div>
+      </div>
+    </div>
+    <div class="ref-grid-full">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#C74634">RESOURCE MANAGER — WORKLOAD CONTROL</div>
+        <div class="ref-row"><div class="ref-cmd">Consumer Groups</div><div class="ref-desc">Named groups of sessions sharing resource limits. OLTP_GROUP, BATCH_GROUP, REPORTING_GROUP. Sessions automatically mapped via consumer group mapping rules (module name, program name, username, etc.).</div></div>
+        <div class="ref-row"><div class="ref-cmd">Resource Plans</div><div class="ref-desc">Define CPU% allocation, I/O limits, parallel degree limits, session limits, idle timeout per consumer group. Active plan set by: ALTER SYSTEM SET RESOURCE_MANAGER_PLAN='MY_PLAN'.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Auto-switch</div><div class="ref-desc">Sessions can be automatically switched to a different consumer group after consuming CPU/runtime. Example: after 60 seconds of CPU, move from OLTP_GROUP to LOW_PRIORITY_GROUP.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Create resource manager plan
+BEGIN
+  DBMS_RESOURCE_MANAGER.CREATE_PENDING_AREA();
+  DBMS_RESOURCE_MANAGER.CREATE_CONSUMER_GROUP('OLTP_GROUP','OLTP users');
+  DBMS_RESOURCE_MANAGER.CREATE_CONSUMER_GROUP('BATCH_GROUP','Batch jobs');
+  DBMS_RESOURCE_MANAGER.CREATE_PLAN('MY_PLAN','My resource plan');
+  DBMS_RESOURCE_MANAGER.CREATE_PLAN_DIRECTIVE(
+    plan=>'MY_PLAN', group_or_subplan=>'OLTP_GROUP',
+    mgmt_p1=>70,   -- 70% CPU in level 1
+    parallel_degree_limit_p1=>4);
+  DBMS_RESOURCE_MANAGER.CREATE_PLAN_DIRECTIVE(
+    plan=>'MY_PLAN', group_or_subplan=>'BATCH_GROUP',
+    mgmt_p1=>20,
+    max_est_exec_time=>3600);  -- kill if estimated >1 hour
+  DBMS_RESOURCE_MANAGER.VALIDATE_PENDING_AREA();
+  DBMS_RESOURCE_MANAGER.SUBMIT_PENDING_AREA();
+END;
+/
+ALTER SYSTEM SET RESOURCE_MANAGER_PLAN='MY_PLAN' SCOPE=BOTH;</div>
       </div>
     </div>
   </div><!-- /crs-performance -->
@@ -9892,6 +10859,131 @@ FETCH FIRST 10 ROWS ONLY;
 -- RMAN crosscheck and delete expired
 -- RMAN> CROSSCHECK BACKUP;
 -- RMAN> DELETE EXPIRED BACKUP;</div>
+      </div>
+    </div>
+    <div class="crs-section-title"><span class="crs-module-tag">WEEK 5 DEEP NOTES</span> HIGH AVAILABILITY, DATA GUARD &amp; RAC — EXAM DETAIL</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#2ECC71">DATA GUARD — DETAILED CONFIGURATION</div>
+        <div class="ref-row"><div class="ref-cmd">Redo shipping modes</div><div class="ref-desc">ASYNC (default/performance): primary ships redo asynchronously — standby may lag. SYNC (maximum availability): primary waits for standby to receive redo before returning from COMMIT. SYNC+AFFIRM (maximum protection): primary waits for standby to write to disk.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Protection modes</div><div class="ref-desc">MAXIMUM PERFORMANCE: ASYNC shipping, zero performance impact, possible data loss. MAXIMUM AVAILABILITY: SYNC shipping, no data loss if standby reachable, automatic fallback to ASYNC if standby unreachable. MAXIMUM PROTECTION: SYNC+AFFIRM, database shuts down if standby unreachable — zero data loss guaranteed.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Physical standby</div><div class="ref-desc">Exact byte-for-byte copy of primary. MRP (Managed Recovery Process) applies redo. Can be opened READ ONLY with Redo Apply active (Active Data Guard — licensed). Used for disaster recovery + reporting offload.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Logical standby</div><div class="ref-desc">SQL Apply converts redo to SQL statements and applies. Standby can have different physical structure (indexes, partitions). Allows DML on non-replicated objects. More complex, less common.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Switchover vs Failover</div><div class="ref-desc">SWITCHOVER: planned role reversal — both databases remain synchronized. Zero data loss. FAILOVER: unplanned — primary failed. Data loss possible depending on protection mode. After failover, old primary must be reinstated.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Key Data Guard V$ views
+SELECT name, db_unique_name, database_role, protection_mode,
+  protection_level, open_mode, switchover_status
+FROM v$database;
+
+-- Check apply lag on standby
+SELECT name, value, time_computed FROM v$dataguard_stats
+WHERE name IN ('transport lag','apply lag','estimated startup time');
+
+-- Monitor redo application
+SELECT process, status, sequence#, blocks, delay_mins
+FROM v$managed_standby;
+
+-- Switchover to standby (on primary)
+ALTER DATABASE COMMIT TO SWITCHOVER TO PHYSICAL STANDBY WITH SESSION SHUTDOWN;
+-- Then on standby:
+ALTER DATABASE COMMIT TO SWITCHOVER TO PRIMARY WITH SESSION SHUTDOWN;
+ALTER DATABASE OPEN;
+
+-- DGMGRL (Data Guard Broker CLI) — recommended
+DGMGRL> SHOW CONFIGURATION;
+DGMGRL> SWITCHOVER TO standby_name;
+DGMGRL> FAILOVER TO standby_name;</div>
+      </div>
+    </div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#C74634">RAC — REAL APPLICATION CLUSTERS DETAIL</div>
+        <div class="ref-row"><div class="ref-cmd">Cache Fusion</div><div class="ref-desc">When an instance needs a block another instance has in its buffer cache, it transfers the block via the high-speed private interconnect (not disk). GCS (Global Cache Service) coordinates. GES (Global Enqueue Service) manages distributed locks.</div></div>
+        <div class="ref-row"><div class="ref-cmd">SCAN Listener</div><div class="ref-desc">Single Client Access Name — 3 IP addresses (minimum), DNS round-robin load balancing. Clients connect to SCAN instead of individual node VIPs. SCAN VIPs float across nodes. Simplifies application connection strings.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Services in RAC</div><div class="ref-desc">Services define which instances handle which connections. PREFERRED instances run the service normally. AVAILABLE instances take over if preferred fails. Use DBMS_SERVICE or srvctl to manage services.</div></div>
+        <div class="ref-row"><div class="ref-cmd">RAC-specific tuning</div><div class="ref-desc">Avoid GC (global cache) contention: use sequence CACHE large values, use REVERSE KEY indexes for hot index right edges, use partitioning to keep data local to one instance when possible. Monitor: V$GES_STATISTICS, V$GC_ELEMENTS.</div></div>
+        <div class="ref-row"><div class="ref-cmd">OCR &amp; Voting Disk</div><div class="ref-desc">OCR (Oracle Cluster Registry): stores cluster configuration. Voting disk: quorum device — if a node can't reach voting disk, it's fenced out (STONITH). Requires odd number of voting disks (3, 5). Managed by Oracle Clusterware (Grid Infrastructure).</div></div>
+        <div class="ref-code" style="margin-top:8px">-- RAC monitoring queries
+-- Check all instances
+SELECT inst_id, instance_name, host_name, status, startup_time
+FROM gv$instance ORDER BY inst_id;
+
+-- Cache Fusion wait events (interconnect health)
+SELECT inst_id, event, total_waits, time_waited_micro/1000000 secs
+FROM gv$system_event
+WHERE event LIKE 'gc %' AND total_waits > 0
+ORDER BY time_waited_micro DESC FETCH FIRST 10 ROWS ONLY;
+
+-- RAC services management
+srvctl add service -db ORCL -service OLTP_SVC -preferred ORCL1 -available ORCL2
+srvctl start service -db ORCL -service OLTP_SVC
+srvctl status service -db ORCL
+
+-- Check interconnect
+SELECT name, ip_address, is_public FROM v$cluster_interconnects;</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#00D4FF">DBMS_SCHEDULER — EXAM DETAIL</div>
+        <div class="ref-row"><div class="ref-cmd">Job types</div><div class="ref-desc">PLSQL_BLOCK (anonymous block), STORED_PROCEDURE (named proc), EXECUTABLE (OS command), CHAIN (multi-step workflow), EXTERNAL_SCRIPT, SQL_SCRIPT. Most common: STORED_PROCEDURE and PLSQL_BLOCK.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Calendaring syntax</div><div class="ref-desc">FREQ=DAILY/WEEKLY/MONTHLY/YEARLY. BYHOUR=22, BYMINUTE=0. BYDAY=MON,WED,FRI. BYMONTHDAY=1 (first of month). INTERVAL=2 (every 2 periods). Example: nightly at 10pm = FREQ=DAILY;BYHOUR=22;BYMINUTE=0;BYSECOND=0</div></div>
+        <div class="ref-row"><div class="ref-cmd">SQL Server Agent comparison</div><div class="ref-desc">SQL Server Agent = DBMS_SCHEDULER. SQL Server Agent Job = SCHEDULER Job. SQL Server Agent Step = Scheduler Chain Step. SQL Server Alert = Scheduler Event-based Job. SQL Server Proxy = Scheduler Credential.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Maintenance windows</div><div class="ref-desc">Predefined windows: WEEKNIGHT_WINDOW (Mon-Fri 10pm-2am), WEEKEND_WINDOW (Sat 12am - Mon 2am). Automatic maintenance tasks (GATHER_STATS_JOB, AUTO_SPACE_ADVISOR) run in these windows by default.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Create a production job
+BEGIN
+  DBMS_SCHEDULER.CREATE_JOB(
+    job_name        => 'NIGHTLY_STATS',
+    job_type        => 'STORED_PROCEDURE',
+    job_action      => 'DBMS_STATS.GATHER_DATABASE_STATS',
+    start_date      => TRUNC(SYSDATE+1) + 22/24,  -- tonight at 10pm
+    repeat_interval => 'FREQ=DAILY;BYHOUR=22;BYMINUTE=0;BYSECOND=0',
+    enabled         => TRUE,
+    comments        => 'Nightly statistics gather'
+  );
+END;
+/
+
+-- Monitor job runs
+SELECT job_name, status, actual_start_date,
+  run_duration, error# FROM dba_scheduler_job_run_details
+ORDER BY actual_start_date DESC FETCH FIRST 20 ROWS ONLY;
+
+-- Enable email alerts for failed jobs
+EXEC DBMS_SCHEDULER.SET_SCHEDULER_ATTRIBUTE('email_server','mail.corp.com:25');
+EXEC DBMS_SCHEDULER.ADD_JOB_EMAIL_NOTIFICATION(
+  job_name=>'NIGHTLY_STATS', recipients=>'dba@corp.com',
+  events=>'JOB_FAILED,JOB_BROKEN');</div>
+      </div>
+    </div>
+    <div class="ref-grid-full">
+      <div class="ref-card">
+        <div class="ref-card-title" style="color:#A855F7">SPACE MANAGEMENT — RECYCLE BIN &amp; SEGMENT ADVISOR</div>
+        <div class="ref-row"><div class="ref-cmd">Recycle Bin</div><div class="ref-desc">DROP TABLE moves table to Recycle Bin (renamed SYS_BIN$...). Table still occupies space. FLASHBACK TABLE t TO BEFORE DROP restores it. PURGE TABLE t removes permanently. PURGE RECYCLEBIN clears all. Disabled with RECYCLEBIN=OFF parameter.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Segment Advisor</div><div class="ref-desc">Analyzes segment space usage and recommends SHRINK operations. Runs automatically in maintenance window. Manual: DBMS_ADVISOR.CREATE_TASK with 'Segment Advisor' type. Result in DBA_ADVISOR_RECOMMENDATIONS.</div></div>
+        <div class="ref-row"><div class="ref-cmd">Segment Shrink</div><div class="ref-desc">ALTER TABLE t SHRINK SPACE COMPACT — reclaim space within segment (online, no lock on most rows). ALTER TABLE t SHRINK SPACE — compact + adjust HWM (high water mark). Requires ROW MOVEMENT enabled. More efficient than export/import for fragmented tables.</div></div>
+        <div class="ref-row"><div class="ref-cmd">HWM (High Water Mark)</div><div class="ref-desc">The highest block ever used in a segment. Full table scans read up to HWM — even if rows deleted. DELETE does NOT lower HWM. TRUNCATE resets HWM. SHRINK SPACE lowers HWM. Key for understanding why deletes don't free space.</div></div>
+        <div class="ref-code" style="margin-top:8px">-- Check Recycle Bin contents
+SELECT object_name, original_name, type, space, droptime
+FROM recyclebin ORDER BY droptime DESC;
+
+-- Restore specific table
+FLASHBACK TABLE "SYS_BIN$abc123==$0" TO BEFORE DROP RENAME TO employees_old;
+-- Or by original name:
+FLASHBACK TABLE employees TO BEFORE DROP;
+
+-- Segment shrink (requires row movement)
+ALTER TABLE hr.employees ENABLE ROW MOVEMENT;
+ALTER TABLE hr.employees SHRINK SPACE;
+ALTER TABLE hr.employees DISABLE ROW MOVEMENT;  -- optional cleanup
+
+-- Find top space consumers (candidates for shrink)
+SELECT owner, segment_name, segment_type,
+  ROUND(bytes/1048576,1) size_mb,
+  ROUND(blocks * 8192/1048576 -
+    (num_rows * avg_row_len)/1048576, 1) wasted_mb_est
+FROM dba_segments ds JOIN dba_tables dt
+  ON ds.owner=dt.owner AND ds.segment_name=dt.table_name
+WHERE ds.owner NOT IN ('SYS','SYSTEM')
+ORDER BY bytes DESC FETCH FIRST 20 ROWS ONLY;</div>
       </div>
     </div>
   </div><!-- /crs-highavail -->

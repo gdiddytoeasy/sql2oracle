@@ -1,19 +1,49 @@
 import json
 import os
+import urllib.parse
+import urllib.request
 from flask import Flask, request, jsonify, render_template
 import sqlglot
 import sqlglot.errors
 
 app = Flask(__name__)
 
+# ── Persistent storage via Replit KV (survives deployments) ──────────────────
+
+_KV_URL = os.environ.get("REPLIT_DB_URL")
+
+# Fall back to local files when running outside Replit (dev mode)
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 USERS_FILE = os.path.join(DATA_DIR, "users.json")
 UNLOCKS_FILE = os.path.join(DATA_DIR, "tab_unlocks.json")
-
 os.makedirs(DATA_DIR, exist_ok=True)
 
 
-def read_json(path, default):
+def _kv_get(key, default):
+    """Read a JSON value from Replit KV."""
+    try:
+        url = f"{_KV_URL}/{urllib.parse.quote(key, safe='')}"
+        with urllib.request.urlopen(url) as resp:
+            return json.loads(resp.read().decode())
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return default
+        raise
+    except Exception:
+        return default
+
+
+def _kv_set(key, value):
+    """Write a JSON value to Replit KV."""
+    encoded = urllib.parse.urlencode({key: json.dumps(value)}).encode()
+    req = urllib.request.Request(_KV_URL, data=encoded, method="POST")
+    with urllib.request.urlopen(req):
+        pass
+
+
+def read_json(path, default, kv_key=None):
+    if _KV_URL and kv_key:
+        return _kv_get(kv_key, default)
     try:
         with open(path) as f:
             return json.load(f)
@@ -21,7 +51,10 @@ def read_json(path, default):
         return default
 
 
-def write_json(path, data):
+def write_json(path, data, kv_key=None):
+    if _KV_URL and kv_key:
+        _kv_set(kv_key, data)
+        return
     with open(path, "w") as f:
         json.dump(data, f, indent=2)
 
@@ -30,7 +63,7 @@ def write_json(path, data):
 
 @app.route("/api/users", methods=["GET"])
 def get_users():
-    users = read_json(USERS_FILE, [])
+    users = read_json(USERS_FILE, [], kv_key="users")
     # Strip hashes before sending to client
     return jsonify([{k: v for k, v in u.items() if k != "hash"} for u in users])
 
@@ -40,7 +73,7 @@ def create_user():
     data = request.get_json()
     if not data or not data.get("username") or not data.get("hash"):
         return jsonify({"error": "username and hash are required"}), 400
-    users = read_json(USERS_FILE, [])
+    users = read_json(USERS_FILE, [], kv_key="users")
     if any(u["username"] == data["username"] for u in users):
         return jsonify({"error": "Username already exists"}), 409
     new_user = {
@@ -50,7 +83,7 @@ def create_user():
         "hash": data["hash"],
     }
     users.append(new_user)
-    write_json(USERS_FILE, users)
+    write_json(USERS_FILE, users, kv_key="users")
     return jsonify({"ok": True})
 
 
@@ -58,13 +91,13 @@ def create_user():
 def delete_user(username):
     if username == "admin":
         return jsonify({"error": "Cannot delete admin"}), 403
-    users = read_json(USERS_FILE, [])
+    users = read_json(USERS_FILE, [], kv_key="users")
     users = [u for u in users if u["username"] != username]
-    write_json(USERS_FILE, users)
+    write_json(USERS_FILE, users, kv_key="users")
     # Also clear that user's tab unlocks
-    unlocks = read_json(UNLOCKS_FILE, {})
+    unlocks = read_json(UNLOCKS_FILE, {}, kv_key="tab_unlocks")
     unlocks.pop(username, None)
-    write_json(UNLOCKS_FILE, unlocks)
+    write_json(UNLOCKS_FILE, unlocks, kv_key="tab_unlocks")
     return jsonify({"ok": True})
 
 
@@ -74,7 +107,7 @@ def verify_user():
     data = request.get_json()
     if not data or not data.get("username") or not data.get("hash"):
         return jsonify({"error": "username and hash required"}), 400
-    users = read_json(USERS_FILE, [])
+    users = read_json(USERS_FILE, [], kv_key="users")
     match = next((u for u in users if u["username"] == data["username"] and u["hash"] == data["hash"]), None)
     if match:
         return jsonify({"username": match["username"], "displayName": match["displayName"], "role": match["role"]})
@@ -86,7 +119,7 @@ def verify_user():
 @app.route("/api/tab-unlocks", methods=["GET"])
 def get_tab_unlocks():
     username = request.args.get("username")
-    unlocks = read_json(UNLOCKS_FILE, {})
+    unlocks = read_json(UNLOCKS_FILE, {}, kv_key="tab_unlocks")
     if username:
         return jsonify(unlocks.get(username, ["standard"]))
     return jsonify(unlocks)
@@ -97,9 +130,9 @@ def set_tab_unlocks():
     data = request.get_json()
     if not data or "username" not in data or "tabs" not in data:
         return jsonify({"error": "username and tabs required"}), 400
-    unlocks = read_json(UNLOCKS_FILE, {})
+    unlocks = read_json(UNLOCKS_FILE, {}, kv_key="tab_unlocks")
     unlocks[data["username"]] = data["tabs"]
-    write_json(UNLOCKS_FILE, unlocks)
+    write_json(UNLOCKS_FILE, unlocks, kv_key="tab_unlocks")
     return jsonify({"ok": True})
 
 
