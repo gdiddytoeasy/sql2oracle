@@ -5,13 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SQL to Oracle Converter</title>
     <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
 </head>
 <script>
 (async function() {
   var s = sessionStorage.getItem('ora_auth_session_v2');
   if (!s) { window.location.replace('/'); return; }
   var session = JSON.parse(s);
-  if (session.role === 'admin' || session.role === 'manager') return; // admin/manager always have access
+  if (session.role === 'admin' || session.role === 'manager') return;
   try {
     var res = await fetch('/api/tab-unlocks?username=' + encodeURIComponent(session.username));
     var unlocked = res.ok ? await res.json() : ['standard'];
@@ -57,7 +60,7 @@
 
             <div class="panel-center">
                 <button class="btn btn-primary" id="convert-btn">
-                    Convert to Oracle &#8594;
+                    Convert &#8594;
                 </button>
             </div>
 

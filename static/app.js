@@ -43,6 +43,19 @@ async function loadDialects() {
     }
 }
 
+function highlightSQL(code) {
+    if (typeof hljs !== 'undefined') {
+        try {
+            return hljs.highlight(code, { language: 'sql' }).value;
+        } catch (e) {}
+    }
+    return escapeHTML(code);
+}
+
+function escapeHTML(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
 async function convertSQL() {
     const sql = document.getElementById("sql-input").value.trim();
     const source = document.getElementById("source-dialect").value;
@@ -62,8 +75,8 @@ async function convertSQL() {
     }
 
     convertBtn.disabled = true;
-    convertBtn.textContent = "Converting...";
-    outputArea.innerHTML = '<span class="placeholder-text">Converting...</span>';
+    convertBtn.innerHTML = "Converting\u2026";
+    outputArea.innerHTML = '<span class="placeholder-text">Converting\u2026</span>';
     copyBtn.style.display = "none";
     stmtCount.style.display = "none";
 
@@ -79,9 +92,9 @@ async function convertSQL() {
         if (!res.ok || data.error) {
             errorBanner.textContent = data.error || "An unexpected error occurred.";
             errorBanner.style.display = "block";
-            outputArea.innerHTML = '<span class="placeholder-text">Converted Oracle SQL will appear here...</span>';
+            outputArea.innerHTML = '<span class="placeholder-text">Converted Oracle SQL will appear here\u2026</span>';
         } else {
-            outputArea.textContent = data.result;
+            outputArea.innerHTML = '<pre><code class="hljs language-sql">' + highlightSQL(data.result) + '</code></pre>';
             outputArea.classList.add("has-result");
             copyBtn.style.display = "inline-flex";
             if (data.statements > 1) {
@@ -92,15 +105,16 @@ async function convertSQL() {
     } catch (e) {
         errorBanner.textContent = "Network error. Please try again.";
         errorBanner.style.display = "block";
-        outputArea.innerHTML = '<span class="placeholder-text">Converted Oracle SQL will appear here...</span>';
+        outputArea.innerHTML = '<span class="placeholder-text">Converted Oracle SQL will appear here\u2026</span>';
     } finally {
         convertBtn.disabled = false;
-        convertBtn.textContent = "Convert to Oracle →";
+        convertBtn.innerHTML = "Convert \u2192";
     }
 }
 
 function copyOutput() {
-    const text = document.getElementById("output-area").textContent;
+    const code = document.querySelector("#output-area code");
+    const text = code ? code.textContent : document.getElementById("output-area").textContent;
     navigator.clipboard.writeText(text).then(() => {
         const btn = document.getElementById("copy-btn");
         btn.textContent = "Copied!";
@@ -117,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("clear-btn").addEventListener("click", () => {
         document.getElementById("sql-input").value = "";
-        document.getElementById("output-area").innerHTML = '<span class="placeholder-text">Converted Oracle SQL will appear here...</span>';
+        document.getElementById("output-area").innerHTML = '<span class="placeholder-text">Converted Oracle SQL will appear here\u2026</span>';
         document.getElementById("output-area").classList.remove("has-result");
         document.getElementById("error-banner").style.display = "none";
         document.getElementById("copy-btn").style.display = "none";
