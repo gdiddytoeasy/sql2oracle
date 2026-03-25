@@ -187,20 +187,6 @@ body {
 </div>
 
 <script>
-// ── Auth defaults (mirror those in architecture.html) ─────────────────────
-var AUTH_DEFAULTS = [
-  { username:'admin',   displayName:'Administrator', role:'admin',
-    hash:'25e91ff6c383f40010e295237e3c8a9ca91e163a162b2628dbc47aef69bac09a' },
-  { username:'manager', displayName:'Manager',       role:'manager',
-    hash:'866485796cfa8d7c0cf7111640205b83076433547577511d81f8030ae99ecea5' },
-  { username:'dba1',    displayName:'DBA User 1',    role:'dba',
-    hash:'d1102a789f9523e9646134f293de4bb86246787eabb58a24c6d6730bf60a53d6' },
-  { username:'student', displayName:'Student',       role:'student',
-    hash:'d4538dbfb5b1741ead4640b9159dfdaaf05d01674f91db50c500a4001ed3b405' },
-  { username:'guest',   displayName:'Guest Viewer',  role:'viewer',
-    hash:'3ab35742c8b37b3395b233535928ac25c768cebf9183901cf92fb218b7cc6db1' }
-];
-
 // ── Redirect if already logged in ─────────────────────────────────────────
 (function() {
   var s = sessionStorage.getItem('ora_auth_session_v2');
@@ -213,18 +199,6 @@ async function sha256(str) {
   return Array.from(new Uint8Array(buf)).map(function(b) {
     return b.toString(16).padStart(2, '0');
   }).join('');
-}
-
-// ── Load users (merge defaults with any localStorage additions) ────────────
-function loadUsers() {
-  var stored = localStorage.getItem('ora_auth_users_v2');
-  var custom = stored ? JSON.parse(stored) : [];
-  var merged = AUTH_DEFAULTS.slice();
-  custom.forEach(function(cu) {
-    var idx = merged.findIndex(function(u) { return u.username === cu.username; });
-    if (idx >= 0) merged[idx] = cu; else merged.push(cu);
-  });
-  return merged;
 }
 
 // ── Login ──────────────────────────────────────────────────────────────────
@@ -242,13 +216,20 @@ async function doLogin() {
   btn.disabled = true;
 
   var hash = await sha256(password);
-  var users = loadUsers();
-  var match = users.find(function(u) { return u.username === username && u.hash === hash; });
+  var match = null;
+  try {
+    var res = await fetch('/api/users/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: username, hash: hash })
+    });
+    if (res.ok) match = await res.json();
+  } catch(e) {}
 
   btn.innerHTML = '&#9654;&nbsp; SIGN IN';
   btn.disabled = false;
 
-  if (match) {
+  if (match && !match.error) {
     document.getElementById('auth-error').classList.remove('visible');
     sessionStorage.setItem('ora_auth_session_v2', JSON.stringify({
       username: match.username,

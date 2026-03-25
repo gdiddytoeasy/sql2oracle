@@ -7,15 +7,14 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <script>
-(function() {
+(async function() {
   var s = sessionStorage.getItem('ora_auth_session_v2');
   if (!s) { window.location.replace('/'); return; }
   var session = JSON.parse(s);
   if (session.role === 'admin' || session.role === 'manager') return; // admin/manager always have access
   try {
-    var raw = localStorage.getItem('oracle_tab_unlocks_v2');
-    var allUnlocks = raw ? JSON.parse(raw) : {};
-    var unlocked = allUnlocks[session.username] || ['standard'];
+    var res = await fetch('/api/tab-unlocks?username=' + encodeURIComponent(session.username));
+    var unlocked = res.ok ? await res.json() : ['standard'];
     if (unlocked.indexOf('sql_converter') < 0) {
       window.location.replace('/architecture');
     }

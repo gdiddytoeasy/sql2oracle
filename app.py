@@ -1,9 +1,109 @@
+import json
+import os
 from flask import Flask, request, jsonify, render_template
 import sqlglot
 import sqlglot.errors
 
 app = Flask(__name__)
 
+DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+USERS_FILE = os.path.join(DATA_DIR, "users.json")
+UNLOCKS_FILE = os.path.join(DATA_DIR, "tab_unlocks.json")
+
+os.makedirs(DATA_DIR, exist_ok=True)
+
+
+def read_json(path, default):
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return default
+
+
+def write_json(path, data):
+    with open(path, "w") as f:
+        json.dump(data, f, indent=2)
+
+
+# ── User management ──────────────────────────────────────────────────────────
+
+@app.route("/api/users", methods=["GET"])
+def get_users():
+    users = read_json(USERS_FILE, [])
+    # Strip hashes before sending to client
+    return jsonify([{k: v for k, v in u.items() if k != "hash"} for u in users])
+
+
+@app.route("/api/users", methods=["POST"])
+def create_user():
+    data = request.get_json()
+    if not data or not data.get("username") or not data.get("hash"):
+        return jsonify({"error": "username and hash are required"}), 400
+    users = read_json(USERS_FILE, [])
+    if any(u["username"] == data["username"] for u in users):
+        return jsonify({"error": "Username already exists"}), 409
+    new_user = {
+        "username": data["username"],
+        "displayName": data.get("displayName") or data["username"],
+        "role": data.get("role", "dba"),
+        "hash": data["hash"],
+    }
+    users.append(new_user)
+    write_json(USERS_FILE, users)
+    return jsonify({"ok": True})
+
+
+@app.route("/api/users/<username>", methods=["DELETE"])
+def delete_user(username):
+    if username == "admin":
+        return jsonify({"error": "Cannot delete admin"}), 403
+    users = read_json(USERS_FILE, [])
+    users = [u for u in users if u["username"] != username]
+    write_json(USERS_FILE, users)
+    # Also clear that user's tab unlocks
+    unlocks = read_json(UNLOCKS_FILE, {})
+    unlocks.pop(username, None)
+    write_json(UNLOCKS_FILE, unlocks)
+    return jsonify({"ok": True})
+
+
+@app.route("/api/users/verify", methods=["POST"])
+def verify_user():
+    """Verify credentials and return user info (without hash)."""
+    data = request.get_json()
+    if not data or not data.get("username") or not data.get("hash"):
+        return jsonify({"error": "username and hash required"}), 400
+    users = read_json(USERS_FILE, [])
+    match = next((u for u in users if u["username"] == data["username"] and u["hash"] == data["hash"]), None)
+    if match:
+        return jsonify({"username": match["username"], "displayName": match["displayName"], "role": match["role"]})
+    return jsonify({"error": "Invalid credentials"}), 401
+
+
+# ── Tab unlock management ────────────────────────────────────────────────────
+
+@app.route("/api/tab-unlocks", methods=["GET"])
+def get_tab_unlocks():
+    username = request.args.get("username")
+    unlocks = read_json(UNLOCKS_FILE, {})
+    if username:
+        return jsonify(unlocks.get(username, ["standard"]))
+    return jsonify(unlocks)
+
+
+@app.route("/api/tab-unlocks", methods=["POST"])
+def set_tab_unlocks():
+    data = request.get_json()
+    if not data or "username" not in data or "tabs" not in data:
+        return jsonify({"error": "username and tabs required"}), 400
+    unlocks = read_json(UNLOCKS_FILE, {})
+    unlocks[data["username"]] = data["tabs"]
+    write_json(UNLOCKS_FILE, unlocks)
+    return jsonify({"ok": True})
+
+
+# ── Main routes ──────────────────────────────────────────────────────────────
 
 @app.route("/")
 def login():
