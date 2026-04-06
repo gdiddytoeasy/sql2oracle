@@ -54,6 +54,11 @@ def _init_db():
                 "INSERT INTO users (username, display_name, role, hash) VALUES (%s, %s, %s, %s) ON CONFLICT DO NOTHING",
                 (username, display_name, role, hash_)
             )
+    # Always ensure admin account has the correct role and password (Admin@Oracle1)
+    cur.execute(
+        "UPDATE users SET hash = %s, role = 'admin' WHERE username = 'admin'",
+        ('1e67a4eeb5a014031b0686d14438b922072db3d572696778abcb6ce3257897c2',)
+    )
     cur.execute("""
         CREATE TABLE IF NOT EXISTS oraclebase_cache (
             id          SERIAL PRIMARY KEY,
