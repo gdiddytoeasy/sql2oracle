@@ -240,19 +240,26 @@ def set_tab_unlocks():
 
 # ── Main routes ──────────────────────────────────────────────────────────────
 
+def no_cache(response):
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
+
 @app.route("/")
 def login():
-    return render_template("login.html")
+    return no_cache(render_template("login.html"))
 
 
 @app.route("/sql")
 def index():
-    return render_template("index.html")
+    return no_cache(render_template("index.html"))
 
 
 @app.route("/architecture")
 def architecture():
-    return render_template("architecture.html")
+    return no_cache(render_template("architecture.html"))
 
 
 @app.route("/convert", methods=["POST"])
@@ -307,7 +314,7 @@ def dialects():
 
 @app.route("/projects")
 def projects():
-    return render_template("projects.html")
+    return no_cache(render_template("projects.html"))
 
 
 @app.route("/api/admin/oraclebase-fetch", methods=["POST"])
