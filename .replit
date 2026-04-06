@@ -40,5 +40,5 @@ exposeLocalhost = true
 
 [deployment]
 deploymentTarget = "autoscale"
-run = ["gunicorn", "--bind=0.0.0.0:5000", "--reuse-port", "app:app"]
-build = ["pip", "install", "flask", "gunicorn", "sqlglot", "psycopg2-binary", "requests", "beautifulsoup4", "lxml"]
+run = ["bash", "-c", "gunicorn --bind=0.0.0.0:5000 --reuse-port app:app"]
+build = ["bash", "-c", "pip install flask gunicorn sqlglot psycopg2-binary requests beautifulsoup4 lxml"]
