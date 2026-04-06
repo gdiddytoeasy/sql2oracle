@@ -241,6 +241,7 @@ CREATE TABLE lab_progress (
       "text": "string",
       "choices": [
         { "label": "string", "next": 1, "feedback": "string" }
+    // next: 0-based index into steps array, or null to end the scenario
       ]
     }
   ]
@@ -274,7 +275,7 @@ CREATE TABLE lab_progress (
 - Exercise rendered based on type:
   - **Quiz** — question + 4 options, submit shows correct/wrong + explanation + oraclebase reference
   - **Scenario** — branching decision tree, each step reveals consequences and next choices
-  - **Written** — textarea + Submit for Review; admin can view and comment
+  - **Written** — textarea + Submit for Review; admin can view and mark as reviewed (no comment thread — feedback is out-of-band)
   - **Flashcard** — flip animation, self-mark "I know this" / "Review again", deck progress
 - Next / Previous exercise navigation within the topic
 
