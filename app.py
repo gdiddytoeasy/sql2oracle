@@ -393,6 +393,9 @@ def update_assignment(assignment_id):
     data = request.get_json()
     if not data:
         return jsonify({"error": "No data provided"}), 400
+    required = ("title", "description", "topic", "difficulty")
+    if any(data.get(k) is None for k in required):
+        return jsonify({"error": "title, description, topic, difficulty required"}), 400
     conn = _get_db()
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     cur.execute("""
