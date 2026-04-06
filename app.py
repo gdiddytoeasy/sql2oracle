@@ -2,7 +2,7 @@ import json
 import os
 import psycopg2
 import psycopg2.extras
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, make_response
 import sqlglot
 import sqlglot.errors
 import requests as req
@@ -236,6 +236,14 @@ def set_tab_unlocks():
     cur.close()
     conn.close()
     return jsonify({"ok": True})
+
+
+def no_cache(response):
+    response = make_response(response)
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 
 # ── Main routes ──────────────────────────────────────────────────────────────
