@@ -105,7 +105,7 @@ def _init_db():
             type          TEXT NOT NULL CHECK (type IN ('quiz','scenario','written','flashcard')),
             title         TEXT NOT NULL,
             content_json  JSONB NOT NULL,
-            oraclebase_id INTEGER REFERENCES oraclebase_cache(id),
+            oraclebase_id INTEGER REFERENCES oraclebase_cache(id) ON DELETE SET NULL,
             sort_order    INTEGER NOT NULL DEFAULT 0,
             created_by    TEXT NOT NULL REFERENCES users(username),
             created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
