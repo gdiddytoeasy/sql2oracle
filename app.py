@@ -421,5 +421,263 @@ def delete_assignment(assignment_id):
     return jsonify({"ok": True})
 
 
+# ── Showcase API ─────────────────────────────────────────────────────────────
+
+@app.route("/api/showcase", methods=["GET"])
+def get_showcase():
+    """Returns approved entries for students; all entries for admin/manager."""
+    role = request.args.get("role", "student")
+    username = request.args.get("username", "")
+    conn = _get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    if role in ("admin", "manager"):
+        cur.execute("SELECT * FROM showcase_entries ORDER BY submitted_at DESC")
+    else:
+        cur.execute("""
+            SELECT * FROM showcase_entries
+            WHERE approved = TRUE OR student_username = %s
+            ORDER BY submitted_at DESC
+        """, (username,))
+    rows = [dict(r) for r in cur.fetchall()]
+    cur.close()
+    conn.close()
+    return jsonify(rows)
+
+
+@app.route("/api/showcase", methods=["POST"])
+def create_showcase():
+    data = request.get_json()
+    if not data or not data.get("student_username") or not data.get("title") or not data.get("description"):
+        return jsonify({"error": "student_username, title, description required"}), 400
+    conn = _get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute("""
+        INSERT INTO showcase_entries (student_username, title, description, url)
+        VALUES (%s, %s, %s, %s) RETURNING *
+    """, (data["student_username"], data["title"], data["description"], data.get("url")))
+    row = dict(cur.fetchone())
+    cur.close()
+    conn.close()
+    return jsonify(row), 201
+
+
+@app.route("/api/showcase/<int:entry_id>/approve", methods=["PUT"])
+def approve_showcase(entry_id):
+    data = request.get_json() or {}
+    approved = data.get("approved", True)
+    approved_by = data.get("approved_by", "admin")
+    conn = _get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute("""
+        UPDATE showcase_entries
+        SET approved=%s, approved_by=%s, approved_at=CASE WHEN %s THEN NOW() ELSE NULL END
+        WHERE id=%s RETURNING *
+    """, (approved, approved_by if approved else None, approved, entry_id))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    if not row:
+        return jsonify({"error": "Not found"}), 404
+    return jsonify(dict(row))
+
+
+@app.route("/api/showcase/<int:entry_id>", methods=["DELETE"])
+def delete_showcase(entry_id):
+    conn = _get_db()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM showcase_entries WHERE id=%s", (entry_id,))
+    cur.close()
+    conn.close()
+    return jsonify({"ok": True})
+
+
+# ── Lab Topics + Exercises API ───────────────────────────────────────────────
+
+@app.route("/api/lab-topics", methods=["GET"])
+def get_lab_topics():
+    username = request.args.get("username", "")
+    conn = _get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute("SELECT * FROM lab_topics ORDER BY sort_order, id")
+    topics = [dict(r) for r in cur.fetchall()]
+    for topic in topics:
+        cur.execute("SELECT COUNT(*) FROM lab_exercises WHERE topic_id=%s", (topic["id"],))
+        topic["exercise_count"] = cur.fetchone()["count"]
+        if username:
+            cur.execute("""
+                SELECT COUNT(*) FROM lab_progress lp
+                JOIN lab_exercises le ON le.id = lp.exercise_id
+                WHERE le.topic_id=%s AND lp.username=%s AND lp.completed=TRUE
+            """, (topic["id"], username))
+            topic["completed_count"] = cur.fetchone()["count"]
+        else:
+            topic["completed_count"] = 0
+    cur.close()
+    conn.close()
+    return jsonify(topics)
+
+
+@app.route("/api/lab-topics", methods=["POST"])
+def create_lab_topic():
+    data = request.get_json()
+    if not data or not data.get("title") or not data.get("description"):
+        return jsonify({"error": "title and description required"}), 400
+    conn = _get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute("""
+        INSERT INTO lab_topics (title, description, icon, sort_order)
+        VALUES (%s, %s, %s, %s) RETURNING *
+    """, (data["title"], data["description"], data.get("icon", "📚"), data.get("sort_order", 0)))
+    row = dict(cur.fetchone())
+    cur.close()
+    conn.close()
+    return jsonify(row), 201
+
+
+@app.route("/api/lab-topics/<int:topic_id>/exercises", methods=["GET"])
+def get_lab_exercises(topic_id):
+    username = request.args.get("username", "")
+    conn = _get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute("""
+        SELECT le.*, oc.title AS ora_title, oc.summary AS ora_summary, oc.url AS ora_url
+        FROM lab_exercises le
+        LEFT JOIN oraclebase_cache oc ON oc.id = le.oraclebase_id
+        WHERE le.topic_id=%s ORDER BY le.sort_order, le.id
+    """, (topic_id,))
+    exercises = [dict(r) for r in cur.fetchall()]
+    if username:
+        for ex in exercises:
+            cur.execute("""
+                SELECT completed, score, answer_json FROM lab_progress
+                WHERE username=%s AND exercise_id=%s
+            """, (username, ex["id"]))
+            prog = cur.fetchone()
+            ex["progress"] = dict(prog) if prog else None
+    cur.close()
+    conn.close()
+    return jsonify(exercises)
+
+
+@app.route("/api/lab-exercises/<int:exercise_id>", methods=["GET"])
+def get_lab_exercise(exercise_id):
+    username = request.args.get("username", "")
+    conn = _get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute("""
+        SELECT le.*, oc.title AS ora_title, oc.summary AS ora_summary, oc.url AS ora_url
+        FROM lab_exercises le
+        LEFT JOIN oraclebase_cache oc ON oc.id = le.oraclebase_id
+        WHERE le.id=%s
+    """, (exercise_id,))
+    row = cur.fetchone()
+    if not row:
+        cur.close()
+        conn.close()
+        return jsonify({"error": "Not found"}), 404
+    ex = dict(row)
+    if username:
+        cur.execute("SELECT completed, score, answer_json FROM lab_progress WHERE username=%s AND exercise_id=%s",
+                    (username, exercise_id))
+        prog = cur.fetchone()
+        ex["progress"] = dict(prog) if prog else None
+    cur.close()
+    conn.close()
+    return jsonify(ex)
+
+
+@app.route("/api/lab-exercises", methods=["POST"])
+def create_lab_exercise():
+    data = request.get_json()
+    required = ("topic_id", "type", "title", "content_json", "created_by")
+    if not data or any(k not in data for k in required):
+        return jsonify({"error": "topic_id, type, title, content_json, created_by required"}), 400
+    if data["type"] not in ("quiz", "scenario", "written", "flashcard"):
+        return jsonify({"error": "type must be quiz, scenario, written, or flashcard"}), 400
+    conn = _get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute("""
+        INSERT INTO lab_exercises (topic_id, type, title, content_json, oraclebase_id, sort_order, created_by)
+        VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING *
+    """, (data["topic_id"], data["type"], data["title"],
+          json.dumps(data["content_json"]), data.get("oraclebase_id"),
+          data.get("sort_order", 0), data["created_by"]))
+    row = dict(cur.fetchone())
+    cur.close()
+    conn.close()
+    return jsonify(row), 201
+
+
+@app.route("/api/lab-exercises/<int:exercise_id>", methods=["PUT"])
+def update_lab_exercise(exercise_id):
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+    conn = _get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute("""
+        UPDATE lab_exercises SET title=%s, content_json=%s, oraclebase_id=%s, sort_order=%s
+        WHERE id=%s RETURNING *
+    """, (data.get("title"), json.dumps(data.get("content_json", {})),
+          data.get("oraclebase_id"), data.get("sort_order", 0), exercise_id))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    if not row:
+        return jsonify({"error": "Not found"}), 404
+    return jsonify(dict(row))
+
+
+@app.route("/api/lab-exercises/<int:exercise_id>", methods=["DELETE"])
+def delete_lab_exercise(exercise_id):
+    conn = _get_db()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM lab_exercises WHERE id=%s", (exercise_id,))
+    cur.close()
+    conn.close()
+    return jsonify({"ok": True})
+
+
+# ── Lab Progress API ─────────────────────────────────────────────────────────
+
+@app.route("/api/lab-progress", methods=["POST"])
+def save_lab_progress():
+    data = request.get_json()
+    if not data or not data.get("username") or not data.get("exercise_id"):
+        return jsonify({"error": "username and exercise_id required"}), 400
+    conn = _get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute("""
+        INSERT INTO lab_progress (username, exercise_id, completed, score, answer_json, completed_at)
+        VALUES (%s, %s, %s, %s, %s, CASE WHEN %s THEN NOW() ELSE NULL END)
+        ON CONFLICT (username, exercise_id) DO UPDATE
+        SET completed=EXCLUDED.completed, score=EXCLUDED.score,
+            answer_json=EXCLUDED.answer_json,
+            completed_at=CASE WHEN EXCLUDED.completed THEN NOW() ELSE lab_progress.completed_at END
+        RETURNING *
+    """, (data["username"], data["exercise_id"],
+          data.get("completed", False), data.get("score"),
+          json.dumps(data.get("answer_json")) if data.get("answer_json") else None,
+          data.get("completed", False)))
+    row = dict(cur.fetchone())
+    cur.close()
+    conn.close()
+    return jsonify(row)
+
+
+@app.route("/api/lab-progress", methods=["GET"])
+def get_lab_progress():
+    username = request.args.get("username")
+    if not username:
+        return jsonify({"error": "username required"}), 400
+    conn = _get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute("SELECT * FROM lab_progress WHERE username=%s", (username,))
+    rows = [dict(r) for r in cur.fetchall()]
+    cur.close()
+    conn.close()
+    return jsonify(rows)
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
