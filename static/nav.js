@@ -15,7 +15,7 @@
 
   function buildNav(unlockedTabs) {
     var links = [
-      { href: '/architecture', label: 'Architecture', key: 'architecture' },
+      { href: '/architecture', label: 'Architecture',  key: 'architecture' },
       { href: '/sql',          label: 'SQL Converter', key: 'sql_converter' },
       { href: '/projects',     label: 'Projects',      key: 'projects' },
     ];
@@ -62,12 +62,21 @@
     if (panel) panel.classList.toggle('open');
   };
 
-  if (isAdmin) {
-    buildNav(['architecture', 'sql_converter', 'projects']);
+  // Always wait for DOM to be ready before injecting the nav bar
+  function initNav() {
+    if (isAdmin) {
+      buildNav(['architecture', 'sql_converter', 'projects']);
+    } else {
+      fetch('/api/tab-unlocks?username=' + encodeURIComponent(session.username))
+        .then(function (r) { return r.ok ? r.json() : ['architecture']; })
+        .catch(function () { return ['architecture']; })
+        .then(buildNav);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initNav);
   } else {
-    fetch('/api/tab-unlocks?username=' + encodeURIComponent(session.username))
-      .then(function (r) { return r.ok ? r.json() : ['architecture']; })
-      .catch(function () { return ['architecture']; })
-      .then(buildNav);
+    initNav();
   }
 })();
