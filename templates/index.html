@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SQL to Oracle Converter</title>
     <link rel="stylesheet" href="/static/style.css">
+    <script src="/static/nav.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
@@ -27,16 +28,7 @@
 })();
 </script>
 <body>
-    <header>
-        <div class="header-inner">
-            <div class="logo">
-                <img src="/static/logo.svg" alt="Torch House Tech" class="logo-svg">
-                <span class="logo-text">sql<strong>2oracle</strong></span>
-            </div>
-            <p class="tagline">Transpile SQL from any dialect into Oracle-compatible SQL</p>
-            <a href="/architecture" class="nav-link">Oracle Architecture &#8594;</a>
-        </div>
-    </header>
+    <header id="main-nav"></header>
 
     <main>
         <div class="converter-grid">
@@ -81,36 +73,45 @@
         <div id="error-banner" class="error-banner" style="display:none"></div>
 
         <section class="info-section">
-            <h2>Supported Conversions</h2>
+            <h2>Supported Conversions &amp; Oracle Reference</h2>
             <div class="info-grid">
                 <div class="info-card">
                     <h3>Data Types</h3>
                     <ul>
-                        <li>VARCHAR / TEXT &#8594; VARCHAR2</li>
-                        <li>INT / INTEGER &#8594; NUMBER</li>
-                        <li>BOOLEAN &#8594; NUMBER(1)</li>
-                        <li>DATETIME &#8594; DATE / TIMESTAMP</li>
-                        <li>AUTO_INCREMENT &#8594; SEQUENCE pattern</li>
+                        <li>VARCHAR / TEXT &rarr; VARCHAR2 (max 4000 bytes)</li>
+                        <li>CHAR vs VARCHAR2 — CHAR is fixed-length, padded with spaces</li>
+                        <li>INT / INTEGER &rarr; NUMBER(38)</li>
+                        <li>BOOLEAN &rarr; NUMBER(1) — Oracle has no native BOOLEAN in SQL</li>
+                        <li>DATETIME &rarr; DATE (includes time) / TIMESTAMP</li>
+                        <li>NVARCHAR2 for Unicode; CLOB / BLOB for large objects</li>
+                        <li>AUTO_INCREMENT &rarr; SEQUENCE + DEFAULT or IDENTITY column (12c+)</li>
                     </ul>
                 </div>
                 <div class="info-card">
                     <h3>Functions</h3>
                     <ul>
-                        <li>IFNULL / COALESCE &#8594; NVL</li>
-                        <li>NOW() &#8594; SYSDATE</li>
-                        <li>CONCAT &#8594; || operator</li>
-                        <li>LIMIT / TOP &#8594; ROWNUM / FETCH FIRST</li>
-                        <li>GROUP_CONCAT &#8594; LISTAGG</li>
+                        <li>IFNULL / COALESCE &rarr; NVL(expr, default)</li>
+                        <li>NVL2(expr, val_if_not_null, val_if_null)</li>
+                        <li>DECODE(expr, search, result [, default])</li>
+                        <li>NULLIF(expr1, expr2) &rarr; NULL if equal</li>
+                        <li>NOW() &rarr; SYSDATE / SYSTIMESTAMP</li>
+                        <li>CONCAT &rarr; || operator</li>
+                        <li>LIMIT / TOP &rarr; ROWNUM / FETCH FIRST n ROWS ONLY (12c+)</li>
+                        <li>GROUP_CONCAT &rarr; LISTAGG(col, ',') WITHIN GROUP (ORDER BY col)</li>
+                        <li>TO_DATE('2024-01-15', 'YYYY-MM-DD') — always specify format mask</li>
                     </ul>
                 </div>
                 <div class="info-card">
                     <h3>Syntax</h3>
                     <ul>
-                        <li>ILIKE &#8594; UPPER/LOWER LIKE</li>
-                        <li>EXCEPT &#8594; MINUS</li>
-                        <li>Backtick identifiers &#8594; double-quoted</li>
-                        <li>String escaping differences</li>
-                        <li>JOIN syntax normalization</li>
+                        <li>ILIKE &rarr; UPPER(col) LIKE UPPER(:val)</li>
+                        <li>EXCEPT &rarr; MINUS</li>
+                        <li>Backtick identifiers &rarr; double-quoted</li>
+                        <li>MERGE INTO target USING source ON … WHEN MATCHED … WHEN NOT MATCHED …</li>
+                        <li>CONNECT BY PRIOR — hierarchical queries (no recursive CTE needed)</li>
+                        <li>PIVOT / UNPIVOT — native Oracle syntax</li>
+                        <li>String escaping: use q'[…]' for strings containing quotes</li>
+                        <li>JOIN syntax normalization — ANSI JOIN preferred over (+) syntax</li>
                     </ul>
                 </div>
                 <div class="info-card">
@@ -120,7 +121,18 @@
                         <li>PostgreSQL</li>
                         <li>SQL Server (T-SQL)</li>
                         <li>BigQuery, Snowflake, Redshift</li>
-                        <li>SQLite, Hive, Spark, Presto, Trino</li>
+                        <li>SQLite, Hive, Spark, Presto, Trino, DuckDB</li>
+                    </ul>
+                </div>
+                <div class="info-card">
+                    <h3>Quick Tips</h3>
+                    <ul>
+                        <li>Oracle requires FROM DUAL for SELECT without a table: <code>SELECT 1 FROM DUAL</code></li>
+                        <li>String comparison is case-sensitive — use UPPER() or NLS_SORT</li>
+                        <li>Sequences: CREATE SEQUENCE s START WITH 1 INCREMENT BY 1; then s.NEXTVAL</li>
+                        <li>Empty string '' = NULL in Oracle — use IS NULL to check</li>
+                        <li>Date arithmetic: SYSDATE + 1 adds one day; SYSDATE - 1/24 subtracts one hour</li>
+                        <li>Use DBMS_METADATA.GET_DDL to extract object definitions</li>
                     </ul>
                 </div>
             </div>
