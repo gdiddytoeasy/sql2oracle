@@ -1,0 +1,7 @@
+flask
+gunicorn
+sqlglot
+psycopg2-binary
+requests
+beautifulsoup4
+lxml
