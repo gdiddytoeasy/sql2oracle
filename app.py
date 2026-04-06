@@ -300,5 +300,123 @@ def dialects():
     return jsonify(supported)
 
 
+@app.route("/projects")
+def projects():
+    return render_template("projects.html")
+
+
+@app.route("/api/admin/oraclebase-fetch", methods=["POST"])
+def oraclebase_fetch():
+    data = request.get_json()
+    if not data or not data.get("url") or not data.get("topic"):
+        return jsonify({"error": "url and topic required"}), 400
+    url = data["url"].strip()
+    topic = data["topic"].strip()
+    if not url.startswith("https://www.oraclebase.com/"):
+        return jsonify({"error": "Only oraclebase.com URLs are accepted"}), 400
+    try:
+        resp = req.get(url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
+        resp.raise_for_status()
+    except Exception as e:
+        return jsonify({"error": f"Fetch failed: {str(e)}"}), 502
+    soup = BeautifulSoup(resp.text, "lxml")
+    title_tag = soup.find("h1") or soup.find("title")
+    title = title_tag.get_text(strip=True) if title_tag else url
+    # Grab first 3 non-empty paragraphs from main content area
+    main = soup.find("div", {"id": "main-content"}) or soup.find("article") or soup.body
+    paras = [p.get_text(" ", strip=True) for p in (main.find_all("p") if main else []) if len(p.get_text(strip=True)) > 40]
+    summary = " ".join(paras[:3]) or "No summary available."
+    conn = _get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute("""
+        INSERT INTO oraclebase_cache (url, title, summary, topic)
+        VALUES (%s, %s, %s, %s)
+        ON CONFLICT (url) DO UPDATE SET title=EXCLUDED.title, summary=EXCLUDED.summary,
+            topic=EXCLUDED.topic, cached_at=NOW()
+        RETURNING *
+    """, (url, title, summary[:1000], topic))
+    row = dict(cur.fetchone())
+    cur.close()
+    conn.close()
+    return jsonify(row)
+
+
+@app.route("/api/oraclebase-cache", methods=["GET"])
+def oraclebase_cache_list():
+    topic = request.args.get("topic")
+    conn = _get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    if topic:
+        cur.execute("SELECT * FROM oraclebase_cache WHERE topic = %s ORDER BY cached_at DESC", (topic,))
+    else:
+        cur.execute("SELECT * FROM oraclebase_cache ORDER BY cached_at DESC")
+    rows = [dict(r) for r in cur.fetchall()]
+    cur.close()
+    conn.close()
+    return jsonify(rows)
+
+
+@app.route("/api/assignments", methods=["GET"])
+def get_assignments():
+    conn = _get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute("SELECT * FROM assignments ORDER BY created_at DESC")
+    rows = [dict(r) for r in cur.fetchall()]
+    cur.close()
+    conn.close()
+    return jsonify(rows)
+
+
+@app.route("/api/assignments", methods=["POST"])
+def create_assignment():
+    data = request.get_json()
+    required = ("title", "description", "topic", "difficulty", "created_by")
+    if not data or any(k not in data for k in required):
+        return jsonify({"error": "title, description, topic, difficulty, created_by required"}), 400
+    if data["difficulty"] not in ("beginner", "intermediate", "advanced"):
+        return jsonify({"error": "difficulty must be beginner, intermediate, or advanced"}), 400
+    conn = _get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute("""
+        INSERT INTO assignments (title, description, topic, difficulty, due_date, created_by)
+        VALUES (%s, %s, %s, %s, %s, %s) RETURNING *
+    """, (data["title"], data["description"], data["topic"], data["difficulty"],
+          data.get("due_date"), data["created_by"]))
+    row = dict(cur.fetchone())
+    cur.close()
+    conn.close()
+    return jsonify(row), 201
+
+
+@app.route("/api/assignments/<int:assignment_id>", methods=["PUT"])
+def update_assignment(assignment_id):
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+    conn = _get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute("""
+        UPDATE assignments SET title=%s, description=%s, topic=%s, difficulty=%s, due_date=%s
+        WHERE id=%s RETURNING *
+    """, (data.get("title"), data.get("description"), data.get("topic"),
+          data.get("difficulty"), data.get("due_date"), assignment_id))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    if not row:
+        return jsonify({"error": "Not found"}), 404
+    return jsonify(dict(row))
+
+
+@app.route("/api/assignments/<int:assignment_id>", methods=["DELETE"])
+def delete_assignment(assignment_id):
+    conn = _get_db()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM assignments WHERE id=%s", (assignment_id,))
+    cur.close()
+    conn.close()
+    return jsonify({"ok": True})
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
