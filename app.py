@@ -5,6 +5,8 @@ import psycopg2.extras
 from flask import Flask, request, jsonify, render_template
 import sqlglot
 import sqlglot.errors
+import requests as req
+from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 
@@ -52,6 +54,74 @@ def _init_db():
                 "INSERT INTO users (username, display_name, role, hash) VALUES (%s, %s, %s, %s) ON CONFLICT DO NOTHING",
                 (username, display_name, role, hash_)
             )
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS oraclebase_cache (
+            id          SERIAL PRIMARY KEY,
+            url         TEXT NOT NULL UNIQUE,
+            title       TEXT NOT NULL,
+            summary     TEXT NOT NULL,
+            topic       TEXT NOT NULL,
+            cached_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+    """)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS assignments (
+            id          SERIAL PRIMARY KEY,
+            title       TEXT NOT NULL,
+            description TEXT NOT NULL,
+            topic       TEXT NOT NULL,
+            difficulty  TEXT NOT NULL CHECK (difficulty IN ('beginner','intermediate','advanced')),
+            due_date    DATE,
+            created_by  TEXT NOT NULL REFERENCES users(username),
+            created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+    """)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS showcase_entries (
+            id               SERIAL PRIMARY KEY,
+            student_username TEXT NOT NULL REFERENCES users(username),
+            title            TEXT NOT NULL,
+            description      TEXT NOT NULL,
+            url              TEXT,
+            submitted_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            approved         BOOLEAN NOT NULL DEFAULT FALSE,
+            approved_by      TEXT REFERENCES users(username),
+            approved_at      TIMESTAMPTZ
+        )
+    """)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS lab_topics (
+            id          SERIAL PRIMARY KEY,
+            title       TEXT NOT NULL,
+            description TEXT NOT NULL,
+            icon        TEXT NOT NULL DEFAULT '📚',
+            sort_order  INTEGER NOT NULL DEFAULT 0
+        )
+    """)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS lab_exercises (
+            id            SERIAL PRIMARY KEY,
+            topic_id      INTEGER NOT NULL REFERENCES lab_topics(id) ON DELETE CASCADE,
+            type          TEXT NOT NULL CHECK (type IN ('quiz','scenario','written','flashcard')),
+            title         TEXT NOT NULL,
+            content_json  JSONB NOT NULL,
+            oraclebase_id INTEGER REFERENCES oraclebase_cache(id),
+            sort_order    INTEGER NOT NULL DEFAULT 0,
+            created_by    TEXT NOT NULL REFERENCES users(username),
+            created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+    """)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS lab_progress (
+            username     TEXT NOT NULL REFERENCES users(username),
+            exercise_id  INTEGER NOT NULL REFERENCES lab_exercises(id) ON DELETE CASCADE,
+            completed    BOOLEAN NOT NULL DEFAULT FALSE,
+            score        INTEGER,
+            answer_json  JSONB,
+            completed_at TIMESTAMPTZ,
+            PRIMARY KEY (username, exercise_id)
+        )
+    """)
     cur.close()
     conn.close()
 
