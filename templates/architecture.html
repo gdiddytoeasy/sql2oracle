@@ -71,7 +71,7 @@
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
-html, body { width:100%; height:100%; overflow:hidden; background:var(--bg); color:var(--txt); }
+html, body { width:100%; min-height:100%; background:var(--bg); color:var(--txt); }
 
 body {
   font-family:'Rajdhani',sans-serif;
@@ -113,8 +113,8 @@ body {
 
 /* ── MAIN CANVAS ───────────────────── */
 #canvas {
-  position:fixed; top:72px; left:0; right:0; bottom:0;
-  overflow:auto;
+  position:fixed; top:132px; left:0; right:0; bottom:0;
+  overflow:auto; height:calc(100vh - 132px);
 }
 #diagram {
   position:relative;
@@ -1727,9 +1727,12 @@ body.viewer-mode .sec-section:hover {
 }
 #access-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 </style>
+<link rel="stylesheet" href="/static/style.css">
+<script src="/static/nav.js"></script>
 <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
 </head>
 <body>
+<header id="main-nav"></header>
 <script>
 (function() {
   if (!sessionStorage.getItem('ora_auth_session_v2')) {
@@ -25430,6 +25433,51 @@ initAuth();
   });
 })();
 
+</script>
+
+<section id="arch-reference-panel" style="
+  max-width:1400px; margin:0 auto; padding:24px 32px 40px;
+  display:none;
+">
+  <h2 style="font-family:'Orbitron',monospace;font-size:11px;letter-spacing:3px;
+              color:rgba(255,255,255,0.4);text-transform:uppercase;margin-bottom:16px;">
+    Reference — oraclebase.com
+  </h2>
+  <div id="arch-reference-cards" style="
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;
+  "></div>
+</section>
+
+<script>
+(function() {
+  fetch('/api/oraclebase-cache?topic=architecture')
+    .then(function(r){ return r.ok ? r.json() : []; })
+    .then(function(items) {
+      if (!items.length) return;
+      var panel = document.getElementById('arch-reference-panel');
+      var container = document.getElementById('arch-reference-cards');
+      panel.style.display = 'block';
+      container.innerHTML = items.slice(0, 4).map(function(item) {
+        return [
+          '<div style="background:rgba(14,30,60,0.5);border:1px solid rgba(59,130,246,0.2);',
+          'border-radius:10px;padding:16px;">',
+          '<div style="font-family:\'Orbitron\',monospace;font-size:8px;letter-spacing:2px;',
+          'color:#3B82F6;margin-bottom:6px;">ORACLEBASE.COM</div>',
+          '<div style="font-family:\'Share Tech Mono\',monospace;font-size:12px;',
+          'color:rgba(255,255,255,0.8);margin-bottom:8px;">' + escHTML(item.title) + '</div>',
+          '<div style="font-size:12px;color:rgba(255,255,255,0.4);line-height:1.5;',
+          'margin-bottom:12px;">' + escHTML(item.summary.slice(0,200)) + '…</div>',
+          '<a href="' + escHTML(item.url) + '" target="_blank" rel="noopener" ',
+          'style="font-family:\'Orbitron\',monospace;font-size:9px;letter-spacing:1px;',
+          'color:#3B82F6;text-decoration:none;">Read Article →</a>',
+          '</div>'
+        ].join('');
+      }).join('');
+    });
+  function escHTML(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+})();
 </script>
 </body>
 </html>
