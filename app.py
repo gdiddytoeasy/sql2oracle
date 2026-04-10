@@ -54,11 +54,18 @@ def _init_db():
                 "INSERT INTO users (username, display_name, role, hash) VALUES (%s, %s, %s, %s) ON CONFLICT DO NOTHING",
                 (username, display_name, role, hash_)
             )
-    # Always ensure admin account has the correct role and password (Admin@Oracle1)
-    cur.execute(
-        "UPDATE users SET hash = %s, role = 'admin' WHERE username = 'admin'",
-        ('1e67a4eeb5a014031b0686d14438b922072db3d572696778abcb6ce3257897c2',)
-    )
+    # Always enforce correct passwords for all default accounts
+    enforced = [
+        ('admin',   'Administrator', 'admin',   '1e67a4eeb5a014031b0686d14438b922072db3d572696778abcb6ce3257897c2'),
+        ('dba1',    'DBA Student',   'dba',     'afdb5173eade6c2f4d471709828049f97eaa493f37ded5f7ea7ba715b1232fc9'),
+        ('student', 'Student',       'student', 'f5016f9973ff8e485d4f85090bfd451f97cef471ed95a5f81578058f1342bf2a'),
+        ('guest',   'Guest Viewer',  'viewer',  '9594fb14922df9ed9ef4a03fbbea976e27cde7e1ebe0460c6ccfcda2da074281'),
+    ]
+    for username, display_name, role, hash_ in enforced:
+        cur.execute(
+            "UPDATE users SET hash = %s, role = %s, display_name = %s WHERE username = %s",
+            (hash_, role, display_name, username)
+        )
     cur.execute("""
         CREATE TABLE IF NOT EXISTS oraclebase_cache (
             id          SERIAL PRIMARY KEY,
@@ -192,6 +199,35 @@ def verify_user():
     cur.execute(
         "SELECT username, display_name AS \"displayName\", role FROM users WHERE username = %s AND hash = %s",
         (data["username"], data["hash"])
+    )
+    match = cur.fetchone()
+    cur.close()
+    conn.close()
+    if match:
+        return jsonify(dict(match))
+    return jsonify({"error": "Invalid credentials"}), 401
+
+
+@app.route("/api/login", methods=["POST"])
+def api_login():
+    """Compatibility endpoint: accepts {username, password} or {username, hash}."""
+    import hashlib
+    data = request.get_json()
+    if not data or not data.get("username"):
+        return jsonify({"error": "username required"}), 400
+    username = data["username"].strip().lower()
+    # Accept either a raw password or a pre-hashed value
+    if data.get("password"):
+        hash_ = hashlib.sha256(data["password"].encode()).hexdigest()
+    elif data.get("hash"):
+        hash_ = data["hash"]
+    else:
+        return jsonify({"error": "password or hash required"}), 400
+    conn = _get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute(
+        "SELECT username, display_name AS \"displayName\", role FROM users WHERE username = %s AND hash = %s",
+        (username, hash_)
     )
     match = cur.fetchone()
     cur.close()
