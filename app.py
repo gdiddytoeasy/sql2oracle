@@ -694,4 +694,15 @@ def get_lab_progress():
 
 
 if __name__ == "__main__":
+    import subprocess, signal
+    try:
+        result = subprocess.run(["fuser", "5000/tcp"], capture_output=True, text=True)
+        pids = result.stdout.strip().split()
+        for pid in pids:
+            try:
+                os.kill(int(pid), signal.SIGKILL)
+            except Exception:
+                pass
+    except Exception:
+        pass
     app.run(host="0.0.0.0", port=5000, debug=True)
