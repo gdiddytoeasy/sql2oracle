@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oracle Assignments — Users, Roles & Tablespaces</title>
+<link rel="stylesheet" href="./src/style.css">
+<style>
+  body { --bg: #0a0e27; --txt: #e0e6ed; --txt-dim: #9099a8; }
+
+  #assignments-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    background: var(--bg);
+  }
+
+  .assignment-section {
+    background: rgba(30, 34, 54, 0.8);
+    border: 1px solid rgba(46, 128, 253, 0.2);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+
+  .section-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #2680fd;
+    margin-bottom: 16px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .step {
+    background: rgba(20, 24, 42, 0.9);
+    border-left: 4px solid #fd7e04;
+    padding: 16px;
+    margin: 16px 0;
+    border-radius: 4px;
+  }
+
+  .step-number {
+    display: inline-block;
+    background: #fd7e04;
+    color: #000;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 32px;
+    font-weight: bold;
+    margin-right: 12px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .step-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #2680fd;
+    margin-bottom: 8px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .step-description {
+    color: var(--txt-dim);
+    margin-bottom: 12px;
+    line-height: 1.6;
+  }
+
+  .code-block {
+    background: rgba(10, 14, 27, 0.9);
+    border: 1px solid rgba(46, 128, 253, 0.3);
+    border-radius: 6px;
+    padding: 16px;
+    margin: 12px 0;
+    position: relative;
+    overflow-x: auto;
+  }
+
+  .code-block code {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: #38BDF8;
+    line-height: 1.6;
+    display: block;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  .copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #2680fd;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    transition: background 0.3s;
+  }
+
+  .copy-btn:hover {
+    background: #1a5acc;
+  }
+
+  .copy-btn.copied {
+    background: #34d399;
+  }
+
+  .expected-output {
+    background: rgba(34, 197, 94, 0.05);
+    border-left: 4px solid #34d399;
+    padding: 12px;
+    margin: 12px 0;
+    border-radius: 4px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: #86efac;
+  }
+
+  .note {
+    background: rgba(59, 130, 246, 0.05);
+    border-left: 4px solid #3b82f6;
+    padding: 12px;
+    margin: 12px 0;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #93c5fd;
+  }
+
+  .warning {
+    background: rgba(239, 68, 68, 0.05);
+    border-left: 4px solid #ef4444;
+    padding: 12px;
+    margin: 12px 0;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #fca5a5;
+  }
+
+  .exercise-box {
+    background: rgba(168, 85, 247, 0.05);
+    border: 2px dashed rgba(168, 85, 247, 0.3);
+    padding: 16px;
+    margin: 16px 0;
+    border-radius: 6px;
+  }
+
+  .exercise-title {
+    font-weight: 700;
+    color: #c084fc;
+    margin-bottom: 12px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .objectives {
+    background: rgba(46, 204, 113, 0.05);
+    border-left: 4px solid #2ecc71;
+    padding: 12px;
+    margin: 12px 0;
+    border-radius: 4px;
+  }
+
+  .objectives-title {
+    font-weight: 700;
+    color: #6ee7a0;
+    margin-bottom: 8px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .objectives ul {
+    margin: 0;
+    padding-left: 20px;
+    color: var(--txt-dim);
+  }
+
+  .objectives li {
+    margin: 6px 0;
+    line-height: 1.5;
+  }
+
+  #header {
+    border-bottom: 2px solid rgba(46, 128, 253, 0.2);
+  }
+
+  .nav-tabs {
+    display: flex;
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .nav-tab {
+    padding: 8px 16px;
+    background: rgba(30, 34, 54, 0.6);
+    border: 1px solid rgba(46, 128, 253, 0.2);
+    border-radius: 4px;
+    color: var(--txt-dim);
+    cursor: pointer;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+
+  .nav-tab:hover, .nav-tab.active {
+    background: #2680fd;
+    color: white;
+    border-color: #2680fd;
+  }
+
+  .table-schema {
+    background: rgba(10, 14, 27, 0.9);
+    border: 1px solid rgba(46, 128, 253, 0.3);
+    border-radius: 6px;
+    padding: 16px;
+    margin: 12px 0;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: #38BDF8;
+    overflow-x: auto;
+  }
+
+  .comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 13px;
+  }
+
+  .comparison-table th, .comparison-table td {
+    border: 1px solid rgba(46, 128, 253, 0.2);
+    padding: 12px;
+    text-align: left;
+  }
+
+  .comparison-table th {
+    background: rgba(46, 128, 253, 0.15);
+    color: #2680fd;
+    font-weight: 700;
+  }
+
+  .comparison-table tr:nth-child(even) {
+    background: rgba(46, 128, 253, 0.05);
+  }
+
+  .verification-checklist {
+    background: rgba(30, 34, 54, 0.6);
+    border: 1px solid rgba(46, 204, 113, 0.2);
+    border-radius: 6px;
+    padding: 16px;
+    margin: 12px 0;
+  }
+
+  .checklist-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    color: var(--txt-dim);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+  }
+
+  .checklist-item input[type="checkbox"] {
+    margin-right: 12px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="header">
+  <div class="h-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="486.67 -662.98 466.66 300.52"><path d="M705.47,-511.18 C705.47,-512.52 704.66,-513.68 703.50,-514.18 C702.63,-516.21 702.43,-518.15 702.93,-519.95 C703.69,-522.66 705.82,-524.63 707.29,-525.71 C708.05,-525.16 708.99,-524.83 710.01,-524.83 C712.60,-524.83 714.70,-526.93 714.70,-529.52 C714.70,-532.11 712.60,-534.21 710.01,-534.21 C707.61,-534.21 705.66,-532.41 705.38,-530.09 C703.43,-528.81 699.73,-525.85 698.43,-521.25 C697.62,-518.38 697.88,-515.40 699.17,-512.37 C699.02,-512.00 698.94,-511.60 698.94,-511.18 C698.94,-509.38 700.40,-507.91 702.20,-507.91 C704.01,-507.91 705.47,-509.38 705.47,-511.18 Z" fill="#fd7e04"/><path d="M714.70,-549.63 C714.70,-552.59 712.30,-554.98 709.34,-554.98 C707.23,-554.98 705.42,-553.75 704.55,-551.97 L699.58,-551.97 C700.51,-554.72 703.22,-558.10 705.77,-560.69 C706.72,-559.84 707.96,-559.30 709.34,-559.30 C712.30,-559.30 714.70,-561.70 714.70,-564.66 C714.70,-567.61 712.30,-570.01 709.34,-570.01 C706.70,-570.01 704.52,-568.10 704.08,-565.58 C701.52,-563.22 695.14,-556.76 694.62,-550.88 L683.73,-543.48 C683.10,-543.82 682.38,-544.03 681.61,-544.03 C679.11,-544.03 677.07,-542.00 677.07,-539.49 C677.07,-536.98 679.11,-534.95 681.61,-534.95 C684.11,-534.95 686.13,-536.97 686.15,-539.46 L697.65,-547.29 L704.55,-547.29 C705.42,-545.51 707.23,-544.27 709.34,-544.27 C712.30,-544.27 714.70,-546.67 714.70,-549.63 Z" fill="#fd7e04"/><path d="M690.63,-521.61 L691.09,-521.63 C691.09,-521.70 690.93,-527.33 697.48,-530.96 C698.62,-530.24 700.04,-529.92 701.56,-530.28 C703.60,-530.76 705.21,-532.45 705.58,-534.51 C706.18,-537.90 703.59,-540.84 700.31,-540.84 C697.35,-540.84 694.95,-538.45 694.95,-535.49 C694.95,-535.30 694.99,-535.12 695.01,-534.94 C689.57,-531.87 687.55,-527.63 686.83,-524.71 C681.13,-526.43 677.35,-529.21 675.65,-533.04 C672.50,-540.12 676.97,-548.89 677.01,-548.97 L677.91,-550.68 L682.51,-554.07 C682.18,-554.55 681.93,-555.09 681.79,-555.67 L675.86,-553.69 C673.64,-556.18 672.29,-558.65 671.83,-561.05 C676.63,-561.70 680.17,-562.69 682.57,-564.07 C680.60,-564.15 678.97,-565.50 678.47,-567.32 C677.06,-566.79 675.03,-566.25 672.09,-565.81 C673.46,-570.33 677.57,-573.49 678.40,-574.10 C679.14,-573.49 679.82,-572.85 680.36,-572.22 C681.05,-572.66 681.86,-572.92 682.74,-572.92 C684.12,-572.92 685.35,-572.29 686.16,-571.31 C685.26,-574.80 681.58,-577.69 679.70,-578.97 C679.15,-580.38 679.36,-581.27 679.66,-581.87 C680.16,-582.90 681.21,-583.85 682.48,-584.68 C685.85,-581.96 691.81,-576.36 692.43,-572.14 C692.53,-571.45 692.41,-570.88 692.18,-570.36 C691.99,-570.38 691.81,-570.41 691.61,-570.41 C688.79,-570.41 686.57,-567.83 687.18,-564.90 C687.54,-563.18 688.92,-561.80 690.64,-561.44 C693.57,-560.83 696.15,-563.05 696.15,-565.87 C696.15,-566.39 696.05,-566.88 695.89,-567.34 C696.93,-568.93 697.36,-570.81 697.06,-572.82 C696.27,-578.18 690.71,-583.78 687.10,-586.92 C687.85,-587.20 688.56,-587.41 689.22,-587.59 L695.00,-588.92 C694.94,-589.22 694.90,-589.53 694.90,-589.85 C694.90,-590.42 695.01,-590.95 695.20,-591.45 L692.22,-593.00 C692.10,-593.47 692.20,-593.64 692.24,-593.70 C693.25,-595.20 698.40,-596.26 702.40,-596.27 C704.98,-593.17 708.58,-587.85 708.37,-583.60 C708.28,-581.90 707.57,-580.52 706.20,-579.37 C705.18,-579.83 703.99,-580.01 702.73,-579.70 C700.65,-579.20 699.01,-577.45 698.69,-575.33 C698.21,-572.11 700.60,-569.32 703.68,-569.15 C705.17,-569.07 706.58,-569.76 707.61,-570.84 C709.47,-572.79 709.52,-574.34 709.18,-575.75 C711.59,-577.76 712.89,-580.32 713.04,-583.37 C713.28,-588.15 710.49,-593.19 707.95,-596.72 C706.48,-598.78 706.96,-601.76 709.13,-603.05 C709.49,-603.26 709.86,-603.40 710.25,-603.46 C712.91,-603.82 715.28,-601.75 715.28,-599.06 L715.28,-518.61 C715.28,-513.20 712.04,-508.20 706.96,-506.34 C704.94,-505.61 703.08,-505.48 701.40,-505.97 C695.18,-507.77 691.54,-517.77 690.63,-521.61 M703.51,-498.64 C704.36,-498.64 705.45,-498.93 706.68,-499.41 C716.27,-503.19 722.30,-512.79 722.30,-523.11 L722.30,-595.02 C722.30,-605.13 718.15,-608.44 713.30,-610.10 C712.28,-610.44 710.11,-610.53 709.34,-610.42 C705.68,-609.94 702.61,-607.52 700.20,-603.22 C696.38,-602.97 689.29,-601.91 686.41,-597.61 C685.77,-596.67 685.18,-595.36 685.13,-593.68 C681.43,-592.39 675.69,-589.71 673.36,-584.98 C672.34,-582.91 672.07,-580.67 672.54,-578.39 C669.83,-576.02 665.46,-571.28 664.72,-564.81 C664.14,-559.74 665.84,-554.76 669.78,-549.96 C668.24,-546.07 665.85,-537.84 669.21,-530.23 C671.72,-524.54 676.80,-520.47 684.31,-518.11 C685.76,-513.37 690.16,-501.93 699.43,-499.23 C700.76,-498.84 702.12,-498.64 703.51,-498.64 Z" fill="#fd7e04"/><path d="M725.62,-540.33 C725.55,-540.33 725.49,-540.34 725.43,-540.34 L725.43,-533.32 C725.49,-533.31 725.55,-533.31 725.62,-533.31 C737.18,-533.31 746.59,-542.55 746.59,-553.91 C746.59,-565.26 737.18,-574.50 725.62,-574.50 C725.55,-574.50 725.49,-574.49 725.43,-574.49 L725.43,-567.46 C725.49,-567.47 725.55,-567.47 725.62,-567.47 C733.31,-567.47 739.57,-561.39 739.57,-553.91 C739.57,-546.42 733.31,-540.33 725.62,-540.33 Z" fill="#2680fd"/><path d="M762.15,-536.76 L762.52,-537.64 C762.89,-538.51 763.60,-539.20 764.48,-539.55 C778.90,-545.18 778.90,-545.86 778.90,-548.30 L778.90,-560.00 C778.91,-562.50 778.91,-563.21 764.51,-568.40 C763.59,-568.74 762.84,-569.44 762.46,-570.35 L762.08,-571.24 C761.71,-572.13 761.72,-573.13 762.11,-574.01 C763.45,-577.08 764.47,-579.49 765.23,-581.41 C765.95,-583.23 766.43,-584.60 766.73,-585.66 C766.75,-585.73 766.77,-585.81 766.79,-585.88 C766.80,-585.90 766.80,-585.91 766.81,-585.93 C766.81,-585.94 766.81,-585.95 766.81,-585.95 C766.87,-586.17 766.92,-586.37 766.96,-586.56 C767.42,-588.74 766.85,-589.29 765.95,-590.17 L757.48,-598.44 C755.76,-600.11 755.23,-600.62 741.30,-594.35 C740.42,-593.95 739.42,-593.93 738.53,-594.29 L737.43,-594.74 C736.55,-595.09 735.85,-595.79 735.49,-596.67 C729.75,-610.74 729.02,-610.74 726.66,-610.74 L724.74,-610.74 L724.74,-603.71 C725.95,-601.25 728.24,-595.89 730.09,-591.29 L730.09,-591.29 C730.45,-590.40 731.15,-589.70 732.03,-589.34 L738.70,-586.65 C739.59,-586.29 740.59,-586.31 741.47,-586.71 L741.47,-586.71 C746.01,-588.78 751.38,-591.10 753.97,-592.05 L759.63,-586.53 C759.48,-586.12 759.30,-585.63 759.09,-585.10 C758.54,-583.67 757.79,-581.85 756.97,-579.91 C756.17,-578.00 755.30,-575.97 754.46,-574.09 C754.07,-573.21 754.06,-572.20 754.43,-571.30 L757.18,-564.77 C757.57,-563.86 758.31,-563.16 759.24,-562.83 L759.25,-562.83 C763.90,-561.17 769.32,-559.11 771.87,-557.99 L771.87,-550.27 C769.35,-549.08 763.88,-546.84 759.17,-545.03 C758.28,-544.68 757.57,-543.99 757.20,-543.11 L754.46,-536.59 C754.07,-535.66 754.09,-534.62 754.52,-533.71 L754.52,-533.71 C756.61,-529.35 758.94,-524.17 759.94,-521.60 L754.29,-516.08 C751.67,-516.98 746.15,-519.19 741.48,-521.18 L741.48,-521.18 C740.62,-521.55 739.65,-521.56 738.79,-521.21 L732.12,-518.51 C731.21,-518.14 730.49,-517.40 730.14,-516.48 C728.45,-511.91 726.34,-506.59 725.19,-504.10 L720.74,-504.10 L720.74,-497.08 L727.16,-497.08 C729.58,-497.08 730.34,-497.08 735.65,-511.13 C735.99,-512.05 736.71,-512.79 737.62,-513.15 L738.73,-513.60 C739.59,-513.95 740.56,-513.94 741.41,-513.58 C755.64,-507.59 756.11,-508.06 757.84,-509.72 L766.32,-518.01 C768.07,-519.74 768.62,-520.28 762.21,-533.90 C761.79,-534.80 761.77,-535.84 762.15,-536.76 Z" fill="#2680fd"/><path d="M718.06,-638.05 C717.85,-636.19 717.97,-620.00 717.95,-615.62 L721.91,-615.57 C722.08,-623.20 722.19,-636.51 722.03,-638.02 C724.75,-638.60 727.21,-640.38 728.55,-643.19 C730.37,-647.02 729.30,-651.73 726.01,-654.41 C721.63,-657.98 715.29,-656.90 712.27,-652.36 C710.11,-649.12 710.38,-644.85 712.59,-641.65 C714.08,-639.50 716.04,-638.50 718.06,-638.05 Z" fill="#2680fd"/><path d="M773.09,-585.03 C779.64,-588.96 790.94,-595.99 792.13,-596.93 C794.08,-594.94 796.90,-593.81 799.98,-594.19 C804.20,-594.70 807.60,-598.12 808.11,-602.33 C808.78,-607.95 804.48,-612.73 799.03,-612.85 C795.14,-612.94 791.68,-610.43 790.15,-606.85 C789.12,-604.44 789.33,-602.25 790.03,-600.31 C788.35,-599.48 774.73,-590.73 771.02,-588.41 Z" fill="#2680fd"/><path d="M809.00,-515.48 C807.49,-519.06 803.77,-521.19 799.88,-521.10 C797.26,-521.05 795.35,-519.96 793.87,-518.52 C792.42,-519.72 778.85,-528.52 775.20,-530.94 L772.97,-527.66 C779.25,-523.32 790.31,-515.92 791.66,-515.22 C790.65,-512.62 790.78,-509.59 792.39,-506.93 C794.59,-503.30 799.10,-501.60 803.15,-502.88 C808.55,-504.58 811.13,-510.46 809.00,-515.48 Z" fill="#2680fd"/><path d="M749.04,-608.16 C751.84,-611.93 756.62,-618.57 757.08,-619.38 C758.65,-618.70 760.52,-618.72 762.18,-619.65 C764.46,-620.93 765.60,-623.66 764.90,-626.18 C763.97,-629.53 760.41,-631.24 757.28,-630.04 C755.05,-629.18 753.67,-626.95 753.64,-624.56 C753.62,-622.95 754.24,-621.75 755.10,-620.81 C754.33,-619.94 748.64,-611.79 747.07,-609.60 Z" fill="#2680fd"/><path d="M798.31,-559.22 C796.99,-558.30 796.37,-557.09 796.10,-555.85 C794.95,-555.98 785.01,-555.89 782.32,-555.90 L782.28,-553.46 C786.98,-553.36 795.16,-553.31 796.08,-553.41 C796.45,-551.74 797.54,-550.22 799.27,-549.41 C801.63,-548.29 804.52,-548.95 806.16,-550.98 C808.35,-553.67 807.69,-557.57 804.89,-559.42 C802.90,-560.75 800.28,-560.58 798.31,-559.22 Z" fill="#2680fd"/><path d="M649.85,-606.85 C648.33,-610.43 644.86,-612.94 640.97,-612.85 C635.52,-612.73 631.22,-607.94 631.89,-602.33 C632.40,-598.11 635.80,-594.70 640.02,-594.19 C643.10,-593.81 645.92,-594.94 647.87,-596.93 C649.06,-595.99 660.36,-588.96 666.91,-585.03 L668.98,-588.41 C665.27,-590.73 651.66,-599.48 649.97,-600.31 C650.67,-602.25 650.88,-604.44 649.85,-606.85 Z" fill="#2680fd"/><path d="M646.13,-518.52 C644.65,-519.96 642.74,-521.05 640.12,-521.10 C636.23,-521.19 632.51,-519.06 631.00,-515.48 C628.87,-510.46 631.45,-504.58 636.85,-502.88 C640.90,-501.60 645.41,-503.30 647.61,-506.93 C649.22,-509.59 649.35,-512.62 648.34,-515.22 C649.69,-515.92 660.75,-523.32 667.03,-527.67 L664.80,-530.94 C661.15,-528.52 647.58,-519.72 646.13,-518.52 Z" fill="#2680fd"/><path d="M692.93,-609.60 C691.36,-611.79 685.67,-619.94 684.90,-620.81 C685.76,-621.75 686.38,-622.95 686.36,-624.56 C686.33,-626.95 684.95,-629.18 682.71,-630.04 C679.59,-631.24 676.03,-629.53 675.10,-626.18 C674.40,-623.66 675.54,-620.93 677.82,-619.65 C679.48,-618.72 681.35,-618.70 682.92,-619.38 C683.38,-618.57 688.16,-611.93 690.96,-608.16 Z" fill="#2680fd"/><path d="M640.73,-549.41 C642.46,-550.23 643.55,-551.74 643.92,-553.41 C644.84,-553.31 653.02,-553.36 657.72,-553.46 L657.68,-555.90 C654.99,-555.89 645.04,-555.98 643.90,-555.85 C643.63,-557.10 643.01,-558.30 641.69,-559.22 C639.72,-560.58 637.10,-560.75 635.11,-559.42 C632.31,-557.57 631.65,-553.68 633.84,-550.98 C635.48,-548.95 638.37,-548.29 640.73,-549.41 Z" fill="#2680fd"/><path d="M744.76,-494.39 L698.75,-494.39 C696.81,-494.39 695.24,-492.82 695.24,-490.88 C695.24,-488.94 696.81,-487.37 698.75,-487.37 L744.76,-487.37 C746.70,-487.37 748.27,-488.94 748.27,-490.88 C748.27,-492.82 746.70,-494.39 744.76,-494.39 Z" fill="#2680fd"/><path d="M734.18,-484.25 L707.59,-484.25 C705.65,-484.25 704.08,-482.67 704.08,-480.73 C704.08,-478.79 705.65,-477.22 707.59,-477.22 L734.18,-477.22 C736.12,-477.22 737.69,-478.79 737.69,-480.73 C737.69,-482.67 736.12,-484.25 734.18,-484.25 Z" fill="#2680fd"/><path d="M729.84,-474.49 L714.39,-474.49 C712.45,-474.49 710.88,-472.91 710.88,-470.97 C710.88,-469.03 712.45,-467.46 714.39,-467.46 L716.96,-467.46 C716.96,-464.87 719.06,-462.78 721.64,-462.78 L722.42,-462.78 C725.01,-462.78 727.11,-464.87 727.11,-467.46 L729.84,-467.46 C731.78,-467.46 733.35,-469.03 733.35,-470.97 C733.35,-472.91 731.78,-474.49 729.84,-474.49 Z" fill="#2680fd"/><path d="M681.66,-569.56 C681.80,-570.22 681.26,-571.20 680.36,-572.23 C679.13,-571.44 678.31,-570.06 678.31,-568.49 C678.31,-568.08 678.37,-567.69 678.47,-567.32 C681.27,-568.37 681.62,-569.39 681.66,-569.56 Z" fill="#fd7e04"/><path d="M687.17,-568.49 C687.17,-569.56 686.79,-570.54 686.16,-571.31 C686.38,-570.43 686.44,-569.51 686.24,-568.58 C685.84,-566.75 684.63,-565.27 682.57,-564.07 C682.62,-564.07 682.68,-564.06 682.74,-564.06 C685.19,-564.06 687.17,-566.05 687.17,-568.49 Z" fill="#fd7e04"/><path d="M686.24,-568.58 C686.44,-569.51 686.38,-570.43 686.16,-571.31 C685.35,-572.29 684.12,-572.92 682.74,-572.92 C681.87,-572.92 681.05,-572.66 680.37,-572.23 C681.26,-571.20 681.80,-570.22 681.66,-569.56 C681.62,-569.39 681.27,-568.37 678.47,-567.32 C678.97,-565.50 680.61,-564.15 682.57,-564.07 C684.63,-565.27 685.84,-566.75 686.24,-568.58 Z" fill="#fd7e04"/><path d="M686.11,-552.22 C688.56,-552.22 690.54,-554.21 690.54,-556.65 C690.54,-559.10 688.56,-561.08 686.11,-561.08 C683.66,-561.08 681.68,-559.10 681.68,-556.65 C681.68,-556.32 681.72,-555.99 681.79,-555.67 L687.08,-557.43 L682.51,-554.07 C683.32,-552.96 684.63,-552.22 686.11,-552.22 Z" fill="#fd7e04"/><path d="M681.79,-555.67 C681.93,-555.09 682.18,-554.55 682.51,-554.07 L687.08,-557.43 Z" fill="#fd7e04"/><path d="M699.33,-585.42 C701.78,-585.42 703.76,-587.40 703.76,-589.85 C703.76,-592.30 701.78,-594.28 699.33,-594.28 C697.45,-594.28 695.85,-593.10 695.20,-591.45 L698.50,-589.73 L695.00,-588.92 C695.43,-586.92 697.20,-585.42 699.33,-585.42 Z" fill="#fd7e04"/><path d="M695.20,-591.45 C695.01,-590.95 694.90,-590.42 694.90,-589.85 C694.90,-589.53 694.94,-589.22 695.00,-588.92 L698.50,-589.73 Z" fill="#fd7e04"/><path d="M505.78,-443.26 L491.67,-443.26 L491.67,-450.89 L528.28,-450.89 L528.28,-443.26 L514.17,-443.26 L514.17,-406.39 L505.78,-406.39 Z" fill="#2680fd"/><path d="M539.66,-428.19 C539.85,-420.88 543.79,-413.06 554.28,-413.06 C564.77,-413.06 568.71,-420.95 568.84,-428.26 C568.96,-435.76 564.77,-444.15 554.28,-444.15 C543.79,-444.15 539.47,-435.69 539.66,-428.19 M577.10,-428.38 C576.97,-416.88 569.92,-405.37 554.28,-405.37 C538.64,-405.37 531.40,-416.62 531.40,-428.32 C531.40,-440.02 538.90,-451.78 554.28,-451.78 C569.60,-451.78 577.23,-440.02 577.10,-428.38 Z" fill="#2680fd"/><path d="M591.72,-443.07 L591.72,-428.83 L604.50,-428.83 C609.84,-428.83 612.13,-432.39 612.13,-435.95 C612.13,-439.51 609.77,-443.07 604.50,-443.07 M622.74,-406.39 L612.76,-406.39 L599.79,-421.26 L591.72,-421.26 L591.72,-406.39 L583.33,-406.39 L583.33,-450.95 C590.39,-450.95 597.44,-450.89 604.50,-450.89 C614.99,-450.82 620.52,-443.83 620.52,-436.14 C620.52,-430.04 617.72,-423.87 609.27,-422.15 L622.74,-406.96 Z" fill="#2680fd"/><path d="M665.40,-411.98 C660.82,-407.47 654.91,-405.37 648.49,-405.37 C631.96,-405.37 624.97,-416.75 624.90,-428.32 C624.84,-439.95 632.40,-451.78 648.49,-451.78 C654.53,-451.78 660.25,-449.49 664.82,-444.97 L659.23,-439.57 C656.31,-442.43 652.36,-443.77 648.49,-443.77 C637.74,-443.77 633.10,-435.76 633.17,-428.32 C633.23,-420.95 637.49,-413.25 648.49,-413.25 C652.36,-413.25 656.75,-414.84 659.68,-417.77 Z" fill="#2680fd"/><path d="M700.42,-406.32 L700.42,-424.31 L678.55,-424.31 L678.55,-406.32 L670.16,-406.32 L670.16,-450.82 L678.55,-450.82 L678.55,-432.07 L700.42,-432.07 L700.42,-450.82 L708.75,-450.82 L708.75,-406.32 Z" fill="#2680fd"/><path d="M759.79,-406.32 L759.79,-424.31 L737.92,-424.31 L737.92,-406.32 L729.53,-406.32 L729.53,-450.82 L737.92,-450.82 L737.92,-432.07 L759.79,-432.07 L759.79,-450.82 L768.12,-450.82 L768.12,-406.32 Z" fill="#2680fd"/><path d="M782.29,-428.19 C782.48,-420.88 786.43,-413.06 796.91,-413.06 C807.40,-413.06 811.34,-420.95 811.47,-428.26 C811.60,-435.76 807.40,-444.15 796.91,-444.15 C786.43,-444.15 782.10,-435.69 782.29,-428.19 M819.74,-428.38 C819.61,-416.88 812.55,-405.37 796.91,-405.37 C781.28,-405.37 774.03,-416.62 774.03,-428.32 C774.03,-440.02 781.53,-451.78 796.91,-451.78 C812.23,-451.78 819.86,-440.02 819.74,-428.38 Z" fill="#2680fd"/><path d="M864.93,-450.82 L864.93,-425.33 C864.93,-412.17 856.86,-405.44 845.67,-405.44 C834.99,-405.44 825.90,-411.92 825.90,-425.33 L825.90,-450.82 L834.23,-450.82 L834.23,-425.33 C834.23,-417.32 838.81,-413.06 845.73,-413.06 C852.66,-413.06 856.61,-417.70 856.61,-425.33 L856.61,-450.82 Z" fill="#2680fd"/><path d="M900.59,-440.14 C899.07,-442.69 894.87,-445.10 890.04,-445.10 C883.81,-445.10 880.82,-442.50 880.82,-439.19 C880.82,-435.31 885.40,-434.23 890.74,-433.60 C900.02,-432.45 908.67,-430.04 908.67,-419.42 C908.67,-409.50 899.89,-405.24 889.98,-405.24 C880.89,-405.24 873.89,-408.04 870.59,-416.18 L877.58,-419.80 C879.55,-414.91 884.70,-412.74 890.10,-412.74 C895.38,-412.74 900.34,-414.59 900.34,-419.42 C900.34,-423.62 895.95,-425.33 890.04,-425.97 C880.95,-427.05 872.56,-429.46 872.56,-439.44 C872.56,-448.60 881.59,-452.35 889.79,-452.41 C896.72,-452.41 903.90,-450.44 907.27,-443.58 Z" fill="#2680fd"/><path d="M948.33,-406.39 L915.02,-406.39 L915.02,-450.89 L948.33,-450.89 L948.33,-442.75 L923.35,-442.75 L923.35,-432.52 L947.44,-432.52 L947.44,-424.70 L923.35,-424.70 L923.35,-414.65 L948.33,-414.65 Z" fill="#2680fd"/><path d="M667.80,-393.66 L658.04,-393.66 L658.04,-398.94 L683.36,-398.94 L683.36,-393.66 L673.60,-393.66 L673.60,-368.17 L667.80,-368.17 Z" fill="#fd7e04"/><path d="M713.34,-368.17 L690.31,-368.17 L690.31,-398.94 L713.34,-398.94 L713.34,-393.31 L696.06,-393.31 L696.06,-386.23 L712.73,-386.23 L712.73,-380.83 L696.06,-380.83 L696.06,-373.88 L713.34,-373.88 Z" fill="#fd7e04"/><path d="M748.46,-372.03 C745.30,-368.91 741.21,-367.46 736.77,-367.46 C725.34,-367.46 720.50,-375.33 720.46,-383.33 C720.42,-391.38 725.65,-399.56 736.77,-399.56 C740.95,-399.56 744.90,-397.97 748.07,-394.85 L744.20,-391.11 C742.18,-393.09 739.45,-394.02 736.77,-394.02 C729.34,-394.02 726.13,-388.48 726.18,-383.33 C726.22,-378.23 729.16,-372.91 736.77,-372.91 C739.45,-372.91 742.49,-374.01 744.51,-376.03 Z" fill="#fd7e04"/><path d="M776.20,-368.12 L776.20,-380.56 L761.08,-380.56 L761.08,-368.12 L755.27,-368.12 L755.27,-398.90 L761.08,-398.90 L761.08,-385.93 L776.20,-385.93 L776.20,-398.90 L781.96,-398.90 L781.96,-368.12 Z" fill="#fd7e04"/></svg></div>
+  <div>
+    <div class="h-title">ORACLE TUTOR</div>
+    <div class="h-sub">ASSIGNMENTS · EXERCISES · HANDS-ON LABS</div>
+    <div class="nav-tabs">
+      <a href="index.html" class="nav-tab">Architecture</a>
+      <a href="assignments.html" class="nav-tab active">Assignments</a>
+    </div>
+  </div>
+</div>
+
+<!-- ASSIGNMENTS CONTAINER -->
+<div id="assignments-container">
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- ASSIGNMENT 1: USERS, ROLES & TABLESPACES -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+
+<div class="assignment-section">
+  <div class="section-title">ASSIGNMENT 1: Users, Roles & Tablespaces Management</div>
+
+  <div class="objectives">
+    <div class="objectives-title">📋 Learning Objectives</div>
+    <ul>
+      <li>Create and manage Oracle database users</li>
+      <li>Grant system and object privileges to users</li>
+      <li>Create and manage database roles</li>
+      <li>Create and configure tablespaces</li>
+      <li>Add datafiles to tablespaces</li>
+      <li>Configure space alerts and thresholds</li>
+    </ul>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="step">
+    <span class="step-number">1</span>
+    <div class="step-title">Create Three Database Users</div>
+    <div class="step-description">
+      Create three new users with restricted privileges. These users will represent different application roles with varying access levels.
+    </div>
+
+    <div class="code-block">
+      <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+      <code>-- Connect as SYSDBA
+CONNECT / AS SYSDBA
+
+-- Create User 1: APP_USER01
+CREATE USER app_user01 IDENTIFIED BY Welcome123
+  DEFAULT TABLESPACE users
+  QUOTA 100M ON users;
+
+-- Create User 2: APP_USER02
+CREATE USER app_user02 IDENTIFIED BY Welcome123
+  DEFAULT TABLESPACE users
+  QUOTA 100M ON users;
+
+-- Create User 3: APP_USER03
+CREATE USER app_user03 IDENTIFIED BY Welcome123
+  DEFAULT TABLESPACE users
+  QUOTA 100M ON users;</code>
+    </div>
+
+    <div class="expected-output">
+      <strong>Expected Output:</strong><br>
+      User APP_USER01 created.<br>
+      User APP_USER02 created.<br>
+      User APP_USER03 created.
+    </div>
+
+    <div class="note">
+      <strong>ℹ Note:</strong> The QUOTA clause limits the amount of space each user can consume in the USERS tablespace. This prevents accidental space exhaustion by individual users.
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step">
+    <span class="step-number">2</span>
+    <div class="step-title">Grant CONNECT Privilege to All Users</div>
+    <div class="step-description">
+      Grant the CONNECT privilege (which includes CREATE SESSION) to enable users to connect to the database. Also grant basic CREATE privileges for app development.
+    </div>
+
+    <div class="code-block">
+      <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+      <code>-- Grant CONNECT privilege (CREATE SESSION) to all users
+GRANT CONNECT TO app_user01;
+GRANT CONNECT TO app_user02;
+GRANT CONNECT TO app_user03;
+
+-- Grant CREATE TABLE privilege for development
+GRANT CREATE TABLE TO app_user01;
+GRANT CREATE TABLE TO app_user02;
+GRANT CREATE TABLE TO app_user03;
+
+-- Grant additional resource privileges
+GRANT CREATE SEQUENCE TO app_user01;
+GRANT CREATE SEQUENCE TO app_user02;
+GRANT CREATE SEQUENCE TO app_user03;
+
+GRANT CREATE PROCEDURE TO app_user01;
+GRANT CREATE PROCEDURE TO app_user02;
+GRANT CREATE PROCEDURE TO app_user03;</code>
+    </div>
+
+    <div class="expected-output">
+      <strong>Expected Output:</strong><br>
+      Grant succeeded. (repeated 12 times)
+    </div>
+
+    <div class="note">
+      <strong>ℹ Note:</strong> CONNECT is a role that includes CREATE SESSION, RESOURCE, and other basic privileges. Alternatively, you can grant CREATE SESSION directly for more granular control.
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step">
+    <span class="step-number">3</span>
+    <div class="step-title">Create a Composite Role for DML Operations</div>
+    <div class="step-description">
+      Create a custom role that bundles all the permissions needed for application users to perform INSERT, UPDATE, and DELETE operations on existing tables.
+    </div>
+
+    <div class="code-block">
+      <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+      <code>-- Create a custom role for DML operations
+CREATE ROLE app_dml_role;
+
+-- Grant privileges to the role
+GRANT CREATE SESSION TO app_dml_role;
+GRANT CREATE TABLE TO app_dml_role;
+GRANT CREATE SEQUENCE TO app_dml_role;
+GRANT CREATE PROCEDURE TO app_dml_role;
+GRANT CREATE VIEW TO app_dml_role;
+GRANT CREATE INDEX TO app_dml_role;
+GRANT CREATE TRIGGER TO app_dml_role;
+GRANT UNLIMITED TABLESPACE TO app_dml_role;</code>
+    </div>
+
+    <div class="expected-output">
+      <strong>Expected Output:</strong><br>
+      Role created.<br>
+      Grant succeeded. (repeated 8 times)
+    </div>
+
+    <div class="note">
+      <strong>ℹ Note:</strong> UNLIMITED TABLESPACE grants the role user the ability to use unlimited space in all tablespaces. Use with caution in production; consider specific quotas instead.
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step">
+    <span class="step-number">4</span>
+    <div class="step-title">Assign the Role to the Third User</div>
+    <div class="step-description">
+      Assign the app_dml_role to app_user03, giving this user all the bundled permissions at once. This demonstrates the power of roles for privilege management.
+    </div>
+
+    <div class="code-block">
+      <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+      <code>-- Grant the custom role to app_user03
+GRANT app_dml_role TO app_user03;
+
+-- Verify the role assignment
+SELECT * FROM dba_role_privs
+WHERE grantee = 'APP_USER03';</code>
+    </div>
+
+    <div class="expected-output">
+      <strong>Expected Output:</strong><br>
+      Grant succeeded.<br><br>
+      GRANTEE      GRANTED_ROLE          ADMIN_OPTION<br>
+      ─────────────────────────────────────────────────<br>
+      APP_USER03   APP_DML_ROLE          NO
+    </div>
+
+    <div class="note">
+      <strong>ℹ Note:</strong> The ADMIN_OPTION set to 'NO' means app_user03 cannot grant this role to other users. Set ADMIN_OPTION to YES if this is required.
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="step">
+    <span class="step-number">5</span>
+    <div class="step-title">Create Tablespace for User 1</div>
+    <div class="step-description">
+      Create a dedicated tablespace for app_user01. This provides storage isolation and makes it easier to manage user-specific data and performance.
+    </div>
+
+    <div class="code-block">
+      <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+      <code>-- Create tablespace for app_user01
+CREATE TABLESPACE app_user01_ts
+  DATAFILE '/oracle/oradata/app_user01_01.dbf'
+  SIZE 100M
+  AUTOEXTEND ON
+  NEXT 10M
+  MAXSIZE 500M
+  EXTENT MANAGEMENT LOCAL
+  SEGMENT SPACE MANAGEMENT AUTO;
+
+-- Assign as default tablespace for user1
+ALTER USER app_user01 DEFAULT TABLESPACE app_user01_ts;
+ALTER USER app_user01 QUOTA 200M ON app_user01_ts;</code>
+    </div>
+
+    <div class="expected-output">
+      <strong>Expected Output:</strong><br>
+      Tablespace created.<br>
+      User altered.<br>
+      User altered.
+    </div>
+
+    <div class="note">
+      <strong>ℹ Note:</strong> AUTOEXTEND allows the tablespace to grow automatically. EXTENT MANAGEMENT LOCAL uses bitmaps for faster extent allocation.
+    </div>
+  </div>
+
+  <!-- STEP 6 -->
+  <div class="step">
+    <span class="step-number">6</span>
+    <div class="step-title">Create Tablespace for User 2</div>
+    <div class="step-description">
+      Create a separate tablespace for app_user02 with the same configuration pattern as User 1.
+    </div>
+
+    <div class="code-block">
+      <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+      <code>-- Create tablespace for app_user02
+CREATE TABLESPACE app_user02_ts
+  DATAFILE '/oracle/oradata/app_user02_01.dbf'
+  SIZE 100M
+  AUTOEXTEND ON
+  NEXT 10M
+  MAXSIZE 500M
+  EXTENT MANAGEMENT LOCAL
+  SEGMENT SPACE MANAGEMENT AUTO;
+
+-- Assign as default tablespace for user2
+ALTER USER app_user02 DEFAULT TABLESPACE app_user02_ts;
+ALTER USER app_user02 QUOTA 200M ON app_user02_ts;</code>
+    </div>
+
+    <div class="expected-output">
+      <strong>Expected Output:</strong><br>
+      Tablespace created.<br>
+      User altered.<br>
+      User altered.
+    </div>
+  </div>
+
+  <!-- STEP 7 -->
+  <div class="step">
+    <span class="step-number">7</span>
+    <div class="step-title">Create Tablespace for User 3</div>
+    <div class="step-description">
+      Create the final tablespace for app_user03. This user will benefit from the DML role's expanded privileges within their own tablespace.
+    </div>
+
+    <div class="code-block">
+      <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+      <code>-- Create tablespace for app_user03
+CREATE TABLESPACE app_user03_ts
+  DATAFILE '/oracle/oradata/app_user03_01.dbf'
+  SIZE 100M
+  AUTOEXTEND ON
+  NEXT 10M
+  MAXSIZE 500M
+  EXTENT MANAGEMENT LOCAL
+  SEGMENT SPACE MANAGEMENT AUTO;
+
+-- Assign as default tablespace for user3
+ALTER USER app_user03 DEFAULT TABLESPACE app_user03_ts;
+ALTER USER app_user03 QUOTA 200M ON app_user03_ts;</code>
+    </div>
+
+    <div class="expected-output">
+      <strong>Expected Output:</strong><br>
+      Tablespace created.<br>
+      User altered.<br>
+      User altered.
+    </div>
+  </div>
+
+  <!-- STEP 8 -->
+  <div class="step">
+    <span class="step-number">8</span>
+    <div class="step-title">Add Secondary Datafiles to Tablespaces</div>
+    <div class="step-description">
+      Add additional datafiles to each tablespace to increase storage capacity and distribute I/O across multiple disk spindles for performance optimization.
+    </div>
+
+    <div class="code-block">
+      <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+      <code>-- Add secondary datafile to User 1 tablespace
+ALTER TABLESPACE app_user01_ts
+  ADD DATAFILE '/oracle/oradata/app_user01_02.dbf'
+  SIZE 100M
+  AUTOEXTEND ON
+  NEXT 10M
+  MAXSIZE 500M;
+
+-- Add secondary datafile to User 2 tablespace
+ALTER TABLESPACE app_user02_ts
+  ADD DATAFILE '/oracle/oradata/app_user02_02.dbf'
+  SIZE 100M
+  AUTOEXTEND ON
+  NEXT 10M
+  MAXSIZE 500M;
+
+-- Add secondary datafile to User 3 tablespace
+ALTER TABLESPACE app_user03_ts
+  ADD DATAFILE '/oracle/oradata/app_user03_02.dbf'
+  SIZE 100M
+  AUTOEXTEND ON
+  NEXT 10M
+  MAXSIZE 500M;</code>
+    </div>
+
+    <div class="expected-output">
+      <strong>Expected Output:</strong><br>
+      Tablespace altered. (repeated 3 times)
+    </div>
+
+    <div class="note">
+      <strong>ℹ Note:</strong> Multiple datafiles allow Oracle to stripe I/O operations across different storage devices, improving query performance.
+    </div>
+  </div>
+
+  <!-- STEP 9 -->
+  <div class="step">
+    <span class="step-number">9</span>
+    <div class="step-title">Set Space Usage Thresholds to 85%</div>
+    <div class="step-description">
+      Configure space alerts on all tablespaces to trigger warnings when they reach 85% capacity. This provides proactive monitoring to prevent running out of space.
+    </div>
+
+    <div class="code-block">
+      <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+      <code>-- Set warning threshold at 85% for User 1 tablespace
+ALTER TABLESPACE app_user01_ts
+  STORAGE (MAXEXTENTS UNLIMITED);
+
+-- Create alert for app_user01_ts at 85%
+BEGIN
+  DBMS_SPACE_ADMIN.TABLESPACE_THRESHOLD_ALERT(
+    ts_name => 'APP_USER01_TS',
+    threshold_type => DBMS_SPACE_ADMIN.THRESHOLD_PERCENT,
+    threshold_value => 85,
+    alert_type => DBMS_SPACE_ADMIN.ALERT_ON_PERCENT
+  );
+END;
+/
+
+-- Set warning threshold at 85% for User 2 tablespace
+BEGIN
+  DBMS_SPACE_ADMIN.TABLESPACE_THRESHOLD_ALERT(
+    ts_name => 'APP_USER02_TS',
+    threshold_type => DBMS_SPACE_ADMIN.THRESHOLD_PERCENT,
+    threshold_value => 85,
+    alert_type => DBMS_SPACE_ADMIN.ALERT_ON_PERCENT
+  );
+END;
+/
+
+-- Set warning threshold at 85% for User 3 tablespace
+BEGIN
+  DBMS_SPACE_ADMIN.TABLESPACE_THRESHOLD_ALERT(
+    ts_name => 'APP_USER03_TS',
+    threshold_type => DBMS_SPACE_ADMIN.THRESHOLD_PERCENT,
+    threshold_value => 85,
+    alert_type => DBMS_SPACE_ADMIN.ALERT_ON_PERCENT
+  );
+END;
+/</code>
+    </div>
+
+    <div class="expected-output">
+      <strong>Expected Output:</strong><br>
+      Tablespace altered.<br>
+      PL/SQL procedure successfully completed. (repeated 3 times)
+    </div>
+
+    <div class="warning">
+      <strong>⚠ Warning:</strong> Alerts are triggered when threshold is reached. Monitor the alert log and respond promptly to prevent tablespace full errors.
+    </div>
+  </div>
+
+  <!-- STEP 10: VERIFICATION -->
+  <div class="step" style="background: rgba(46, 204, 113, 0.05); border-left-color: #34d399;">
+    <span class="step-number">✓</span>
+    <div class="step-title">Verification: Check Your Work</div>
+    <div class="step-description">
+      Run these queries to verify that all users, roles, tablespaces, and thresholds have been configured correctly.
+    </div>
+
+    <div class="code-block">
+      <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+      <code>-- Verify users were created
+SELECT username, default_tablespace, created
+FROM dba_users
+WHERE username IN ('APP_USER01', 'APP_USER02', 'APP_USER03')
+ORDER BY username;
+
+-- Verify role was created and assigned
+SELECT grantee, granted_role
+FROM dba_role_privs
+WHERE grantee IN ('APP_USER01', 'APP_USER02', 'APP_USER03', 'APP_DML_ROLE');
+
+-- Verify tablespaces were created
+SELECT tablespace_name, status, extent_management, segment_space_management
+FROM dba_tablespaces
+WHERE tablespace_name IN ('APP_USER01_TS', 'APP_USER02_TS', 'APP_USER03_TS')
+ORDER BY tablespace_name;
+
+-- Verify datafiles
+SELECT tablespace_name, file_name, bytes/1024/1024 AS size_mb, autoextensible
+FROM dba_data_files
+WHERE tablespace_name IN ('APP_USER01_TS', 'APP_USER02_TS', 'APP_USER03_TS')
+ORDER BY tablespace_name, file_name;
+
+-- Check user quotas
+SELECT username, tablespace_name, max_bytes/1024/1024 AS quota_mb
+FROM dba_ts_quotas
+WHERE username IN ('APP_USER01', 'APP_USER02', 'APP_USER03')
+ORDER BY username;</code>
+    </div>
+
+    <div class="verification-checklist">
+      <div class="checklist-item">
+        <input type="checkbox"> All three users (APP_USER01, APP_USER02, APP_USER03) created
+      </div>
+      <div class="checklist-item">
+        <input type="checkbox"> CONNECT privilege granted to all users
+      </div>
+      <div class="checklist-item">
+        <input type="checkbox"> APP_DML_ROLE created with DML privileges
+      </div>
+      <div class="checklist-item">
+        <input type="checkbox"> APP_DML_ROLE granted to APP_USER03
+      </div>
+      <div class="checklist-item">
+        <input type="checkbox"> Three tablespaces created (app_user01_ts, app_user02_ts, app_user03_ts)
+      </div>
+      <div class="checklist-item">
+        <input type="checkbox"> Each tablespace has 2 datafiles (100M + 100M = 200M total)
+      </div>
+      <div class="checklist-item">
+        <input type="checkbox"> Each user has 200M quota in their default tablespace
+      </div>
+      <div class="checklist-item">
+        <input type="checkbox"> Space thresholds set to 85% on all tablespaces
+      </div>
+    </div>
+  </div>
+
+  <!-- EXERCISE BOX -->
+  <div class="exercise-box">
+    <div class="exercise-title">🎯 Practice Exercise</div>
+    <p style="color: var(--txt-dim); margin: 12px 0; line-height: 1.6;">
+      After completing the assignment, try these challenge tasks:
+    </p>
+    <ol style="color: var(--txt-dim); margin-left: 20px; line-height: 1.8;">
+      <li><strong>Create another role</strong> called "APP_READONLY_ROLE" that grants only SELECT privileges, then assign it to APP_USER01</li>
+      <li><strong>Add a third datafile</strong> to app_user02_ts and increase the tablespace size to 400M</li>
+      <li><strong>Query the threshold settings</strong> using DBA_TABLESPACE_THRESHOLD_PARAMETERS to verify the 85% threshold</li>
+      <li><strong>Create a test table</strong> in each user's tablespace and insert sample data to verify their access</li>
+      <li><strong>Generate a space usage report</strong> showing the current percentage of space used in each tablespace</li>
+    </ol>
+  </div>
+
+</div>
+
+</div>
+
+<!-- JAVASCRIPT FOR INTERACTIVE FEATURES -->
+<script>
+function copyCode(btn) {
+  const codeBlock = btn.parentElement.querySelector('code');
+  const code = codeBlock.textContent;
+
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = '✓ COPIED';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'COPY';
+      btn.classList.remove('copied');
+    }, 2000);
+  }).catch(err => {
+    console.error('Failed to copy:', err);
+    btn.textContent = '✗ ERROR';
+  });
+}
+
+// Smooth scroll behavior
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function (e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+});
+</script>
+
+</body>
+</html>
