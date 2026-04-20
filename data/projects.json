@@ -1,0 +1,130 @@
+[
+  {
+    "id": 1,
+    "title": "Users, Roles & Tablespaces Management",
+    "description": "Create and manage Oracle database users, roles, and tablespaces with proper privilege management and space allocation.",
+    "difficulty": "intermediate",
+    "category": "Database Administration",
+    "objectives": [
+      "Create and manage Oracle database users",
+      "Grant system and object privileges to users",
+      "Create and manage database roles",
+      "Create and configure tablespaces",
+      "Add datafiles to tablespaces",
+      "Configure space alerts and thresholds"
+    ],
+    "tasks": [
+      {
+        "stepNumber": 1,
+        "title": "Create Three Database Users",
+        "description": "Create three new users with restricted privileges. These users will represent different application roles with varying access levels.",
+        "code": "-- Connect as SYSDBA\nCONNECT / AS SYSDBA\n\n-- Create User 1: APP_USER01\nCREATE USER app_user01 IDENTIFIED BY Welcome123\n  DEFAULT TABLESPACE users\n  QUOTA 100M ON users;\n\n-- Create User 2: APP_USER02\nCREATE USER app_user02 IDENTIFIED BY Welcome123\n  DEFAULT TABLESPACE users\n  QUOTA 100M ON users;\n\n-- Create User 3: APP_USER03\nCREATE USER app_user03 IDENTIFIED BY Welcome123\n  DEFAULT TABLESPACE users\n  QUOTA 100M ON users;",
+        "expectedOutput": "User APP_USER01 created.\nUser APP_USER02 created.\nUser APP_USER03 created.",
+        "note": "The QUOTA clause limits the amount of space each user can consume in the USERS tablespace. This prevents accidental space exhaustion by individual users."
+      },
+      {
+        "stepNumber": 2,
+        "title": "Grant CONNECT Privilege to All Users",
+        "description": "Grant the CONNECT privilege (which includes CREATE SESSION) to enable users to connect to the database. Also grant basic CREATE privileges for app development.",
+        "code": "-- Grant CONNECT privilege (CREATE SESSION) to all users\nGRANT CONNECT TO app_user01;\nGRANT CONNECT TO app_user02;\nGRANT CONNECT TO app_user03;\n\n-- Grant CREATE TABLE privilege for development\nGRANT CREATE TABLE TO app_user01;\nGRANT CREATE TABLE TO app_user02;\nGRANT CREATE TABLE TO app_user03;\n\n-- Grant additional resource privileges\nGRANT CREATE SEQUENCE TO app_user01;\nGRANT CREATE SEQUENCE TO app_user02;\nGRANT CREATE SEQUENCE TO app_user03;\n\nGRANT CREATE PROCEDURE TO app_user01;\nGRANT CREATE PROCEDURE TO app_user02;\nGRANT CREATE PROCEDURE TO app_user03;",
+        "expectedOutput": "Grant succeeded. (repeated 12 times)",
+        "note": "CONNECT is a role that includes CREATE SESSION, RESOURCE, and other basic privileges. Alternatively, you can grant CREATE SESSION directly for more granular control."
+      },
+      {
+        "stepNumber": 3,
+        "title": "Create a Composite Role for DML Operations",
+        "description": "Create a custom role that bundles all the permissions needed for application users to perform INSERT, UPDATE, and DELETE operations on existing tables.",
+        "code": "-- Create a custom role for DML operations\nCREATE ROLE app_dml_role;\n\n-- Grant privileges to the role\nGRANT CREATE SESSION TO app_dml_role;\nGRANT CREATE TABLE TO app_dml_role;\nGRANT CREATE SEQUENCE TO app_dml_role;\nGRANT CREATE PROCEDURE TO app_dml_role;\nGRANT CREATE VIEW TO app_dml_role;\nGRANT CREATE INDEX TO app_dml_role;\nGRANT CREATE TRIGGER TO app_dml_role;\nGRANT UNLIMITED TABLESPACE TO app_dml_role;",
+        "expectedOutput": "Role created.\nGrant succeeded. (repeated 8 times)",
+        "note": "UNLIMITED TABLESPACE grants the role user the ability to use unlimited space in all tablespaces. Use with caution in production; consider specific quotas instead."
+      },
+      {
+        "stepNumber": 4,
+        "title": "Assign the Role to the Third User",
+        "description": "Assign the app_dml_role to app_user03, giving this user all the bundled permissions at once. This demonstrates the power of roles for privilege management.",
+        "code": "-- Grant the custom role to app_user03\nGRANT app_dml_role TO app_user03;\n\n-- Verify the role assignment\nSELECT * FROM dba_role_privs\nWHERE grantee = 'APP_USER03';",
+        "expectedOutput": "Grant succeeded.\n\nGRANTEE      GRANTED_ROLE          ADMIN_OPTION\n─────────────────────────────────────────────────\nAPP_USER03   APP_DML_ROLE          NO",
+        "note": "The ADMIN_OPTION set to 'NO' means app_user03 cannot grant this role to other users. Set ADMIN_OPTION to YES if this is required."
+      },
+      {
+        "stepNumber": 5,
+        "title": "Create Tablespace for User 1",
+        "description": "Create a dedicated tablespace for app_user01. This provides storage isolation and makes it easier to manage user-specific data and performance.",
+        "code": "-- Create tablespace for app_user01\nCREATE TABLESPACE app_user01_ts\n  DATAFILE '/oracle/oradata/app_user01_01.dbf'\n  SIZE 100M\n  AUTOEXTEND ON\n  NEXT 10M\n  MAXSIZE 500M\n  EXTENT MANAGEMENT LOCAL\n  SEGMENT SPACE MANAGEMENT AUTO;\n\n-- Assign as default tablespace for user1\nALTER USER app_user01 DEFAULT TABLESPACE app_user01_ts;\nALTER USER app_user01 QUOTA 200M ON app_user01_ts;",
+        "expectedOutput": "Tablespace created.\nUser altered.\nUser altered.",
+        "note": "AUTOEXTEND allows the tablespace to grow automatically. EXTENT MANAGEMENT LOCAL uses bitmaps for faster extent allocation."
+      },
+      {
+        "stepNumber": 6,
+        "title": "Create Tablespace for User 2",
+        "description": "Create a separate tablespace for app_user02 with the same configuration pattern as User 1.",
+        "code": "-- Create tablespace for app_user02\nCREATE TABLESPACE app_user02_ts\n  DATAFILE '/oracle/oradata/app_user02_01.dbf'\n  SIZE 100M\n  AUTOEXTEND ON\n  NEXT 10M\n  MAXSIZE 500M\n  EXTENT MANAGEMENT LOCAL\n  SEGMENT SPACE MANAGEMENT AUTO;\n\n-- Assign as default tablespace for user2\nALTER USER app_user02 DEFAULT TABLESPACE app_user02_ts;\nALTER USER app_user02 QUOTA 200M ON app_user02_ts;",
+        "expectedOutput": "Tablespace created.\nUser altered.\nUser altered.",
+        "note": ""
+      },
+      {
+        "stepNumber": 7,
+        "title": "Create Tablespace for User 3",
+        "description": "Create the final tablespace for app_user03. This user will benefit from the DML role's expanded privileges within their own tablespace.",
+        "code": "-- Create tablespace for app_user03\nCREATE TABLESPACE app_user03_ts\n  DATAFILE '/oracle/oradata/app_user03_01.dbf'\n  SIZE 100M\n  AUTOEXTEND ON\n  NEXT 10M\n  MAXSIZE 500M\n  EXTENT MANAGEMENT LOCAL\n  SEGMENT SPACE MANAGEMENT AUTO;\n\n-- Assign as default tablespace for user3\nALTER USER app_user03 DEFAULT TABLESPACE app_user03_ts;\nALTER USER app_user03 QUOTA 200M ON app_user03_ts;",
+        "expectedOutput": "Tablespace created.\nUser altered.\nUser altered.",
+        "note": ""
+      },
+      {
+        "stepNumber": 8,
+        "title": "Add Secondary Datafiles to Tablespaces",
+        "description": "Add additional datafiles to each tablespace to increase storage capacity and distribute I/O across multiple disk spindles for performance optimization.",
+        "code": "-- Add secondary datafile to User 1 tablespace\nALTER TABLESPACE app_user01_ts\n  ADD DATAFILE '/oracle/oradata/app_user01_02.dbf'\n  SIZE 100M\n  AUTOEXTEND ON\n  NEXT 10M\n  MAXSIZE 500M;\n\n-- Add secondary datafile to User 2 tablespace\nALTER TABLESPACE app_user02_ts\n  ADD DATAFILE '/oracle/oradata/app_user02_02.dbf'\n  SIZE 100M\n  AUTOEXTEND ON\n  NEXT 10M\n  MAXSIZE 500M;\n\n-- Add secondary datafile to User 3 tablespace\nALTER TABLESPACE app_user03_ts\n  ADD DATAFILE '/oracle/oradata/app_user03_02.dbf'\n  SIZE 100M\n  AUTOEXTEND ON\n  NEXT 10M\n  MAXSIZE 500M;",
+        "expectedOutput": "Tablespace altered. (repeated 3 times)",
+        "note": "Multiple datafiles allow Oracle to stripe I/O operations across different storage devices, improving query performance."
+      },
+      {
+        "stepNumber": 9,
+        "title": "Set Space Usage Thresholds to 85%",
+        "description": "Configure space alerts on all tablespaces to trigger warnings when they reach 85% capacity. This provides proactive monitoring to prevent running out of space.",
+        "code": "-- Set warning threshold at 85% for User 1 tablespace\nALTER TABLESPACE app_user01_ts\n  STORAGE (MAXEXTENTS UNLIMITED);\n\n-- Create alert for app_user01_ts at 85%\nBEGIN\n  DBMS_SPACE_ADMIN.TABLESPACE_THRESHOLD_ALERT(\n    ts_name => 'APP_USER01_TS',\n    threshold_type => DBMS_SPACE_ADMIN.THRESHOLD_PERCENT,\n    threshold_value => 85,\n    alert_type => DBMS_SPACE_ADMIN.ALERT_ON_PERCENT\n  );\nEND;\n/\n\n-- Set warning threshold at 85% for User 2 tablespace\nBEGIN\n  DBMS_SPACE_ADMIN.TABLESPACE_THRESHOLD_ALERT(\n    ts_name => 'APP_USER02_TS',\n    threshold_type => DBMS_SPACE_ADMIN.THRESHOLD_PERCENT,\n    threshold_value => 85,\n    alert_type => DBMS_SPACE_ADMIN.ALERT_ON_PERCENT\n  );\nEND;\n/\n\n-- Set warning threshold at 85% for User 3 tablespace\nBEGIN\n  DBMS_SPACE_ADMIN.TABLESPACE_THRESHOLD_ALERT(\n    ts_name => 'APP_USER03_TS',\n    threshold_type => DBMS_SPACE_ADMIN.THRESHOLD_PERCENT,\n    threshold_value => 85,\n    alert_type => DBMS_SPACE_ADMIN.ALERT_ON_PERCENT\n  );\nEND;\n/",
+        "expectedOutput": "Tablespace altered.\nPL/SQL procedure successfully completed. (repeated 3 times)",
+        "warning": "Alerts are triggered when threshold is reached. Monitor the alert log and respond promptly to prevent tablespace full errors."
+      }
+    ],
+    "verification": {
+      "title": "Verification: Check Your Work",
+      "description": "Run these queries to verify that all users, roles, tablespaces, and thresholds have been configured correctly.",
+      "code": "-- Verify users were created\nSELECT username, default_tablespace, created\nFROM dba_users\nWHERE username IN ('APP_USER01', 'APP_USER02', 'APP_USER03')\nORDER BY username;\n\n-- Verify role was created and assigned\nSELECT grantee, granted_role\nFROM dba_role_privs\nWHERE grantee IN ('APP_USER01', 'APP_USER02', 'APP_USER03', 'APP_DML_ROLE');\n\n-- Verify tablespaces were created\nSELECT tablespace_name, status, extent_management, segment_space_management\nFROM dba_tablespaces\nWHERE tablespace_name IN ('APP_USER01_TS', 'APP_USER02_TS', 'APP_USER03_TS')\nORDER BY tablespace_name;\n\n-- Verify datafiles\nSELECT tablespace_name, file_name, bytes/1024/1024 AS size_mb, autoextensible\nFROM dba_data_files\nWHERE tablespace_name IN ('APP_USER01_TS', 'APP_USER02_TS', 'APP_USER03_TS')\nORDER BY tablespace_name, file_name;\n\n-- Check user quotas\nSELECT username, tablespace_name, max_bytes/1024/1024 AS quota_mb\nFROM dba_ts_quotas\nWHERE username IN ('APP_USER01', 'APP_USER02', 'APP_USER03')\nORDER BY username;",
+      "checklist": [
+        "All three users (APP_USER01, APP_USER02, APP_USER03) created",
+        "CONNECT privilege granted to all users",
+        "APP_DML_ROLE created with DML privileges",
+        "APP_DML_ROLE granted to APP_USER03",
+        "Three tablespaces created (app_user01_ts, app_user02_ts, app_user03_ts)",
+        "Each tablespace has 2 datafiles (100M + 100M = 200M total)",
+        "Each user has 200M quota in their default tablespace",
+        "Space thresholds set to 85% on all tablespaces"
+      ]
+    },
+    "exercises": [
+      {
+        "title": "Create another role",
+        "description": "Create another role called 'APP_READONLY_ROLE' that grants only SELECT privileges, then assign it to APP_USER01"
+      },
+      {
+        "title": "Add a third datafile",
+        "description": "Add a third datafile to app_user02_ts and increase the tablespace size to 400M"
+      },
+      {
+        "title": "Query the threshold settings",
+        "description": "Query the threshold settings using DBA_TABLESPACE_THRESHOLD_PARAMETERS to verify the 85% threshold"
+      },
+      {
+        "title": "Create a test table",
+        "description": "Create a test table in each user's tablespace and insert sample data to verify their access"
+      },
+      {
+        "title": "Generate a space usage report",
+        "description": "Generate a space usage report showing the current percentage of space used in each tablespace"
+      }
+    ],
+    "createdDate": "2026-04-20",
+    "status": "active"
+  }
+]
