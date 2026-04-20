@@ -1,0 +1,60 @@
+Navigation Bar
+New static/nav.js — shared nav bar injected into every page. Shows Architecture | SQL Converter | Projects links, hides tabs the user hasn't unlocked, displays logged-in user's name with a green dot, and a Sign Out button
+Hamburger menu on mobile (< 900px)
+All 3 pages updated to use it: index.html, architecture.html, projects.html
+SQL Converter Page (/sql)
+Replaced 4 sparse info cards with 5 enriched Oracle reference cards:
+Data Types — CHAR vs VARCHAR2, NVARCHAR2, CLOB/BLOB, BOOLEAN→NUMBER(1), IDENTITY columns
+Functions — NVL2, DECODE, NULLIF, LISTAGG, TO_DATE format masks
+Syntax — MERGE, CONNECT BY hierarchical queries, PIVOT/UNPIVOT, q'[…]' string escaping
+Source Dialects — unchanged
+Quick Tips (new) — DUAL table, empty string = NULL, sequence syntax, date arithmetic
+Architecture Page (/architecture)
+Shared nav bar added, diagram height adjusted to fit
+New Reference panel below the diagram — auto-fetches and displays oraclebase.com articles tagged architecture (hidden until an admin caches some articles)
+New /projects Hub
+Three tabs, all client-side, no page reloads. Tab state remembered across sessions.
+
+Assignments tab
+
+Grid of assignment cards with topic badge (color-coded), difficulty badge, due date
+Admin: inline form to create/edit/delete assignments
+Topics: Data Guard, RAC, Performance Tuning, Partitioning, Indexes, Backup & Recovery, Security, High Availability
+Showcase tab
+
+Any logged-in user can submit work (title, description, optional URL)
+Pending entries show "Pending Review" badge — visible only to the submitter and admins
+Admin: Approve / Unpublish / Delete controls, yellow warning banner showing count of pending submissions
+Labs tab
+
+Topic grid with progress bars per topic
+Click a topic → exercise list → individual exercise
+4 exercise formats:
+Quiz — 4 options, marks correct/wrong, shows explanation after answering
+Scenario — branching decision tree, each choice reveals feedback and advances the story
+Written — free-text textarea, submitted for instructor review, shows guidance after submit
+Flashcard — flip animation, "I know this" / "Review again" self-marking, deck navigation
+oraclebase.com reference card shown per exercise (if attached)
+Admin: Exercise Builder with type selector, JSON template, and "Attach oraclebase.com Reference" button
+Backend (API routes added to app.py)
+Route	Purpose
+GET /projects	Renders projects hub
+POST /api/admin/oraclebase-fetch	Fetches + caches an oraclebase.com article
+GET /api/oraclebase-cache	Lists cached articles (filter by ?topic=)
+GET/POST /api/assignments	List / create assignments
+PUT/DELETE /api/assignments/<id>	Update / delete assignment
+GET/POST /api/showcase	List / submit showcase entries
+PUT /api/showcase/<id>/approve	Approve or unpublish entry
+DELETE /api/showcase/<id>	Delete entry
+GET/POST /api/lab-topics	List / create lab topics (with progress counts)
+GET /api/lab-topics/<id>/exercises	List exercises with user progress
+GET/POST /api/lab-exercises	Get / create exercise
+PUT/DELETE /api/lab-exercises/<id>	Update / delete exercise
+POST/GET /api/lab-progress	Save / retrieve student progress
+Database (6 new tables)
+oraclebase_cache → assignments → showcase_entries → lab_topics → lab_exercises → lab_progress
+
+All created with CREATE TABLE IF NOT EXISTS — no destructive changes to existing data.
+
+Dependencies added
+requests, beautifulsoup4, lxml (for server-side oraclebase.com fetching)

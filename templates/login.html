@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — Torch House Tech</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:100%; height:100%; overflow:hidden; }
+
+body {
+  font-family:'Rajdhani', sans-serif;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 15%, rgba(231,76,60,0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(59,130,246,0.06) 0%, transparent 70%),
+    #04080F;
+  display:flex; align-items:center; justify-content:center; min-height:100vh;
+}
+
+/* ── Animated grid background ── */
+.auth-bg-grid {
+  position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size:40px 40px;
+}
+
+/* ── Floating particles canvas ── */
+#particles-canvas {
+  position:fixed; inset:0; pointer-events:none; z-index:0;
+}
+
+/* ── Ambient glow orbs ── */
+.auth-glow-orb {
+  position:fixed; border-radius:50%; pointer-events:none; z-index:0;
+  filter:blur(80px); opacity:0.4;
+  animation:orb-float 12s ease-in-out infinite alternate;
+}
+.auth-glow-orb.orb-1 {
+  width:300px; height:300px; top:-80px; left:-60px;
+  background:radial-gradient(circle, rgba(231,76,60,0.3), transparent 70%);
+  animation-duration:14s;
+}
+.auth-glow-orb.orb-2 {
+  width:250px; height:250px; bottom:-60px; right:-40px;
+  background:radial-gradient(circle, rgba(59,130,246,0.25), transparent 70%);
+  animation-duration:10s; animation-delay:-5s;
+}
+.auth-glow-orb.orb-3 {
+  width:200px; height:200px; top:40%; right:20%;
+  background:radial-gradient(circle, rgba(168,85,247,0.15), transparent 70%);
+  animation-duration:16s; animation-delay:-3s;
+}
+@keyframes orb-float {
+  0%   { transform:translate(0, 0) scale(1); }
+  50%  { transform:translate(20px, -30px) scale(1.1); }
+  100% { transform:translate(-15px, 20px) scale(0.95); }
+}
+
+/* ── Auth card — glassmorphism ── */
+.auth-card {
+  position:relative; z-index:1;
+  width:440px;
+  background:rgba(7,13,24,0.8);
+  backdrop-filter:blur(24px) saturate(1.4);
+  -webkit-backdrop-filter:blur(24px) saturate(1.4);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:20px;
+  padding:40px 44px 36px;
+  box-shadow:
+    0 24px 64px rgba(0,0,0,0.6),
+    0 0 0 1px rgba(255,255,255,0.04),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+  animation:auth-appear 0.6s cubic-bezier(0.16,1,0.3,1);
+}
+
+/* Subtle top-edge highlight */
+.auth-card::before {
+  content:'';
+  position:absolute; top:0; left:20%; right:20%; height:1px;
+  background:linear-gradient(90deg, transparent, rgba(231,76,60,0.5), transparent);
+  border-radius:1px;
+}
+
+@keyframes auth-appear {
+  from { opacity:0; transform:translateY(30px) scale(0.96); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+
+.auth-card.auth-shake {
+  animation:auth-shake 0.4s cubic-bezier(0.36,0.07,0.19,0.97);
+}
+@keyframes auth-shake {
+  0%,100%{transform:translateX(0);}
+  20%    {transform:translateX(-8px);}
+  40%    {transform:translateX(8px);}
+  60%    {transform:translateX(-5px);}
+  80%    {transform:translateX(5px);}
+}
+
+/* ── Logo & branding ── */
+.auth-logo {
+  text-align:center;
+  margin-bottom:32px;
+}
+.auth-logo-img {
+  height:72px;
+  width:auto;
+  filter:drop-shadow(0 0 16px rgba(253,126,4,0.6));
+  margin-bottom:12px;
+  transition:filter 0.3s ease;
+}
+.auth-logo-img:hover {
+  filter:drop-shadow(0 0 24px rgba(253,126,4,0.8));
+}
+.auth-title {
+  font-family:'Orbitron', monospace;
+  font-size:16px; font-weight:700;
+  color:#E74C3C; letter-spacing:4px;
+  margin-bottom:6px;
+  text-shadow:0 0 20px rgba(231,76,60,0.3);
+}
+.auth-subtitle {
+  font-family:'Share Tech Mono', monospace;
+  font-size:10px; color:rgba(255,255,255,0.3);
+  letter-spacing:1.5px;
+}
+
+/* ── Decorative line ── */
+.auth-divider {
+  height:1px; margin:0 auto 24px;
+  width:60%;
+  background:linear-gradient(90deg, transparent, rgba(231,76,60,0.3), transparent);
+}
+
+/* ── Form fields ── */
+.auth-field { margin-bottom:20px; }
+.auth-label {
+  display:block;
+  font-family:'Orbitron', monospace;
+  font-size:9px; letter-spacing:3px; font-weight:600;
+  color:rgba(255,255,255,0.35);
+  margin-bottom:8px;
+  text-transform:uppercase;
+}
+.auth-input-wrap { position:relative; }
+.auth-input {
+  width:100%; padding:12px 16px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:10px;
+  color:#D1D9E6;
+  font-family:'Share Tech Mono', monospace;
+  font-size:13px;
+  outline:none;
+  transition:border-color 0.25s, box-shadow 0.25s, background 0.25s;
+}
+.auth-input:focus {
+  border-color:rgba(231,76,60,0.5);
+  box-shadow:0 0 0 3px rgba(231,76,60,0.1), 0 0 16px rgba(231,76,60,0.08);
+  background:rgba(255,255,255,0.06);
+}
+.auth-input::placeholder {
+  color:rgba(255,255,255,0.2);
+  font-style:italic;
+}
+.auth-input.has-toggle { padding-right:44px; }
+.auth-toggle {
+  position:absolute; right:12px; top:50%; transform:translateY(-50%);
+  background:none; border:none; cursor:pointer;
+  font-size:16px; color:rgba(255,255,255,0.3);
+  padding:4px; line-height:1;
+  transition:color 0.2s;
+}
+.auth-toggle:hover { color:rgba(255,255,255,0.7); }
+
+/* ── Submit button ── */
+.auth-btn {
+  width:100%; padding:14px;
+  background:linear-gradient(135deg, #E74C3C, #C0392B);
+  border:none; border-radius:12px;
+  color:#fff;
+  font-family:'Orbitron', monospace;
+  font-size:12px; font-weight:700; letter-spacing:3px;
+  cursor:pointer;
+  transition:all 0.25s ease;
+  box-shadow:0 4px 20px rgba(231,76,60,0.3);
+  margin-top:8px;
+  position:relative;
+  overflow:hidden;
+}
+.auth-btn::after {
+  content:'';
+  position:absolute; inset:0;
+  background:linear-gradient(135deg, transparent, rgba(255,255,255,0.1), transparent);
+  opacity:0;
+  transition:opacity 0.3s;
+}
+.auth-btn:hover:not(:disabled) {
+  transform:translateY(-2px);
+  box-shadow:0 6px 28px rgba(231,76,60,0.45);
+}
+.auth-btn:hover:not(:disabled)::after { opacity:1; }
+.auth-btn:active { transform:translateY(0); }
+.auth-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+/* ── Error message ── */
+.auth-error {
+  display:none;
+  margin-top:14px; padding:10px 14px;
+  background:rgba(231,76,60,0.08);
+  border:1px solid rgba(231,76,60,0.25);
+  border-radius:8px;
+  font-family:'Share Tech Mono', monospace;
+  font-size:11px; color:#F1948A;
+  text-align:center;
+  animation:error-in 0.3s ease;
+}
+.auth-error.visible { display:block; }
+@keyframes error-in {
+  from { opacity:0; transform:translateY(-4px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ── Footer ── */
+.auth-footer {
+  margin-top:24px;
+  font-family:'Share Tech Mono', monospace;
+  font-size:9px; color:rgba(255,255,255,0.15);
+  text-align:center; line-height:1.8;
+  letter-spacing:0.5px;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:3px; }
+</style>
+</head>
+<body>
+<div class="auth-bg-grid"></div>
+<canvas id="particles-canvas"></canvas>
+<div class="auth-glow-orb orb-1"></div>
+<div class="auth-glow-orb orb-2"></div>
+<div class="auth-glow-orb orb-3"></div>
+
+<div class="auth-card" id="auth-card">
+  <div class="auth-logo">
+    <img src="/static/logo.svg" alt="Torch House Tech" class="auth-logo-img"><br>
+    <div class="auth-title">ORACLE TRAINING</div>
+    <div class="auth-subtitle">SQL SERVER TO ORACLE DBA &mdash; INTERACTIVE COURSE</div>
+  </div>
+
+  <div class="auth-divider"></div>
+
+  <div class="auth-field">
+    <label class="auth-label" for="auth-username">USERNAME</label>
+    <div class="auth-input-wrap">
+      <input class="auth-input" id="auth-username" type="text"
+             placeholder="Enter your username"
+             autocomplete="username" spellcheck="false">
+    </div>
+  </div>
+
+  <div class="auth-field">
+    <label class="auth-label" for="auth-password">PASSWORD</label>
+    <div class="auth-input-wrap">
+      <input class="auth-input has-toggle" id="auth-password" type="password"
+             placeholder="Enter your password" autocomplete="current-password">
+      <button class="auth-toggle" id="auth-pw-toggle" type="button" tabindex="-1">&#128065;</button>
+    </div>
+  </div>
+
+  <button class="auth-btn" id="auth-submit" onclick="doLogin()">&#9654;&nbsp; SIGN IN</button>
+  <div class="auth-error" id="auth-error">Invalid username or password.</div>
+
+  <div class="auth-footer">
+    ORACLE DATABASE ARCHITECTURE &mdash; INTERACTIVE TRAINING PLATFORM<br>
+    ACCESS RESTRICTED TO AUTHORIZED USERS ONLY
+  </div>
+</div>
+
+<script>
+// ── Floating particles ──────────────────────────────────────────────────
+(function() {
+  var canvas = document.getElementById('particles-canvas');
+  var ctx = canvas.getContext('2d');
+  var particles = [];
+  var PARTICLE_COUNT = 40;
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  for (var i = 0; i < PARTICLE_COUNT; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.5 + 0.5,
+      dx: (Math.random() - 0.5) * 0.3,
+      dy: (Math.random() - 0.5) * 0.3,
+      opacity: Math.random() * 0.3 + 0.1,
+      color: Math.random() > 0.6 ? '231,76,60' : (Math.random() > 0.5 ? '59,130,246' : '168,85,247')
+    });
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      p.x += p.dx;
+      p.y += p.dy;
+      if (p.x < 0) p.x = canvas.width;
+      if (p.x > canvas.width) p.x = 0;
+      if (p.y < 0) p.y = canvas.height;
+      if (p.y > canvas.height) p.y = 0;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(' + p.color + ',' + p.opacity + ')';
+      ctx.fill();
+
+      // Draw faint connections to nearby particles
+      for (var j = i + 1; j < particles.length; j++) {
+        var p2 = particles[j];
+        var dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+        if (dist < 120) {
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.strokeStyle = 'rgba(255,255,255,' + (0.03 * (1 - dist / 120)) + ')';
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── Redirect if already logged in ─────────────────────────────────────────
+(function() {
+  var s = sessionStorage.getItem('ora_auth_session_v2');
+  if (s) { window.location.replace('/architecture'); }
+})();
+
+// ── SHA-256 via Web Crypto API ─────────────────────────────────────────────
+async function sha256(str) {
+  var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(function(b) {
+    return b.toString(16).padStart(2, '0');
+  }).join('');
+}
+
+// ── Login ──────────────────────────────────────────────────────────────────
+async function doLogin() {
+  var username = (document.getElementById('auth-username').value || '').trim().toLowerCase();
+  var password = document.getElementById('auth-password').value || '';
+
+  if (!username || !password) {
+    showError('Please enter your username and password.');
+    return;
+  }
+
+  var btn = document.getElementById('auth-submit');
+  btn.innerHTML = '&#9203;&nbsp; VERIFYING...';
+  btn.disabled = true;
+
+  var hash;
+  try {
+    hash = await sha256(password);
+  } catch(e) {
+    btn.innerHTML = '&#9654;&nbsp; SIGN IN';
+    btn.disabled = false;
+    showError('Crypto error — ensure you are using HTTPS.');
+    return;
+  }
+
+  var match = null;
+  var errMsg = 'Invalid username or password. Please try again.';
+  try {
+    var res = await fetch('/api/users/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: username, hash: hash })
+    });
+    if (res.ok) {
+      match = await res.json();
+    } else {
+      var errData = await res.json().catch(function() { return {}; });
+      errMsg = errData.error || ('Server error (' + res.status + ')');
+    }
+  } catch(e) {
+    errMsg = 'Network error — cannot reach server.';
+  }
+
+  btn.innerHTML = '&#9654;&nbsp; SIGN IN';
+  btn.disabled = false;
+
+  if (match && !match.error) {
+    document.getElementById('auth-error').classList.remove('visible');
+    sessionStorage.setItem('ora_auth_session_v2', JSON.stringify({
+      username: match.username,
+      displayName: match.displayName,
+      role: match.role
+    }));
+    // Smooth transition before redirect
+    document.getElementById('auth-card').style.transition = 'opacity 0.3s, transform 0.3s';
+    document.getElementById('auth-card').style.opacity = '0';
+    document.getElementById('auth-card').style.transform = 'translateY(-10px) scale(0.98)';
+    setTimeout(function() { window.location.href = '/architecture'; }, 300);
+  } else {
+    showError(errMsg);
+  }
+}
+
+function showError(msg) {
+  var errEl = document.getElementById('auth-error');
+  var card  = document.getElementById('auth-card');
+  errEl.textContent = msg;
+  errEl.classList.add('visible');
+  card.classList.remove('auth-shake');
+  void card.offsetWidth;
+  card.classList.add('auth-shake');
+}
+
+// ── Password show/hide ─────────────────────────────────────────────────────
+document.getElementById('auth-pw-toggle').addEventListener('click', function() {
+  var inp = document.getElementById('auth-password');
+  var hidden = inp.type === 'password';
+  inp.type = hidden ? 'text' : 'password';
+  this.innerHTML = hidden ? '&#128584;' : '&#128065;';
+});
+
+// ── Enter key navigation ───────────────────────────────────────────────────
+document.getElementById('auth-username').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') document.getElementById('auth-password').focus();
+});
+document.getElementById('auth-password').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doLogin();
+});
+
+// Auto-focus username
+setTimeout(function() { document.getElementById('auth-username').focus(); }, 100);
+</script>
+</body>
+</html>

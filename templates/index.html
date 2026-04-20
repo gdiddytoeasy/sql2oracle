@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL to Oracle Converter</title>
+    <link rel="stylesheet" href="/static/style.css?v=20260406">
+    <script src="/static/nav.js?v=20260407"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
+</head>
+<script>
+(async function() {
+  var s = sessionStorage.getItem('ora_auth_session_v2');
+  if (!s) { window.location.replace('/'); return; }
+  var session = JSON.parse(s);
+  if (session.role === 'admin' || session.role === 'manager') return;
+  try {
+    var res = await fetch('/api/tab-unlocks?username=' + encodeURIComponent(session.username));
+    var unlocked = res.ok ? await res.json() : ['standard'];
+    if (unlocked.indexOf('sql_converter') < 0) {
+      window.location.replace('/architecture');
+    }
+  } catch(e) {
+    window.location.replace('/architecture');
+  }
+})();
+</script>
+<body>
+    <header id="main-nav"></header>
+
+    <main>
+        <div class="converter-grid">
+            <div class="panel panel-input">
+                <div class="panel-header">
+                    <label for="sql-input">Input SQL</label>
+                    <div class="panel-controls">
+                        <select id="source-dialect" title="Source dialect">
+                            <option value="">Loading dialects...</option>
+                        </select>
+                        <button class="btn btn-secondary" id="clear-btn">Clear</button>
+                        <button class="btn btn-secondary" id="example-btn">Example</button>
+                    </div>
+                </div>
+                <textarea
+                    id="sql-input"
+                    placeholder="Paste your SQL here..."
+                    spellcheck="false"
+                ></textarea>
+            </div>
+
+            <div class="panel-center">
+                <button class="btn btn-primary" id="convert-btn">
+                    Convert &#8594;
+                </button>
+            </div>
+
+            <div class="panel panel-output">
+                <div class="panel-header">
+                    <label>Oracle SQL Output</label>
+                    <div class="panel-controls">
+                        <span id="stmt-count" class="stmt-badge" style="display:none"></span>
+                        <button class="btn btn-secondary" id="copy-btn" style="display:none">Copy</button>
+                    </div>
+                </div>
+                <div id="output-area" class="output-area">
+                    <span class="placeholder-text">Converted Oracle SQL will appear here...</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="error-banner" class="error-banner" style="display:none"></div>
+
+        <section class="info-section">
+            <h2>Supported Conversions &amp; Oracle Reference</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>Data Types</h3>
+                    <ul>
+                        <li>VARCHAR / TEXT &rarr; VARCHAR2 (max 4000 bytes)</li>
+                        <li>CHAR vs VARCHAR2 — CHAR is fixed-length, padded with spaces</li>
+                        <li>INT / INTEGER &rarr; NUMBER(38)</li>
+                        <li>BOOLEAN &rarr; NUMBER(1) — Oracle has no native BOOLEAN in SQL</li>
+                        <li>DATETIME &rarr; DATE (includes time) / TIMESTAMP</li>
+                        <li>NVARCHAR2 for Unicode; CLOB / BLOB for large objects</li>
+                        <li>AUTO_INCREMENT &rarr; SEQUENCE + DEFAULT or IDENTITY column (12c+)</li>
+                    </ul>
+                </div>
+                <div class="info-card">
+                    <h3>Functions</h3>
+                    <ul>
+                        <li>IFNULL / COALESCE &rarr; NVL(expr, default)</li>
+                        <li>NVL2(expr, val_if_not_null, val_if_null)</li>
+                        <li>DECODE(expr, search, result [, default])</li>
+                        <li>NULLIF(expr1, expr2) &rarr; NULL if equal</li>
+                        <li>NOW() &rarr; SYSDATE / SYSTIMESTAMP</li>
+                        <li>CONCAT &rarr; || operator</li>
+                        <li>LIMIT / TOP &rarr; ROWNUM / FETCH FIRST n ROWS ONLY (12c+)</li>
+                        <li>GROUP_CONCAT &rarr; LISTAGG(col, ',') WITHIN GROUP (ORDER BY col)</li>
+                        <li>TO_DATE('2024-01-15', 'YYYY-MM-DD') — always specify format mask</li>
+                    </ul>
+                </div>
+                <div class="info-card">
+                    <h3>Syntax</h3>
+                    <ul>
+                        <li>ILIKE &rarr; UPPER(col) LIKE UPPER(:val)</li>
+                        <li>EXCEPT &rarr; MINUS</li>
+                        <li>Backtick identifiers &rarr; double-quoted</li>
+                        <li>MERGE INTO target USING source ON … WHEN MATCHED … WHEN NOT MATCHED …</li>
+                        <li>CONNECT BY PRIOR — hierarchical queries (no recursive CTE needed)</li>
+                        <li>PIVOT / UNPIVOT — native Oracle syntax</li>
+                        <li>String escaping: use q'[…]' for strings containing quotes</li>
+                        <li>JOIN syntax normalization — ANSI JOIN preferred over (+) syntax</li>
+                    </ul>
+                </div>
+                <div class="info-card">
+                    <h3>Source Dialects</h3>
+                    <ul>
+                        <li>MySQL / MariaDB</li>
+                        <li>PostgreSQL</li>
+                        <li>SQL Server (T-SQL)</li>
+                        <li>BigQuery, Snowflake, Redshift</li>
+                        <li>SQLite, Hive, Spark, Presto, Trino, DuckDB</li>
+                    </ul>
+                </div>
+                <div class="info-card">
+                    <h3>Quick Tips</h3>
+                    <ul>
+                        <li>Oracle requires FROM DUAL for SELECT without a table: <code>SELECT 1 FROM DUAL</code></li>
+                        <li>String comparison is case-sensitive — use UPPER() or NLS_SORT</li>
+                        <li>Sequences: CREATE SEQUENCE s START WITH 1 INCREMENT BY 1; then s.NEXTVAL</li>
+                        <li>Empty string '' = NULL in Oracle — use IS NULL to check</li>
+                        <li>Date arithmetic: SYSDATE + 1 adds one day; SYSDATE - 1/24 subtracts one hour</li>
+                        <li>Use DBMS_METADATA.GET_DDL to extract object definitions</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Powered by <a href="https://github.com/tobymao/sqlglot" target="_blank" rel="noopener">sqlglot</a> &mdash; open-source SQL parser &amp; transpiler</p>
+    </footer>
+
+    <script src="/static/app.js?v=20260406"></script>
+</body>
+</html>

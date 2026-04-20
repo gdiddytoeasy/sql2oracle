@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projects — sql2oracle</title>
+<link rel="stylesheet" href="/static/style.css?v=20260406">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/static/nav.js?v=20260407"></script>
+<style>
+/* ── Projects page-specific styles ── */
+.projects-main { max-width:1400px; margin:0 auto; padding:32px; }
+
+/* Tab bar */
+.proj-tabs { display:flex; gap:4px; background:rgba(7,13,24,0.75); backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:6px; width:fit-content; margin-bottom:28px; }
+.proj-tab { padding:8px 20px; border-radius:8px; font-family:'Orbitron',monospace; font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.4); cursor:pointer; transition:all 0.2s; border:1px solid transparent; }
+.proj-tab:hover { color:rgba(255,255,255,0.7); background:rgba(255,255,255,0.04); }
+.proj-tab.active { color:#f0813d; background:rgba(231,76,60,0.1); border-color:rgba(231,76,60,0.25); }
+.proj-tab-badge { display:inline-block; margin-left:5px; background:rgba(231,76,60,0.2); color:#E74C3C; font-size:9px; padding:1px 6px; border-radius:10px; vertical-align:middle; }
+.proj-panel { display:none; animation:page-enter 0.3s ease; }
+.proj-panel.active { display:block; }
+
+/* Cards grid */
+.cards-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; }
+.card { background:rgba(7,13,24,0.75); backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:20px; transition:all 0.2s; }
+.card:hover { border-color:rgba(255,255,255,0.15); transform:translateY(-2px); box-shadow:0 8px 32px rgba(0,0,0,0.4); }
+
+/* Topic badges */
+.topic-badge { font-family:'Orbitron',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; padding:3px 10px; border-radius:20px; display:inline-block; margin-bottom:12px; }
+.topic-dataguard { background:rgba(59,130,246,0.15); color:#3B82F6; border:1px solid rgba(59,130,246,0.3); }
+.topic-rac       { background:rgba(168,85,247,0.15); color:#A855F7; border:1px solid rgba(168,85,247,0.3); }
+.topic-performance { background:rgba(246,173,85,0.15); color:#F6AD55; border:1px solid rgba(246,173,85,0.3); }
+.topic-partitioning { background:rgba(46,204,113,0.15); color:#2ECC71; border:1px solid rgba(46,204,113,0.3); }
+.topic-indexes   { background:rgba(0,212,255,0.15); color:#00D4FF; border:1px solid rgba(0,212,255,0.3); }
+.topic-backup    { background:rgba(231,76,60,0.15); color:#E74C3C; border:1px solid rgba(231,76,60,0.3); }
+.topic-security  { background:rgba(251,146,60,0.15); color:#FB923C; border:1px solid rgba(251,146,60,0.3); }
+.topic-ha        { background:rgba(52,211,153,0.15); color:#34D399; border:1px solid rgba(34,211,153,0.3); }
+.topic-default   { background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.5); border:1px solid rgba(255,255,255,0.1); }
+
+.card-title { font-family:'Orbitron',monospace; font-size:12px; font-weight:700; color:#fff; margin-bottom:8px; }
+.card-desc  { font-family:'Share Tech Mono',monospace; font-size:11px; color:rgba(255,255,255,0.4); line-height:1.6; margin-bottom:14px; }
+.card-meta  { display:flex; align-items:center; justify-content:space-between; }
+.diff-badge { font-family:'Orbitron',monospace; font-size:9px; letter-spacing:1px; padding:2px 8px; border-radius:4px; }
+.diff-beginner { background:rgba(46,204,113,0.1); color:#2ECC71; }
+.diff-intermediate { background:rgba(246,173,85,0.1); color:#F6AD55; }
+.diff-advanced  { background:rgba(231,76,60,0.1); color:#E74C3C; }
+.due-date { font-family:'Share Tech Mono',monospace; font-size:10px; color:rgba(255,255,255,0.25); }
+.admin-actions { display:flex; gap:6px; margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.05); }
+.btn-sm-edit { padding:4px 12px; background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.2); border-radius:6px; color:#3B82F6; font-family:'Orbitron',monospace; font-size:9px; letter-spacing:1px; cursor:pointer; }
+.btn-sm-del  { padding:4px 12px; background:rgba(231,76,60,0.08); border:1px solid rgba(231,76,60,0.2); border-radius:6px; color:#E74C3C; font-family:'Orbitron',monospace; font-size:9px; letter-spacing:1px; cursor:pointer; }
+
+/* Section header */
+.sec-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+.sec-title { font-family:'Orbitron',monospace; font-size:11px; letter-spacing:3px; color:rgba(255,255,255,0.4); text-transform:uppercase; }
+.btn-add { display:flex; align-items:center; gap:8px; padding:9px 18px; border-radius:10px; background:linear-gradient(135deg,#E74C3C,#C0392B); border:none; color:#fff; cursor:pointer; font-family:'Orbitron',monospace; font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; box-shadow:0 4px 16px rgba(231,76,60,0.3); transition:all 0.2s; }
+.btn-add:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(231,76,60,0.4); }
+
+/* Inline form */
+.inline-form { background:rgba(14,30,60,0.5); border:1px solid rgba(59,130,246,0.2); border-radius:12px; padding:24px; margin-bottom:24px; display:none; }
+.inline-form.open { display:block; animation:page-enter 0.3s ease; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+.form-field label { display:block; font-family:'Orbitron',monospace; font-size:8px; letter-spacing:2px; color:rgba(255,255,255,0.3); margin-bottom:6px; }
+.form-input, .form-select, .form-textarea { width:100%; padding:9px 12px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:8px; color:#D1D9E6; font-family:'Share Tech Mono',monospace; font-size:12px; outline:none; transition:border-color 0.2s; }
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color:rgba(59,130,246,0.4); }
+.form-textarea { min-height:80px; resize:vertical; line-height:1.6; }
+.form-select option { background:#0D1726; }
+.form-actions { display:flex; gap:10px; margin-top:4px; }
+.btn-save   { padding:9px 20px; background:linear-gradient(135deg,#E74C3C,#C0392B); border:none; border-radius:8px; color:#fff; font-family:'Orbitron',monospace; font-size:9px; letter-spacing:2px; cursor:pointer; font-weight:700; }
+.btn-cancel { padding:9px 20px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:rgba(255,255,255,0.4); font-family:'Orbitron',monospace; font-size:9px; letter-spacing:2px; cursor:pointer; }
+
+/* Alert banner */
+.alert-banner { padding:12px 16px; border-radius:10px; margin-bottom:16px; font-family:'Share Tech Mono',monospace; font-size:11px; display:none; }
+.alert-warn { background:rgba(246,173,85,0.06); border:1px solid rgba(246,173,85,0.2); color:rgba(246,173,85,0.8); }
+.alert-banner.visible { display:block; }
+
+/* Showcase cards */
+.showcase-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
+.showcase-card { background:rgba(7,13,24,0.75); border:1px solid rgba(255,255,255,0.08); border-radius:12px; overflow:hidden; transition:all 0.2s; }
+.showcase-card:hover { border-color:rgba(255,255,255,0.15); transform:translateY(-2px); }
+.showcase-img { height:90px; display:flex; align-items:center; justify-content:center; font-size:32px; border-bottom:1px solid rgba(255,255,255,0.06); background:linear-gradient(135deg,rgba(14,30,60,0.8),rgba(20,8,8,0.8)); }
+.showcase-body { padding:14px; }
+.showcase-student { font-family:'Share Tech Mono',monospace; font-size:10px; color:rgba(255,255,255,0.3); margin-bottom:4px; }
+.showcase-title { font-family:'Orbitron',monospace; font-size:11px; color:#fff; margin-bottom:6px; }
+.showcase-desc { font-size:12px; color:rgba(255,255,255,0.4); line-height:1.5; margin-bottom:10px; }
+.badge-pending  { display:inline-block; padding:2px 8px; background:rgba(246,173,85,0.1); border:1px solid rgba(246,173,85,0.3); border-radius:4px; font-family:'Orbitron',monospace; font-size:9px; color:#F6AD55; }
+.badge-approved { display:inline-block; padding:2px 8px; background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.3); border-radius:4px; font-family:'Orbitron',monospace; font-size:9px; color:#2ECC71; }
+
+/* Lab topics grid */
+.lab-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
+.lab-topic-card { background:rgba(7,13,24,0.75); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:20px; cursor:pointer; transition:all 0.2s; }
+.lab-topic-card:hover { border-color:rgba(231,76,60,0.3); transform:translateY(-2px); box-shadow:0 8px 32px rgba(0,0,0,0.4); }
+.lab-icon { font-size:28px; margin-bottom:12px; }
+.lab-title { font-family:'Orbitron',monospace; font-size:11px; font-weight:700; color:#fff; margin-bottom:4px; }
+.lab-count { font-family:'Share Tech Mono',monospace; font-size:10px; color:rgba(255,255,255,0.3); margin-bottom:14px; }
+.progress-bar-wrap { background:rgba(255,255,255,0.06); border-radius:4px; height:4px; }
+.progress-bar-fill { height:4px; border-radius:4px; background:linear-gradient(90deg,#E74C3C,#f0813d); transition:width 0.5s ease; }
+.progress-label { font-family:'Share Tech Mono',monospace; font-size:9px; color:rgba(255,255,255,0.25); margin-top:4px; }
+
+/* Exercise view */
+.exercise-view { display:none; }
+.exercise-view.active { display:block; animation:page-enter 0.3s ease; }
+.breadcrumb { font-family:'Share Tech Mono',monospace; font-size:11px; color:rgba(255,255,255,0.3); margin-bottom:20px; cursor:pointer; }
+.breadcrumb span { color:#f0813d; }
+.exercise-box { background:rgba(7,13,24,0.75); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:28px; max-width:800px; }
+.ex-type-label { font-family:'Orbitron',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; margin-bottom:16px; }
+.ex-type-quiz     { color:#3B82F6; }
+.ex-type-scenario { color:#F6AD55; }
+.ex-type-written  { color:#A855F7; }
+.ex-type-flashcard{ color:#00D4FF; }
+.ex-title { font-family:'Orbitron',monospace; font-size:14px; font-weight:700; color:#fff; margin-bottom:20px; }
+
+/* Quiz */
+.quiz-question { font-size:16px; color:rgba(255,255,255,0.9); margin-bottom:20px; line-height:1.6; }
+.quiz-options { display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
+.quiz-opt { display:flex; align-items:flex-start; gap:12px; padding:12px 16px; border-radius:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); cursor:pointer; transition:all 0.2s; }
+.quiz-opt:hover:not(.disabled) { background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.15); }
+.quiz-opt.selected { background:rgba(231,76,60,0.08); border-color:rgba(231,76,60,0.4); }
+.quiz-opt.correct  { background:rgba(46,204,113,0.08); border-color:rgba(46,204,113,0.4); }
+.quiz-opt.wrong    { background:rgba(231,76,60,0.06); border-color:rgba(231,76,60,0.25); opacity:0.6; }
+.quiz-opt.disabled { pointer-events:none; }
+.quiz-letter { font-family:'Orbitron',monospace; font-size:11px; font-weight:700; color:rgba(255,255,255,0.3); flex-shrink:0; padding-top:1px; }
+.quiz-opt.selected .quiz-letter { color:#E74C3C; }
+.quiz-opt.correct  .quiz-letter { color:#2ECC71; }
+.quiz-text { font-family:'Share Tech Mono',monospace; font-size:12px; color:rgba(255,255,255,0.6); line-height:1.5; }
+.quiz-explanation { margin-top:16px; padding:14px; background:rgba(46,204,113,0.06); border:1px solid rgba(46,204,113,0.2); border-radius:8px; font-family:'Share Tech Mono',monospace; font-size:12px; color:rgba(255,255,255,0.6); line-height:1.6; display:none; }
+
+/* Scenario */
+.scenario-step { padding:16px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:10px; margin-bottom:14px; }
+.scenario-text { font-size:14px; color:rgba(255,255,255,0.8); line-height:1.6; margin-bottom:14px; }
+.scenario-choices { display:flex; flex-direction:column; gap:8px; }
+.scenario-choice { padding:10px 14px; border-radius:8px; background:rgba(59,130,246,0.07); border:1px solid rgba(59,130,246,0.2); font-family:'Share Tech Mono',monospace; font-size:12px; color:rgba(59,130,246,0.8); cursor:pointer; transition:all 0.2s; }
+.scenario-choice:hover { background:rgba(59,130,246,0.14); border-color:rgba(59,130,246,0.4); }
+.scenario-feedback { margin-top:10px; padding:10px 14px; background:rgba(246,173,85,0.06); border:1px solid rgba(246,173,85,0.2); border-radius:8px; font-family:'Share Tech Mono',monospace; font-size:11px; color:rgba(246,173,85,0.8); display:none; }
+
+/* Written */
+.written-prompt { font-size:15px; color:rgba(255,255,255,0.8); line-height:1.6; margin-bottom:16px; padding:16px; background:rgba(255,255,255,0.03); border-left:3px solid rgba(168,85,247,0.5); border-radius:0 8px 8px 0; }
+.written-ta { width:100%; min-height:140px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:10px; color:#D1D9E6; font-family:'Share Tech Mono',monospace; font-size:12px; padding:14px; outline:none; resize:vertical; line-height:1.7; caret-color:#A855F7; }
+.written-ta:focus { border-color:rgba(168,85,247,0.4); }
+.written-guidance { margin-top:14px; padding:14px; background:rgba(168,85,247,0.06); border:1px solid rgba(168,85,247,0.2); border-radius:8px; font-family:'Share Tech Mono',monospace; font-size:12px; color:rgba(255,255,255,0.6); line-height:1.6; display:none; }
+
+/* Flashcard */
+.flashcard-wrap { perspective:1000px; height:180px; margin-bottom:16px; cursor:pointer; }
+.flashcard { width:100%; height:100%; position:relative; transform-style:preserve-3d; transition:transform 0.5s; border-radius:12px; }
+.flashcard.flipped { transform:rotateY(180deg); }
+.flashcard-face { position:absolute; inset:0; border-radius:12px; display:flex; align-items:center; justify-content:center; padding:24px; backface-visibility:hidden; text-align:center; }
+.flashcard-front { background:rgba(14,30,60,0.8); border:1px solid rgba(59,130,246,0.3); }
+.flashcard-back  { background:rgba(8,20,14,0.8); border:1px solid rgba(46,204,113,0.3); transform:rotateY(180deg); }
+.flashcard-label { font-family:'Orbitron',monospace; font-size:8px; letter-spacing:3px; color:rgba(255,255,255,0.25); position:absolute; top:14px; }
+.flashcard-text  { font-size:14px; color:rgba(255,255,255,0.85); line-height:1.6; }
+.flashcard-back .flashcard-text { color:#2ECC71; }
+.fc-hint { font-family:'Share Tech Mono',monospace; font-size:10px; color:rgba(255,255,255,0.25); text-align:center; margin-bottom:12px; }
+.fc-nav { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.fc-nav-btn { padding:7px 14px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:rgba(255,255,255,0.5); font-family:'Orbitron',monospace; font-size:9px; letter-spacing:1px; cursor:pointer; }
+.fc-pos { font-family:'Share Tech Mono',monospace; font-size:11px; color:rgba(255,255,255,0.3); flex:1; text-align:center; }
+.fc-self { display:flex; gap:8px; }
+.fc-know   { flex:1; padding:8px; border-radius:8px; background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.3); color:#2ECC71; font-family:'Orbitron',monospace; font-size:9px; letter-spacing:1px; cursor:pointer; }
+.fc-review { flex:1; padding:8px; border-radius:8px; background:rgba(231,76,60,0.1); border:1px solid rgba(231,76,60,0.3); color:#E74C3C; font-family:'Orbitron',monospace; font-size:9px; letter-spacing:1px; cursor:pointer; }
+
+/* oraclebase ref card */
+.ora-ref-card { background:rgba(14,30,60,0.5); border:1px solid rgba(59,130,246,0.2); border-radius:8px; padding:12px 16px; display:flex; gap:10px; margin-top:16px; }
+.ora-source { font-family:'Orbitron',monospace; font-size:8px; letter-spacing:2px; color:#3B82F6; margin-bottom:3px; }
+.ora-ref-title { font-family:'Share Tech Mono',monospace; font-size:11px; color:rgba(255,255,255,0.7); margin-bottom:4px; }
+.ora-ref-summary { font-size:11px; color:rgba(255,255,255,0.35); line-height:1.5; }
+
+/* Exercise nav */
+.ex-nav { display:flex; align-items:center; gap:10px; margin-top:20px; }
+.btn-ex-nav { padding:9px 18px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:rgba(255,255,255,0.5); font-family:'Orbitron',monospace; font-size:9px; letter-spacing:1px; cursor:pointer; }
+.btn-ex-nav:disabled { opacity:0.3; cursor:not-allowed; }
+.btn-ex-submit { padding:9px 20px; background:linear-gradient(135deg,#E74C3C,#C0392B); border:none; border-radius:8px; color:#fff; font-family:'Orbitron',monospace; font-size:10px; letter-spacing:2px; cursor:pointer; font-weight:700; }
+
+/* Admin exercise builder */
+.exercise-builder { background:rgba(14,30,60,0.5); border:1px solid rgba(59,130,246,0.2); border-radius:12px; padding:24px; margin-top:24px; display:none; }
+.exercise-builder.open { display:block; animation:page-enter 0.3s ease; }
+.builder-title { font-family:'Orbitron',monospace; font-size:10px; letter-spacing:3px; color:#3B82F6; margin-bottom:20px; display:flex; align-items:center; gap:8px; }
+.admin-badge { padding:2px 8px; background:rgba(231,76,60,0.2); color:#E74C3C; border-radius:4px; font-size:8px; }
+.ora-fetch-btn { display:flex; align-items:center; gap:8px; padding:8px 14px; background:rgba(59,130,246,0.07); border:1px solid rgba(59,130,246,0.2); border-radius:8px; font-family:'Share Tech Mono',monospace; font-size:11px; color:rgba(59,130,246,0.7); cursor:pointer; margin-top:10px; }
+
+@media (max-width:900px) {
+  .projects-main { padding:16px; }
+  .form-row { grid-template-columns:1fr; }
+  .cards-grid, .showcase-grid, .lab-grid { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<header id="main-nav"></header>
+
+<main class="projects-main">
+
+  <!-- Tab bar -->
+  <div class="proj-tabs">
+    <div class="proj-tab active" data-tab="assignments" onclick="switchTab('assignments')">
+      Assignments <span class="proj-tab-badge" id="tab-badge-assignments">0</span>
+    </div>
+    <div class="proj-tab" data-tab="showcase" onclick="switchTab('showcase')">
+      Showcase <span class="proj-tab-badge" id="tab-badge-showcase">0</span>
+    </div>
+    <div class="proj-tab" data-tab="labs" onclick="switchTab('labs')">
+      Labs <span class="proj-tab-badge" id="tab-badge-labs">0</span>
+    </div>
+  </div>
+
+  <!-- ── ASSIGNMENTS TAB ── -->
+  <div class="proj-panel active" id="panel-assignments">
+    <div class="sec-header">
+      <span class="sec-title">Assignment Bank</span>
+      <button class="btn-add admin-only" style="display:none" onclick="toggleAssignForm()">+ New Assignment</button>
+    </div>
+    <!-- Inline assignment form (admin only) -->
+    <div class="inline-form" id="assign-form">
+      <input type="hidden" id="assign-edit-id">
+      <div class="form-row">
+        <div class="form-field">
+          <label>Title</label>
+          <input class="form-input" id="assign-title" type="text" placeholder="Assignment title">
+        </div>
+        <div class="form-field">
+          <label>Topic</label>
+          <select class="form-select" id="assign-topic">
+            <option value="Data Guard">Data Guard</option>
+            <option value="RAC">RAC</option>
+            <option value="Performance Tuning">Performance Tuning</option>
+            <option value="Partitioning">Partitioning</option>
+            <option value="Indexes">Indexes</option>
+            <option value="Backup &amp; Recovery">Backup &amp; Recovery</option>
+            <option value="Security">Security</option>
+            <option value="High Availability">High Availability</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Difficulty</label>
+          <select class="form-select" id="assign-difficulty">
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Due Date (optional)</label>
+          <input class="form-input" id="assign-due" type="date">
+        </div>
+      </div>
+      <div class="form-field" style="margin-bottom:14px;">
+        <label>Description</label>
+        <textarea class="form-textarea" id="assign-desc" placeholder="Full assignment description…"></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="btn-save" onclick="saveAssignment()">Save Assignment</button>
+        <button class="btn-cancel" onclick="toggleAssignForm(false)">Cancel</button>
+      </div>
+    </div>
+    <div class="cards-grid" id="assignments-grid"></div>
+  </div>
+
+  <!-- ── SHOWCASE TAB ── -->
+  <div class="proj-panel" id="panel-showcase">
+    <div class="sec-header">
+      <span class="sec-title">Student Showcase</span>
+      <button class="btn-add" onclick="toggleShowcaseForm()">+ Submit Your Work</button>
+    </div>
+    <div class="alert-banner alert-warn" id="showcase-pending-banner"></div>
+    <!-- Inline submit form -->
+    <div class="inline-form" id="showcase-form">
+      <div class="form-row">
+        <div class="form-field">
+          <label>Project Title</label>
+          <input class="form-input" id="sc-title" type="text" placeholder="Your project title">
+        </div>
+        <div class="form-field">
+          <label>URL (GitHub, Google Doc — optional)</label>
+          <input class="form-input" id="sc-url" type="url" placeholder="https://…">
+        </div>
+      </div>
+      <div class="form-field" style="margin-bottom:14px;">
+        <label>Description</label>
+        <textarea class="form-textarea" id="sc-desc" placeholder="Describe your project…"></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="btn-save" onclick="submitShowcase()">Submit for Review</button>
+        <button class="btn-cancel" onclick="toggleShowcaseForm(false)">Cancel</button>
+      </div>
+    </div>
+    <div class="showcase-grid" id="showcase-grid"></div>
+  </div>
+
+  <!-- ── LABS TAB ── -->
+  <div class="proj-panel" id="panel-labs">
+    <!-- Topic list view -->
+    <div id="labs-topics-view">
+      <div class="sec-header">
+        <span class="sec-title">Guided Labs</span>
+        <button class="btn-add admin-only" style="display:none" onclick="toggleTopicForm()">+ New Topic</button>
+      </div>
+      <div class="inline-form" id="topic-form">
+        <div class="form-row">
+          <div class="form-field">
+            <label>Topic Title</label>
+            <input class="form-input" id="topic-title" type="text" placeholder="e.g. Data Guard">
+          </div>
+          <div class="form-field">
+            <label>Icon (emoji)</label>
+            <input class="form-input" id="topic-icon" type="text" placeholder="🛡️" value="📚">
+          </div>
+        </div>
+        <div class="form-field" style="margin-bottom:14px;">
+          <label>Description</label>
+          <textarea class="form-textarea" id="topic-desc" placeholder="Short topic description…"></textarea>
+        </div>
+        <div class="form-actions">
+          <button class="btn-save" onclick="saveTopic()">Save Topic</button>
+          <button class="btn-cancel" onclick="toggleTopicForm(false)">Cancel</button>
+        </div>
+      </div>
+      <div class="lab-grid" id="lab-topics-grid"></div>
+    </div>
+    <!-- Exercise list + exercise view (shown when a topic is clicked) -->
+    <div class="exercise-view" id="exercise-view">
+      <div class="breadcrumb" onclick="backToTopics()">
+        ← Labs / <span id="ex-topic-name"></span>
+      </div>
+      <!-- Exercise builder (admin only) -->
+      <div class="exercise-builder admin-only" id="exercise-builder" style="display:none;margin-bottom:24px;">
+        <div class="builder-title">⚙ Exercise Builder <span class="admin-badge">ADMIN ONLY</span></div>
+        <input type="hidden" id="builder-topic-id">
+        <div class="form-row">
+          <div class="form-field">
+            <label>Exercise Type</label>
+            <select class="form-select" id="builder-type" onchange="updateBuilderTemplate()">
+              <option value="quiz">Multiple Choice (Quiz)</option>
+              <option value="scenario">Scenario Walkthrough</option>
+              <option value="written">Written Response</option>
+              <option value="flashcard">Flashcard</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Title</label>
+            <input class="form-input" id="builder-title" type="text" placeholder="Exercise title">
+          </div>
+        </div>
+        <div class="form-field" style="margin-bottom:10px;">
+          <label>Content JSON</label>
+          <textarea class="form-textarea" id="builder-json" style="min-height:120px;font-size:11px;"></textarea>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <button class="ora-fetch-btn" onclick="openOraFetch()">🔗 Attach oraclebase.com Reference</button>
+          <span id="ora-attached-label" style="font-family:'Share Tech Mono',monospace;font-size:11px;color:#3B82F6;display:none;"></span>
+        </div>
+        <input type="hidden" id="builder-ora-id">
+        <!-- oraclebase fetch mini-form -->
+        <div id="ora-fetch-form" style="display:none;margin-top:12px;padding:14px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:8px;">
+          <div class="form-row">
+            <div class="form-field">
+              <label>oraclebase.com URL</label>
+              <input class="form-input" id="ora-url-input" type="url" placeholder="https://www.oraclebase.com/articles/…">
+            </div>
+            <div class="form-field">
+              <label>Topic Tag</label>
+              <input class="form-input" id="ora-topic-input" type="text" placeholder="data-guard">
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn-save" onclick="fetchOraclebase()">Fetch &amp; Cache</button>
+            <button class="btn-cancel" onclick="document.getElementById('ora-fetch-form').style.display='none'">Cancel</button>
+          </div>
+        </div>
+        <div class="form-actions" style="margin-top:14px;">
+          <button class="btn-save" onclick="saveExercise()">Save Exercise</button>
+          <button class="btn-cancel" onclick="toggleExerciseBuilder(false)">Cancel</button>
+        </div>
+      </div>
+      <button class="btn-add admin-only" id="btn-new-exercise" style="display:none;margin-bottom:20px;" onclick="toggleExerciseBuilder()">+ New Exercise</button>
+      <!-- Exercise list (shows when no exercise selected) -->
+      <div id="exercise-list"></div>
+      <!-- Single exercise view -->
+      <div id="exercise-detail" style="display:none;"></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ── Session ──────────────────────────────────────────────────────────────
+var SESSION = null;
+try { SESSION = JSON.parse(sessionStorage.getItem('ora_auth_session_v2')); } catch(e) {}
+if (!SESSION) { window.location.replace('/'); }
+var IS_ADMIN = SESSION && (SESSION.role === 'admin' || SESSION.role === 'manager');
+
+// Show admin-only elements
+if (IS_ADMIN) {
+  document.querySelectorAll('.admin-only').forEach(function(el) { el.style.display = ''; });
+}
+
+// ── Tab switching ─────────────────────────────────────────────────────────
+var LAST_TAB_KEY = 'projects_last_tab';
+function switchTab(name) {
+  document.querySelectorAll('.proj-tab').forEach(function(t) { t.classList.toggle('active', t.dataset.tab === name); });
+  document.querySelectorAll('.proj-panel').forEach(function(p) { p.classList.toggle('active', p.id === 'panel-' + name); });
+  sessionStorage.setItem(LAST_TAB_KEY, name);
+}
+
+// ── Helper: escape HTML ───────────────────────────────────────────────────
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── Topic badge CSS class ─────────────────────────────────────────────────
+function topicClass(topic) {
+  var map = { 'data guard':'dataguard','rac':'rac','performance tuning':'performance',
+    'partitioning':'partitioning','indexes':'indexes','backup & recovery':'backup',
+    'backup and recovery':'backup','security':'security','high availability':'ha' };
+  return 'topic-' + (map[(topic||'').toLowerCase()] || 'default');
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// ASSIGNMENTS
+// ══════════════════════════════════════════════════════════════════════════
+var ASSIGNMENTS = [];
+
+function loadAssignments() {
+  fetch('/api/assignments')
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      ASSIGNMENTS = data;
+      document.getElementById('tab-badge-assignments').textContent = data.length;
+      renderAssignments();
+    });
+}
+
+function renderAssignments() {
+  var grid = document.getElementById('assignments-grid');
+  if (!ASSIGNMENTS.length) {
+    grid.innerHTML = '<p style="font-family:\'Share Tech Mono\',monospace;font-size:12px;color:rgba(255,255,255,0.3);grid-column:1/-1;">No assignments yet.</p>';
+    return;
+  }
+  grid.innerHTML = ASSIGNMENTS.map(function(a) {
+    var dueStr = a.due_date ? 'Due: ' + a.due_date.split('T')[0] : '';
+    var adminHtml = IS_ADMIN ? [
+      '<div class="admin-actions">',
+      '<button class="btn-sm-edit" onclick="editAssignment(' + a.id + ')">Edit</button>',
+      '<button class="btn-sm-del" onclick="deleteAssignment(' + a.id + ')">Delete</button>',
+      '</div>'
+    ].join('') : '';
+    return [
+      '<div class="card">',
+      '<span class="topic-badge ' + topicClass(a.topic) + '">' + esc(a.topic) + '</span>',
+      '<div class="card-title">' + esc(a.title) + '</div>',
+      '<div class="card-desc">' + esc(a.description) + '</div>',
+      '<div class="card-meta">',
+      '<span class="diff-badge diff-' + esc(a.difficulty) + '">' + esc(a.difficulty) + '</span>',
+      dueStr ? '<span class="due-date">' + esc(dueStr) + '</span>' : '',
+      '</div>',
+      adminHtml,
+      '</div>'
+    ].join('');
+  }).join('');
+}
+
+function toggleAssignForm(open) {
+  var form = document.getElementById('assign-form');
+  var isOpen = typeof open === 'boolean' ? open : !form.classList.contains('open');
+  form.classList.toggle('open', isOpen);
+  if (!isOpen) {
+    document.getElementById('assign-edit-id').value = '';
+    ['assign-title','assign-desc'].forEach(function(id){ document.getElementById(id).value = ''; });
+    document.getElementById('assign-due').value = '';
+  }
+}
+
+function editAssignment(id) {
+  var a = ASSIGNMENTS.find(function(x){ return x.id === id; });
+  if (!a) return;
+  document.getElementById('assign-edit-id').value = id;
+  document.getElementById('assign-title').value = a.title;
+  document.getElementById('assign-desc').value = a.description;
+  document.getElementById('assign-topic').value = a.topic;
+  document.getElementById('assign-difficulty').value = a.difficulty;
+  document.getElementById('assign-due').value = a.due_date ? a.due_date.split('T')[0] : '';
+  toggleAssignForm(true);
+  document.getElementById('assign-form').scrollIntoView({ behavior: 'smooth' });
+}
+
+function saveAssignment() {
+  var editId = document.getElementById('assign-edit-id').value;
+  var payload = {
+    title: document.getElementById('assign-title').value.trim(),
+    description: document.getElementById('assign-desc').value.trim(),
+    topic: document.getElementById('assign-topic').value,
+    difficulty: document.getElementById('assign-difficulty').value,
+    due_date: document.getElementById('assign-due').value || null,
+    created_by: SESSION.username
+  };
+  if (!payload.title || !payload.description) { alert('Title and description are required.'); return; }
+  var method = editId ? 'PUT' : 'POST';
+  var url = editId ? '/api/assignments/' + editId : '/api/assignments';
+  fetch(url, { method: method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) })
+    .then(function(r){ return r.json(); })
+    .then(function() { toggleAssignForm(false); loadAssignments(); });
+}
+
+function deleteAssignment(id) {
+  if (!confirm('Delete this assignment?')) return;
+  fetch('/api/assignments/' + id, { method: 'DELETE' })
+    .then(function() { loadAssignments(); });
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// SHOWCASE
+// ══════════════════════════════════════════════════════════════════════════
+var SHOWCASE = [];
+
+function loadShowcase() {
+  var params = '?role=' + encodeURIComponent(SESSION.role) + '&username=' + encodeURIComponent(SESSION.username);
+  fetch('/api/showcase' + params)
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      SHOWCASE = data;
+      var approved = data.filter(function(e){ return e.approved; }).length;
+      document.getElementById('tab-badge-showcase').textContent = approved;
+      var pending = data.filter(function(e){ return !e.approved; });
+      var banner = document.getElementById('showcase-pending-banner');
+      if (IS_ADMIN && pending.length) {
+        banner.textContent = '⚠ ' + pending.length + ' submission(s) pending approval';
+        banner.classList.add('visible');
+      }
+      renderShowcase();
+    });
+}
+
+function showcaseIcon(title) {
+  var t = (title||'').toLowerCase();
+  if (t.includes('data guard')||t.includes('standby')) return '🛡️';
+  if (t.includes('rac')||t.includes('cluster')) return '🔗';
+  if (t.includes('perf')||t.includes('awr')||t.includes('tuning')) return '⚡';
+  if (t.includes('partition')) return '📊';
+  if (t.includes('index')) return '🗂️';
+  if (t.includes('backup')||t.includes('rman')||t.includes('recover')) return '💾';
+  if (t.includes('security')||t.includes('audit')) return '🔐';
+  return '📋';
+}
+
+function renderShowcase() {
+  var grid = document.getElementById('showcase-grid');
+  if (!SHOWCASE.length) {
+    grid.innerHTML = '<p style="font-family:\'Share Tech Mono\',monospace;font-size:12px;color:rgba(255,255,255,0.3);">No entries yet. Be the first to submit!</p>';
+    return;
+  }
+  grid.innerHTML = SHOWCASE.map(function(e) {
+    var badge = e.approved
+      ? '<span class="badge-approved">✓ Published</span>'
+      : '<span class="badge-pending">⏳ Pending Review</span>';
+    var adminHtml = IS_ADMIN ? [
+      '<div class="admin-actions" style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.05);">',
+      e.approved
+        ? '<button class="btn-sm-edit" onclick="approveShowcase(' + e.id + ',false)">Unpublish</button>'
+        : '<button class="btn-sm-edit" onclick="approveShowcase(' + e.id + ',true)">Approve</button>',
+      '<button class="btn-sm-del" onclick="deleteShowcase(' + e.id + ')">Delete</button>',
+      '</div>'
+    ].join('') : '';
+    var urlHtml = e.url ? '<a href="' + esc(e.url) + '" target="_blank" rel="noopener" style="font-family:\'Orbitron\',monospace;font-size:9px;letter-spacing:1px;color:#3B82F6;text-decoration:none;display:block;margin-top:6px;">View Project →</a>' : '';
+    return [
+      '<div class="showcase-card">',
+      '<div class="showcase-img">' + showcaseIcon(e.title) + '</div>',
+      '<div class="showcase-body">',
+      '<div class="showcase-student">' + esc(e.student_username) + ' · ' + (e.submitted_at||'').split('T')[0] + '</div>',
+      '<div class="showcase-title">' + esc(e.title) + '</div>',
+      '<div class="showcase-desc">' + esc((e.description||'').slice(0,120)) + (e.description.length>120?'…':'') + '</div>',
+      badge, urlHtml, adminHtml,
+      '</div></div>'
+    ].join('');
+  }).join('');
+}
+
+function toggleShowcaseForm(open) {
+  var form = document.getElementById('showcase-form');
+  var isOpen = typeof open === 'boolean' ? open : !form.classList.contains('open');
+  form.classList.toggle('open', isOpen);
+}
+
+function submitShowcase() {
+  var payload = {
+    student_username: SESSION.username,
+    title: document.getElementById('sc-title').value.trim(),
+    description: document.getElementById('sc-desc').value.trim(),
+    url: document.getElementById('sc-url').value.trim() || null
+  };
+  if (!payload.title || !payload.description) { alert('Title and description are required.'); return; }
+  fetch('/api/showcase', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) })
+    .then(function(r){ return r.json(); })
+    .then(function() { toggleShowcaseForm(false); loadShowcase(); });
+}
+
+function approveShowcase(id, approved) {
+  fetch('/api/showcase/' + id + '/approve', {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ approved: approved, approved_by: SESSION.username })
+  }).then(function(){ loadShowcase(); });
+}
+
+function deleteShowcase(id) {
+  if (!confirm('Delete this showcase entry?')) return;
+  fetch('/api/showcase/' + id, { method:'DELETE' }).then(function(){ loadShowcase(); });
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// LABS
+// ══════════════════════════════════════════════════════════════════════════
+var LAB_TOPICS = [];
+var CURRENT_EXERCISES = [];
+var CURRENT_EXERCISE_IDX = 0;
+var CURRENT_TOPIC_ID = null;
+var FC_INDEX = 0;
+var ORA_ATTACHED_ID = null;
+
+function loadLabTopics() {
+  fetch('/api/lab-topics?username=' + encodeURIComponent(SESSION.username))
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      LAB_TOPICS = data;
+      document.getElementById('tab-badge-labs').textContent = data.length;
+      renderLabTopics();
+    });
+}
+
+function renderLabTopics() {
+  var grid = document.getElementById('lab-topics-grid');
+  if (!LAB_TOPICS.length) {
+    grid.innerHTML = '<p style="font-family:\'Share Tech Mono\',monospace;font-size:12px;color:rgba(255,255,255,0.3);">No lab topics yet.</p>';
+    return;
+  }
+  grid.innerHTML = LAB_TOPICS.map(function(t) {
+    var pct = t.exercise_count ? Math.round((t.completed_count / t.exercise_count) * 100) : 0;
+    var progressLabel = t.exercise_count === 0 ? 'No exercises yet'
+      : pct === 0 ? 'Not started'
+      : pct === 100 ? '✓ Complete'
+      : pct + '% complete';
+    return [
+      '<div class="lab-topic-card" onclick="openTopic(' + t.id + ',\'' + esc(t.title) + '\')">',
+      '<div class="lab-icon">' + esc(t.icon) + '</div>',
+      '<div class="lab-title">' + esc(t.title) + '</div>',
+      '<div class="lab-count">' + t.exercise_count + ' exercise' + (t.exercise_count !== 1 ? 's' : '') + '</div>',
+      '<div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:' + pct + '%"></div></div>',
+      '<div class="progress-label">' + esc(progressLabel) + '</div>',
+      '</div>'
+    ].join('');
+  }).join('');
+}
+
+function openTopic(topicId, topicTitle) {
+  CURRENT_TOPIC_ID = topicId;
+  document.getElementById('ex-topic-name').textContent = topicTitle;
+  document.getElementById('builder-topic-id').value = topicId;
+  document.getElementById('labs-topics-view').style.display = 'none';
+  document.getElementById('exercise-view').classList.add('active');
+  if (IS_ADMIN) {
+    document.getElementById('btn-new-exercise').style.display = '';
+    document.getElementById('exercise-builder').style.display = 'none';
+  }
+  loadExercises(topicId);
+}
+
+function backToTopics() {
+  document.getElementById('labs-topics-view').style.display = '';
+  document.getElementById('exercise-view').classList.remove('active');
+  document.getElementById('exercise-list').style.display = '';
+  document.getElementById('exercise-detail').style.display = 'none';
+  loadLabTopics();
+}
+
+function loadExercises(topicId) {
+  fetch('/api/lab-topics/' + topicId + '/exercises?username=' + encodeURIComponent(SESSION.username))
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      CURRENT_EXERCISES = data;
+      renderExerciseList(data);
+    });
+}
+
+function renderExerciseList(exercises) {
+  var list = document.getElementById('exercise-list');
+  list.style.display = '';
+  document.getElementById('exercise-detail').style.display = 'none';
+  if (!exercises.length) {
+    list.innerHTML = '<p style="font-family:\'Share Tech Mono\',monospace;font-size:12px;color:rgba(255,255,255,0.3);">No exercises in this topic yet.</p>';
+    return;
+  }
+  list.innerHTML = '<div class="cards-grid">' + exercises.map(function(ex, idx) {
+    var prog = ex.progress;
+    var statusBadge = prog && prog.completed
+      ? '<span style="font-family:\'Orbitron\',monospace;font-size:9px;color:#2ECC71;letter-spacing:1px;">✓ DONE</span>'
+      : '';
+    var typeColors = { quiz:'#3B82F6', scenario:'#F6AD55', written:'#A855F7', flashcard:'#00D4FF' };
+    return [
+      '<div class="card" style="cursor:pointer;" onclick="openExercise(' + idx + ')">',
+      '<div style="font-family:\'Orbitron\',monospace;font-size:9px;letter-spacing:2px;color:' + (typeColors[ex.type]||'#fff') + ';margin-bottom:10px;text-transform:uppercase;">' + esc(ex.type) + '</div>',
+      '<div class="card-title">' + esc(ex.title) + '</div>',
+      statusBadge,
+      IS_ADMIN ? '<div class="admin-actions"><button class="btn-sm-del" onclick="event.stopPropagation();deleteExercise(' + ex.id + ')">Delete</button></div>' : '',
+      '</div>'
+    ].join('');
+  }).join('') + '</div>';
+}
+
+function openExercise(idx) {
+  CURRENT_EXERCISE_IDX = idx;
+  FC_INDEX = 0;
+  var ex = CURRENT_EXERCISES[idx];
+  document.getElementById('exercise-list').style.display = 'none';
+  var detail = document.getElementById('exercise-detail');
+  detail.style.display = 'block';
+  detail.innerHTML = renderExerciseDetail(ex, idx);
+}
+
+function renderExerciseDetail(ex, idx) {
+  var c = ex.content_json || {};
+  var typeColors = { quiz:'#3B82F6', scenario:'#F6AD55', written:'#A855F7', flashcard:'#00D4FF' };
+  var oraHtml = (ex.ora_title) ? [
+    '<div class="ora-ref-card">',
+    '<div style="font-size:16px;flex-shrink:0;">🔗</div>',
+    '<div><div class="ora-source">ORACLEBASE.COM</div>',
+    '<div class="ora-ref-title">' + esc(ex.ora_title) + '</div>',
+    '<div class="ora-ref-summary">' + esc((ex.ora_summary||'').slice(0,200)) + '</div>',
+    ex.ora_url ? '<a href="' + esc(ex.ora_url) + '" target="_blank" rel="noopener" style="font-family:\'Orbitron\',monospace;font-size:9px;color:#3B82F6;text-decoration:none;margin-top:6px;display:block;">Read Article →</a>' : '',
+    '</div></div>'
+  ].join('') : '';
+
+  var body = '';
+  if (ex.type === 'quiz') { body = renderQuiz(c, ex.id, oraHtml); }
+  else if (ex.type === 'scenario') { body = renderScenario(c, 0); }
+  else if (ex.type === 'written') { body = renderWritten(c, ex.id, ex.progress, oraHtml); }
+  else if (ex.type === 'flashcard') { body = renderFlashcard(c, 0, oraHtml); }
+
+  var navPrev = idx > 0 ? '<button class="btn-ex-nav" onclick="openExercise(' + (idx-1) + ')">← Previous</button>' : '<button class="btn-ex-nav" disabled>← Previous</button>';
+  var navNext = idx < CURRENT_EXERCISES.length - 1 ? '<button class="btn-ex-nav" onclick="openExercise(' + (idx+1) + ')">Next →</button>' : '<button class="btn-ex-nav" disabled>Next →</button>';
+
+  return [
+    '<div class="breadcrumb" onclick="backToExList()">← ' + esc(document.getElementById('ex-topic-name').textContent) + ' / <span>' + esc(ex.title) + '</span></div>',
+    '<div class="exercise-box">',
+    '<div class="ex-type-label ex-type-' + ex.type + '">' + ex.type.toUpperCase() + '</div>',
+    '<div class="ex-title">' + esc(ex.title) + '</div>',
+    body,
+    '</div>',
+    '<div class="ex-nav" style="margin-top:16px;">' + navPrev + navNext + '</div>'
+  ].join('');
+}
+
+function backToExList() {
+  document.getElementById('exercise-detail').style.display = 'none';
+  renderExerciseList(CURRENT_EXERCISES);
+}
+
+function renderQuiz(c, exId, oraHtml) {
+  var letters = ['A','B','C','D'];
+  var opts = (c.options||[]).map(function(opt, i) {
+    return '<div class="quiz-opt" data-idx="' + i + '" onclick="selectQuizOpt(this,' + i + ',' + c.correct + ',' + exId + ')">' +
+      '<span class="quiz-letter">' + letters[i] + '</span>' +
+      '<span class="quiz-text">' + esc(opt) + '</span></div>';
+  }).join('');
+  return [
+    '<div class="quiz-question">' + esc(c.question||'') + '</div>',
+    '<div class="quiz-options">' + opts + '</div>',
+    '<div class="quiz-explanation" id="quiz-exp-' + exId + '">' + esc(c.explanation||'') + '</div>',
+    oraHtml
+  ].join('');
+}
+
+function selectQuizOpt(el, idx, correct, exId) {
+  var opts = el.parentNode.querySelectorAll('.quiz-opt');
+  opts.forEach(function(o){ o.classList.add('disabled'); });
+  el.classList.add('selected');
+  opts[correct].classList.add('correct');
+  if (idx !== correct) { el.classList.add('wrong'); }
+  var exp = document.getElementById('quiz-exp-' + exId);
+  if (exp) exp.style.display = 'block';
+  var score = idx === correct ? 1 : 0;
+  saveProgress(exId, true, score, null);
+}
+
+function renderScenario(c, stepIdx) {
+  var steps = c.steps || [];
+  if (stepIdx >= steps.length) {
+    return '<div style="padding:16px;background:rgba(46,204,113,0.06);border:1px solid rgba(46,204,113,0.2);border-radius:8px;font-family:\'Share Tech Mono\',monospace;font-size:13px;color:#2ECC71;">Scenario complete! Good work.</div>';
+  }
+  var step = steps[stepIdx];
+  var choices = (step.choices||[]).map(function(ch) {
+    var nextIdx = ch.next !== null && ch.next !== undefined ? ch.next : null;
+    return '<div class="scenario-choice" onclick="advanceScenario(this,' + JSON.stringify(ch.feedback) + ',' + (nextIdx !== null ? nextIdx : 'null') + ',' + JSON.stringify(c) + ')">' + esc(ch.label) + '</div>';
+  }).join('');
+  return [
+    '<div class="scenario-step">',
+    '<div class="scenario-text">' + esc(step.text||'') + '</div>',
+    '<div class="scenario-choices">' + choices + '</div>',
+    '<div class="scenario-feedback" id="scenario-feedback"></div>',
+    '</div>'
+  ].join('');
+}
+
+function advanceScenario(el, feedback, nextIdx, c) {
+  var fb = document.getElementById('scenario-feedback');
+  if (fb) { fb.textContent = feedback || ''; fb.style.display = feedback ? 'block' : 'none'; }
+  el.parentNode.querySelectorAll('.scenario-choice').forEach(function(ch){ ch.style.pointerEvents='none'; });
+  if (nextIdx !== null) {
+    setTimeout(function() {
+      var box = document.querySelector('.exercise-box');
+      if (box) box.innerHTML += '<hr style="border:none;border-top:1px solid rgba(255,255,255,0.06);margin:16px 0;">' + renderScenario(c, nextIdx);
+    }, 600);
+  } else {
+    setTimeout(function() {
+      var box = document.querySelector('.exercise-box');
+      if (box) box.innerHTML += '<hr style="border:none;border-top:1px solid rgba(255,255,255,0.06);margin:16px 0;"><div style="padding:14px;background:rgba(46,204,113,0.06);border:1px solid rgba(46,204,113,0.2);border-radius:8px;font-family:\'Share Tech Mono\',monospace;font-size:12px;color:#2ECC71;">Scenario complete!</div>';
+    }, 600);
+  }
+}
+
+function renderWritten(c, exId, progress, oraHtml) {
+  var submitted = progress && progress.completed;
+  var savedAnswer = (progress && progress.answer_json && progress.answer_json.text) || '';
+  return [
+    '<div class="written-prompt">' + esc(c.prompt||'') + '</div>',
+    '<textarea class="written-ta" id="written-ta-' + exId + '" ' + (submitted?'readonly':'') + '>' + esc(savedAnswer) + '</textarea>',
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;">',
+    '<span style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:rgba(255,255,255,0.25);">' + (submitted ? '✓ Submitted for review' : 'Reviewed by instructor · No automated scoring') + '</span>',
+    submitted ? '' : '<button class="btn-ex-submit" onclick="submitWritten(' + exId + ')">Submit for Review →</button>',
+    '</div>',
+    submitted && c.guidance ? '<div class="written-guidance" style="display:block;">' + esc(c.guidance) + '</div>' : '',
+    oraHtml
+  ].join('');
+}
+
+function submitWritten(exId) {
+  var ta = document.getElementById('written-ta-' + exId);
+  if (!ta || !ta.value.trim()) { alert('Please write your answer before submitting.'); return; }
+  saveProgress(exId, true, null, { text: ta.value });
+  ta.readOnly = true;
+  openExercise(CURRENT_EXERCISE_IDX);
+}
+
+function renderFlashcard(c, cardIdx, oraHtml) {
+  var cards = c.cards || [];
+  if (!cards.length) return '<p style="color:rgba(255,255,255,0.4);">No cards defined.</p>';
+  var card = cards[cardIdx];
+  return [
+    '<div class="fc-hint">Click the card to reveal the answer</div>',
+    '<div class="flashcard-wrap" onclick="this.querySelector(\'.flashcard\').classList.toggle(\'flipped\')">',
+    '<div class="flashcard">',
+    '<div class="flashcard-face flashcard-front"><span class="flashcard-label">CONCEPT</span><div class="flashcard-text">' + esc(card.front) + '</div></div>',
+    '<div class="flashcard-face flashcard-back"><span class="flashcard-label">ANSWER</span><div class="flashcard-text">' + esc(card.back) + '</div></div>',
+    '</div></div>',
+    '<div class="fc-nav">',
+    '<button class="fc-nav-btn" ' + (cardIdx===0?'disabled':'') + ' onclick="navigateFlashcard(' + (cardIdx-1) + ',' + JSON.stringify(c) + ')">← Prev</button>',
+    '<span class="fc-pos">Card ' + (cardIdx+1) + ' of ' + cards.length + '</span>',
+    '<button class="fc-nav-btn" ' + (cardIdx===cards.length-1?'disabled':'') + ' onclick="navigateFlashcard(' + (cardIdx+1) + ',' + JSON.stringify(c) + ')">Next →</button>',
+    '</div>',
+    '<div class="fc-self">',
+    '<button class="fc-know" onclick="fcMarkKnow(' + cardIdx + ',' + JSON.stringify(c) + ')">✓ I know this</button>',
+    '<button class="fc-review" onclick="navigateFlashcard(' + (cardIdx<cards.length-1?cardIdx+1:0) + ',' + JSON.stringify(c) + ')">↺ Review again</button>',
+    '</div>',
+    oraHtml
+  ].join('');
+}
+
+function navigateFlashcard(idx, c) {
+  var box = document.querySelector('.exercise-box');
+  if (!box) return;
+  var ex = CURRENT_EXERCISES[CURRENT_EXERCISE_IDX];
+  var oraHtml = ex.ora_title ? '<div class="ora-ref-card"><div style="font-size:16px;flex-shrink:0;">🔗</div><div><div class="ora-source">ORACLEBASE.COM</div><div class="ora-ref-title">' + esc(ex.ora_title) + '</div></div></div>' : '';
+  var fcContent = renderFlashcard(c, idx, oraHtml);
+  box.querySelector('.fc-hint').parentNode.innerHTML = fcContent;
+}
+
+function fcMarkKnow(idx, c) {
+  var ex = CURRENT_EXERCISES[CURRENT_EXERCISE_IDX];
+  var cards = c.cards || [];
+  var nextIdx = idx < cards.length - 1 ? idx + 1 : null;
+  if (nextIdx !== null) { navigateFlashcard(nextIdx, c); }
+  else {
+    saveProgress(ex.id, true, null, null);
+    openExercise(CURRENT_EXERCISE_IDX);
+  }
+}
+
+function saveProgress(exerciseId, completed, score, answerJson) {
+  fetch('/api/lab-progress', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ username: SESSION.username, exercise_id: exerciseId, completed: completed, score: score, answer_json: answerJson })
+  }).catch(function(){});
+}
+
+// ── Admin: topic form ─────────────────────────────────────────────────────
+function toggleTopicForm(open) {
+  var form = document.getElementById('topic-form');
+  var isOpen = typeof open === 'boolean' ? open : !form.classList.contains('open');
+  form.classList.toggle('open', isOpen);
+}
+
+function saveTopic() {
+  var payload = {
+    title: document.getElementById('topic-title').value.trim(),
+    description: document.getElementById('topic-desc').value.trim(),
+    icon: document.getElementById('topic-icon').value.trim() || '📚'
+  };
+  if (!payload.title || !payload.description) { alert('Title and description required.'); return; }
+  fetch('/api/lab-topics', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) })
+    .then(function(r){ return r.json(); })
+    .then(function() { toggleTopicForm(false); loadLabTopics(); });
+}
+
+// ── Admin: exercise builder ───────────────────────────────────────────────
+var BUILDER_TEMPLATES = {
+  quiz: '{\n  "question": "Your question here?",\n  "options": ["Option A", "Option B", "Option C", "Option D"],\n  "correct": 0,\n  "explanation": "Explain why the correct answer is right."\n}',
+  scenario: '{\n  "intro": "Brief setup description.",\n  "steps": [\n    {\n      "text": "Describe the situation at this step.",\n      "choices": [\n        { "label": "Choice A", "next": 1, "feedback": "Feedback for choice A." },\n        { "label": "Choice B", "next": null, "feedback": "Feedback for choice B." }\n      ]\n    },\n    {\n      "text": "Follow-up situation.",\n      "choices": [\n        { "label": "Resolve it", "next": null, "feedback": "Well done!" }\n      ]\n    }\n  ]\n}',
+  written: '{\n  "prompt": "Your question or task description here.",\n  "guidance": "This guidance is shown after the student submits."\n}',
+  flashcard: '{\n  "cards": [\n    { "front": "Concept or question", "back": "Answer or explanation" },\n    { "front": "Second concept", "back": "Second answer" }\n  ]\n}'
+};
+
+function toggleExerciseBuilder(open) {
+  var builder = document.getElementById('exercise-builder');
+  var isOpen = typeof open === 'boolean' ? open : builder.style.display === 'none';
+  builder.style.display = isOpen ? 'block' : 'none';
+  if (isOpen) {
+    updateBuilderTemplate();
+    ORA_ATTACHED_ID = null;
+    document.getElementById('builder-ora-id').value = '';
+    document.getElementById('ora-attached-label').style.display = 'none';
+    builder.scrollIntoView({ behavior:'smooth' });
+  }
+}
+
+function updateBuilderTemplate() {
+  var type = document.getElementById('builder-type').value;
+  document.getElementById('builder-json').value = BUILDER_TEMPLATES[type] || '';
+}
+
+function openOraFetch() {
+  var form = document.getElementById('ora-fetch-form');
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+function fetchOraclebase() {
+  var url = document.getElementById('ora-url-input').value.trim();
+  var topic = document.getElementById('ora-topic-input').value.trim();
+  if (!url || !topic) { alert('URL and topic are required.'); return; }
+  fetch('/api/admin/oraclebase-fetch', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ url: url, topic: topic })
+  })
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      if (data.error) { alert('Fetch failed: ' + data.error); return; }
+      ORA_ATTACHED_ID = data.id;
+      document.getElementById('builder-ora-id').value = data.id;
+      var label = document.getElementById('ora-attached-label');
+      label.textContent = '🔗 Attached: ' + data.title.slice(0,50);
+      label.style.display = '';
+      document.getElementById('ora-fetch-form').style.display = 'none';
+    });
+}
+
+function saveExercise() {
+  var title = document.getElementById('builder-title').value.trim();
+  var type = document.getElementById('builder-type').value;
+  var jsonStr = document.getElementById('builder-json').value.trim();
+  var topicId = parseInt(document.getElementById('builder-topic-id').value);
+  var oraId = document.getElementById('builder-ora-id').value;
+  if (!title) { alert('Title is required.'); return; }
+  var contentJson;
+  try { contentJson = JSON.parse(jsonStr); } catch(e) { alert('Content JSON is invalid: ' + e.message); return; }
+  var payload = { topic_id: topicId, type: type, title: title, content_json: contentJson, created_by: SESSION.username };
+  if (oraId) payload.oraclebase_id = parseInt(oraId);
+  fetch('/api/lab-exercises', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) })
+    .then(function(r){ return r.json(); })
+    .then(function() { toggleExerciseBuilder(false); loadExercises(topicId); });
+}
+
+function deleteExercise(id) {
+  if (!confirm('Delete this exercise?')) return;
+  fetch('/api/lab-exercises/' + id, { method:'DELETE' }).then(function(){ loadExercises(CURRENT_TOPIC_ID); });
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  var lastTab = sessionStorage.getItem('projects_last_tab') || 'assignments';
+  switchTab(lastTab);
+  loadAssignments();
+  loadShowcase();
+  loadLabTopics();
+});
+</script>
+</body>
+</html>
