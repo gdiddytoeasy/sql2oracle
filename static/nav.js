@@ -22,7 +22,7 @@
     ];
 
     var linksHtml = links.filter(function (l) {
-      return isAdmin || unlockedTabs.indexOf(l.key) >= 0 || l.key === 'architecture';
+      return isAdmin || unlockedTabs.indexOf(l.key) >= 0 || l.key === 'architecture' || l.key === 'resources';
     }).map(function (l) {
       var active = currentPath === l.href ? ' nav-item--active' : '';
       return '<a href="' + l.href + '" class="nav-item' + active + '">' + l.label + '</a>';
