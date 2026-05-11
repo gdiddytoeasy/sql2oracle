@@ -9,6 +9,8 @@ import requests as req
 from bs4 import BeautifulSoup
 import docx
 import fitz  # PyMuPDF
+import mammoth
+import base64
 
 app = Flask(__name__)
 
@@ -147,6 +149,16 @@ def _init_db():
             uploaded_by  TEXT NOT NULL REFERENCES users(username),
             uploaded_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             sort_order   INTEGER NOT NULL DEFAULT 0
+        )
+    """)
+    cur.execute("ALTER TABLE resources ADD COLUMN IF NOT EXISTS page_count INTEGER NOT NULL DEFAULT 0")
+    cur.execute("ALTER TABLE resources ADD COLUMN IF NOT EXISTS docx_html TEXT NOT NULL DEFAULT ''")
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS resource_pages (
+            resource_id  INTEGER NOT NULL REFERENCES resources(id) ON DELETE CASCADE,
+            page_num     INTEGER NOT NULL,
+            image_data   BYTEA NOT NULL,
+            PRIMARY KEY (resource_id, page_num)
         )
     """)
     cur.close()
@@ -755,7 +767,11 @@ def resources_page():
 def get_resources():
     conn = _get_db()
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-    cur.execute("SELECT id, title, description, filename, filetype, uploaded_by, uploaded_at, sort_order FROM resources ORDER BY sort_order, uploaded_at DESC")
+    cur.execute("""
+        SELECT id, title, description, filename, filetype,
+               uploaded_by, uploaded_at, sort_order, page_count
+        FROM resources ORDER BY sort_order, uploaded_at DESC
+    """)
     rows = [dict(r) for r in cur.fetchall()]
     cur.close()
     conn.close()
@@ -766,7 +782,11 @@ def get_resources():
 def get_resource_content(resource_id):
     conn = _get_db()
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-    cur.execute("SELECT * FROM resources WHERE id=%s", (resource_id,))
+    cur.execute("""
+        SELECT id, title, description, filename, filetype,
+               uploaded_by, uploaded_at, sort_order, page_count, docx_html, content_text
+        FROM resources WHERE id=%s
+    """, (resource_id,))
     row = cur.fetchone()
     cur.close()
     conn.close()
@@ -775,9 +795,30 @@ def get_resource_content(resource_id):
     return jsonify(dict(row))
 
 
+@app.route("/api/resources/<int:resource_id>/pages/<int:page_num>")
+def get_resource_page_image(resource_id, page_num):
+    """Serve a single rendered page image (PNG) for a PDF resource."""
+    conn = _get_db()
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT image_data FROM resource_pages WHERE resource_id=%s AND page_num=%s",
+        (resource_id, page_num)
+    )
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    if not row:
+        return "Not found", 404
+    resp = make_response(bytes(row[0]))
+    resp.headers["Content-Type"] = "image/png"
+    resp.headers["Cache-Control"] = "public, max-age=86400"
+    return resp
+
+
 @app.route("/api/resources", methods=["POST"])
 def upload_resource():
-    """Admin-only: upload a Word or PDF file and extract its text."""
+    """Admin-only: upload a Word or PDF file. Renders page images + extracts text."""
+    import io as _io
     if "file" not in request.files:
         return jsonify({"error": "file required"}), 400
     f = request.files["file"]
@@ -795,38 +836,64 @@ def upload_resource():
         return jsonify({"error": "Only PDF and DOCX files are supported"}), 400
 
     file_bytes = f.read()
-
-    # Extract text from the uploaded file
     content_text = ""
+    docx_html_str = ""
+    page_images = []  # list of PNG bytes, one per page
+
     try:
-        if ext == "docx":
-            import io
-            doc = docx.Document(io.BytesIO(file_bytes))
-            paragraphs = []
-            for para in doc.paragraphs:
-                if para.text.strip():
-                    paragraphs.append(para.text)
-            content_text = "\n".join(paragraphs)
-        elif ext == "pdf":
+        if ext == "pdf":
             pdf = fitz.open(stream=file_bytes, filetype="pdf")
-            pages = []
+            text_parts = []
             for page in pdf:
-                pages.append(page.get_text())
-            content_text = "\n".join(pages)
+                text_parts.append(page.get_text())
+                # Render at 2× resolution for crisp display
+                mat = fitz.Matrix(2.0, 2.0)
+                pix = page.get_pixmap(matrix=mat, alpha=False)
+                page_images.append(pix.tobytes("png"))
+            content_text = "\n".join(text_parts)
             pdf.close()
+
+        elif ext == "docx":
+            # mammoth → rich HTML with embedded base64 images
+            result = mammoth.convert_to_html(
+                _io.BytesIO(file_bytes),
+                convert_image=mammoth.images.img_element(
+                    lambda img: {"src": "data:" + img.content_type + ";base64," +
+                                 base64.b64encode(img.read()).decode()}
+                )
+            )
+            docx_html_str = result.value
+            # Also extract plain text for word count / search
+            doc = docx.Document(_io.BytesIO(file_bytes))
+            content_text = "\n".join(p.text for p in doc.paragraphs if p.text.strip())
+
     except Exception as e:
         return jsonify({"error": f"Failed to parse file: {str(e)}"}), 400
 
-    if not content_text.strip():
-        return jsonify({"error": "No readable text found in the file"}), 400
+    if not content_text.strip() and not docx_html_str.strip():
+        return jsonify({"error": "No readable content found in the file"}), 400
 
     conn = _get_db()
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     cur.execute("""
-        INSERT INTO resources (title, description, filename, filetype, content_text, uploaded_by, sort_order)
-        VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id, title, description, filename, filetype, uploaded_by, uploaded_at, sort_order
-    """, (title, description, filename, ext, content_text, uploaded_by, sort_order))
+        INSERT INTO resources
+            (title, description, filename, filetype, content_text,
+             docx_html, page_count, uploaded_by, sort_order)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        RETURNING id, title, description, filename, filetype,
+                  uploaded_by, uploaded_at, sort_order, page_count
+    """, (title, description, filename, ext, content_text,
+          docx_html_str, len(page_images), uploaded_by, sort_order))
     row = dict(cur.fetchone())
+    resource_id = row["id"]
+
+    # Store page images
+    for i, png_bytes in enumerate(page_images):
+        cur.execute(
+            "INSERT INTO resource_pages (resource_id, page_num, image_data) VALUES (%s, %s, %s)",
+            (resource_id, i + 1, psycopg2.Binary(png_bytes))
+        )
+
     cur.close()
     conn.close()
     return jsonify(row), 201

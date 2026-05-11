@@ -7,3 +7,4 @@ beautifulsoup4
 lxml
 python-docx
 PyMuPDF
+mammoth

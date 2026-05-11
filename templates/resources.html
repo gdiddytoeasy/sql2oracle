@@ -9,294 +9,147 @@
 <script src="/static/nav.js?v=20260407"></script>
 <style>
 /* ═══════════════════════════════════════════════════════
-   Resources — structured document viewer
+   Resources — visual document viewer
    ═══════════════════════════════════════════════════════ */
 
-.res-main { max-width: 1400px; margin: 0 auto; padding: 28px 32px; }
+.res-main { max-width: 1440px; margin: 0 auto; padding: 24px 32px; }
 
 /* Page header */
-.page-hero {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 28px; padding-bottom: 24px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-.page-hero-left { display: flex; align-items: center; gap: 16px; }
-.page-hero-icon {
-  width: 48px; height: 48px; border-radius: 12px;
-  background: linear-gradient(135deg, rgba(231,76,60,0.2), rgba(240,129,61,0.15));
-  border: 1px solid rgba(231,76,60,0.25);
-  display: flex; align-items: center; justify-content: center; font-size: 22px;
-}
-.page-title { font-family: 'Orbitron', monospace; font-size: 20px; font-weight: 900; color: #fff; margin: 0 0 4px; }
+.page-hero { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.page-hero-left { display: flex; align-items: center; gap: 14px; }
+.page-hero-icon { width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(135deg,rgba(231,76,60,0.2),rgba(240,129,61,0.15)); border: 1px solid rgba(231,76,60,0.25); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.page-title { font-family: 'Orbitron', monospace; font-size: 18px; font-weight: 900; color: #fff; margin: 0 0 3px; }
 .page-subtitle { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.35); }
+.btn-upload-trigger { display: flex; align-items: center; gap: 7px; padding: 8px 18px; border-radius: 10px; background: linear-gradient(135deg,#E74C3C,#C0392B); border: none; color: #fff; cursor: pointer; font-family: 'Orbitron',monospace; font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; box-shadow: 0 4px 16px rgba(231,76,60,0.35); transition: all 0.2s; }
+.btn-upload-trigger:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(231,76,60,0.45); }
 
 /* Alert */
-.alert-msg { padding: 10px 16px; border-radius: 8px; font-family: 'Share Tech Mono', monospace; font-size: 11px; display: none; margin-bottom: 16px; }
+.alert-msg { padding: 10px 16px; border-radius: 8px; font-family: 'Share Tech Mono',monospace; font-size: 11px; display: none; margin-bottom: 16px; }
 .alert-msg.visible { display: block; }
 .alert-ok  { background: rgba(46,204,113,0.08); border: 1px solid rgba(46,204,113,0.25); color: #2ECC71; }
 .alert-err { background: rgba(231,76,60,0.08); border: 1px solid rgba(231,76,60,0.25); color: #E74C3C; }
 
-/* ── Upload panel ── */
-.upload-panel {
-  background: rgba(14,30,60,0.6); border: 1px solid rgba(59,130,246,0.2);
-  border-radius: 14px; padding: 24px; margin-bottom: 20px;
-  display: none; backdrop-filter: blur(12px);
-}
+/* Upload panel */
+.upload-panel { background: rgba(14,30,60,0.65); border: 1px solid rgba(59,130,246,0.2); border-radius: 14px; padding: 22px; margin-bottom: 20px; display: none; backdrop-filter: blur(12px); }
 .upload-panel.open { display: block; animation: fadeUp 0.25s ease; }
-.upload-panel-title { font-family: 'Orbitron', monospace; font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,0.5); margin-bottom: 18px; text-transform: uppercase; }
+.upload-panel-title { font-family: 'Orbitron',monospace; font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,0.45); margin-bottom: 16px; text-transform: uppercase; }
 .upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-.upload-field { display: flex; flex-direction: column; gap: 6px; }
-.upload-label { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 2px; color: rgba(255,255,255,0.3); text-transform: uppercase; }
-.upload-input {
-  width: 100%; padding: 9px 12px;
-  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 8px; color: #D1D9E6; font-family: 'Share Tech Mono', monospace;
-  font-size: 12px; outline: none; transition: border-color 0.2s; box-sizing: border-box;
-}
+.upload-field { display: flex; flex-direction: column; gap: 5px; }
+.upload-label { font-family: 'Orbitron',monospace; font-size: 8px; letter-spacing: 2px; color: rgba(255,255,255,0.3); text-transform: uppercase; }
+.upload-input { width: 100%; padding: 9px 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; color: #D1D9E6; font-family: 'Share Tech Mono',monospace; font-size: 12px; outline: none; transition: border-color 0.2s; box-sizing: border-box; }
 .upload-input:focus { border-color: rgba(59,130,246,0.45); }
-.drop-zone {
-  border: 2px dashed rgba(255,255,255,0.1); border-radius: 10px;
-  padding: 28px 20px; text-align: center; cursor: pointer;
-  transition: all 0.2s; background: rgba(255,255,255,0.02); margin-bottom: 14px;
-}
+.drop-zone { border: 2px dashed rgba(255,255,255,0.1); border-radius: 10px; padding: 26px 20px; text-align: center; cursor: pointer; transition: all 0.2s; background: rgba(255,255,255,0.02); margin-bottom: 14px; }
 .drop-zone:hover, .drop-zone.dragover { border-color: rgba(231,76,60,0.5); background: rgba(231,76,60,0.04); }
 .drop-zone input { display: none; }
-.drop-zone-text { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: rgba(255,255,255,0.35); }
+.drop-zone-text { font-family: 'Share Tech Mono',monospace; font-size: 12px; color: rgba(255,255,255,0.35); }
 .drop-zone-text strong { color: #E74C3C; }
-.drop-zone-file { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #2ECC71; margin-top: 8px; display: none; }
-.upload-progress { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.4); display: none; margin-top: 8px; }
+.drop-zone-file { font-family: 'Share Tech Mono',monospace; font-size: 11px; color: #2ECC71; margin-top: 8px; display: none; }
+.upload-note { font-family: 'Share Tech Mono',monospace; font-size: 10px; color: rgba(255,255,255,0.3); margin-bottom: 12px; }
+.upload-progress { font-family: 'Share Tech Mono',monospace; font-size: 11px; color: rgba(255,255,255,0.4); display: none; margin: 8px 0; }
 .upload-progress.visible { display: block; }
 .upload-actions { display: flex; gap: 10px; }
-.btn-primary { padding: 9px 22px; background: linear-gradient(135deg, #E74C3C, #C0392B); border: none; border-radius: 8px; color: #fff; font-family: 'Orbitron', monospace; font-size: 9px; letter-spacing: 2px; cursor: pointer; font-weight: 700; }
-.btn-ghost { padding: 9px 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: rgba(255,255,255,0.45); font-family: 'Orbitron', monospace; font-size: 9px; letter-spacing: 1px; cursor: pointer; }
-.btn-upload-trigger {
-  display: flex; align-items: center; gap: 8px;
-  padding: 8px 18px; border-radius: 10px;
-  background: linear-gradient(135deg, #E74C3C, #C0392B);
-  border: none; color: #fff; cursor: pointer;
-  font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  box-shadow: 0 4px 16px rgba(231,76,60,0.35); transition: all 0.2s;
-}
-.btn-upload-trigger:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(231,76,60,0.45); }
+.btn-primary { padding: 9px 22px; background: linear-gradient(135deg,#E74C3C,#C0392B); border: none; border-radius: 8px; color: #fff; font-family: 'Orbitron',monospace; font-size: 9px; letter-spacing: 2px; cursor: pointer; font-weight: 700; }
+.btn-ghost { padding: 9px 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: rgba(255,255,255,0.4); font-family: 'Orbitron',monospace; font-size: 9px; cursor: pointer; }
 
-/* ── Main layout ── */
-.res-layout { display: grid; grid-template-columns: 310px 1fr; gap: 24px; align-items: start; }
+/* Main layout */
+.res-layout { display: grid; grid-template-columns: 290px 1fr; gap: 20px; align-items: start; }
 @media (max-width: 960px) { .res-layout { grid-template-columns: 1fr; } }
 
-/* ── Sidebar ── */
-.res-sidebar { display: flex; flex-direction: column; gap: 10px; position: sticky; top: 80px; }
-.sidebar-section-label {
-  font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 3px;
-  color: rgba(255,255,255,0.3); text-transform: uppercase; padding: 0 4px;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.sidebar-count {
-  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 20px; padding: 1px 8px; font-size: 9px;
-  color: rgba(255,255,255,0.4); font-family: 'Share Tech Mono', monospace;
-}
+/* Sidebar */
+.res-sidebar { display: flex; flex-direction: column; gap: 8px; position: sticky; top: 80px; }
+.sidebar-label { font-family: 'Orbitron',monospace; font-size: 8px; letter-spacing: 3px; color: rgba(255,255,255,0.3); text-transform: uppercase; display: flex; align-items: center; justify-content: space-between; padding: 0 2px; margin-bottom: 2px; }
+.sidebar-count { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 1px 7px; font-size: 9px; color: rgba(255,255,255,0.35); font-family: 'Share Tech Mono',monospace; }
 
-.res-card {
-  background: var(--glass-bg); border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 12px; overflow: hidden; cursor: pointer;
-  transition: all 0.2s; backdrop-filter: blur(12px);
-}
-.res-card:hover { border-color: rgba(255,255,255,0.14); transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0,0,0,0.3); }
-.res-card.active { border-color: rgba(231,76,60,0.45); box-shadow: 0 0 0 1px rgba(231,76,60,0.15) inset; }
-
-.res-card-cover {
-  height: 6px;
-  background: linear-gradient(90deg, #E74C3C, #f0813d);
-}
-.res-card-cover.docx { background: linear-gradient(90deg, #3B82F6, #60A5FA); }
-
-.res-card-body { padding: 14px 16px; }
-.res-card-top { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
-.res-card-file-icon {
-  width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px; background: rgba(231,76,60,0.1); border: 1px solid rgba(231,76,60,0.2);
-}
-.res-card-file-icon.docx { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.2); }
+/* Sidebar resource card */
+.res-card { background: rgba(7,13,24,0.8); border: 1px solid rgba(255,255,255,0.07); border-radius: 11px; overflow: hidden; cursor: pointer; transition: all 0.18s; }
+.res-card:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-1px); box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
+.res-card.active { border-color: rgba(231,76,60,0.5); box-shadow: 0 0 0 1px rgba(231,76,60,0.1) inset, 0 4px 16px rgba(231,76,60,0.1); }
+.res-card-stripe { height: 3px; background: linear-gradient(90deg,#E74C3C,#f0813d); }
+.res-card-stripe.docx { background: linear-gradient(90deg,#3B82F6,#60A5FA); }
+.res-card-body { padding: 12px 14px; }
+.res-card-row { display: flex; align-items: center; gap: 10px; }
+.res-card-icon { width: 32px; height: 32px; border-radius: 7px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 15px; background: rgba(231,76,60,0.1); border: 1px solid rgba(231,76,60,0.2); }
+.res-card-icon.docx { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.2); }
 .res-card-info { flex: 1; min-width: 0; }
-.res-card-title {
-  font-family: 'Inter', 'Rajdhani', sans-serif; font-size: 12px; font-weight: 600;
-  color: #fff; line-height: 1.4; margin-bottom: 3px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.res-card-date { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: rgba(255,255,255,0.3); }
-.res-card-desc { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.35); line-height: 1.5; margin-bottom: 8px; }
-.res-card-footer { display: flex; align-items: center; justify-content: space-between; }
-.type-pill {
-  font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1px;
-  padding: 2px 8px; border-radius: 20px; text-transform: uppercase;
-}
-.type-pill.pdf  { background: rgba(231,76,60,0.12); color: #E74C3C; border: 1px solid rgba(231,76,60,0.25); }
-.type-pill.docx { background: rgba(59,130,246,0.12); color: #3B82F6; border: 1px solid rgba(59,130,246,0.25); }
-.btn-del-card {
-  padding: 3px 10px; background: transparent; border: 1px solid rgba(231,76,60,0.2);
-  border-radius: 6px; color: rgba(231,76,60,0.6); font-family: 'Orbitron', monospace;
-  font-size: 8px; cursor: pointer; transition: all 0.15s;
-}
+.res-card-title { font-family: 'Inter','Rajdhani',sans-serif; font-size: 11px; font-weight: 600; color: #e8edf5; line-height: 1.35; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.res-card-meta { font-family: 'Share Tech Mono',monospace; font-size: 9px; color: rgba(255,255,255,0.3); display: flex; gap: 6px; align-items: center; }
+.type-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.type-dot.pdf { background: #E74C3C; }
+.type-dot.docx { background: #3B82F6; }
+.res-card-desc { font-family: 'Share Tech Mono',monospace; font-size: 9px; color: rgba(255,255,255,0.3); line-height: 1.5; margin-top: 7px; }
+.res-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+.type-pill { font-family: 'Orbitron',monospace; font-size: 7px; letter-spacing: 1px; padding: 2px 7px; border-radius: 20px; text-transform: uppercase; }
+.type-pill.pdf  { background: rgba(231,76,60,0.1); color: #E74C3C; border: 1px solid rgba(231,76,60,0.2); }
+.type-pill.docx { background: rgba(59,130,246,0.1); color: #3B82F6; border: 1px solid rgba(59,130,246,0.2); }
+.pages-label { font-family: 'Share Tech Mono',monospace; font-size: 9px; color: rgba(255,255,255,0.25); }
+.btn-del-card { padding: 2px 8px; background: transparent; border: 1px solid rgba(231,76,60,0.18); border-radius: 5px; color: rgba(231,76,60,0.5); font-family: 'Orbitron',monospace; font-size: 7px; cursor: pointer; transition: all 0.15s; }
 .btn-del-card:hover { background: rgba(231,76,60,0.1); color: #E74C3C; }
 
-/* Empty state */
-.res-empty { padding: 40px 20px; text-align: center; }
-.res-empty-icon { font-size: 40px; opacity: 0.35; margin-bottom: 12px; }
-.res-empty-text { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.25); line-height: 1.6; }
+/* Empty sidebar */
+.res-empty { padding: 36px 16px; text-align: center; }
+.res-empty-icon { font-size: 36px; opacity: 0.3; margin-bottom: 10px; }
+.res-empty-text { font-family: 'Share Tech Mono',monospace; font-size: 10px; color: rgba(255,255,255,0.25); line-height: 1.7; }
 
-/* ── Document Viewer ── */
-.doc-viewer {
-  background: var(--glass-bg); border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 14px; overflow: hidden; backdrop-filter: blur(12px);
-  min-height: 75vh; display: flex; flex-direction: column;
-}
+/* ── Document viewer ── */
+.doc-viewer { background: rgba(7,13,24,0.6); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; min-height: 78vh; display: flex; flex-direction: column; overflow: hidden; }
 
 /* Placeholder */
-.doc-placeholder {
-  flex: 1; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 20px; padding: 60px;
-}
-.doc-placeholder-art { font-size: 72px; opacity: 0.15; filter: grayscale(0.5); }
-.doc-placeholder-title { font-family: 'Orbitron', monospace; font-size: 13px; color: rgba(255,255,255,0.2); letter-spacing: 2px; }
-.doc-placeholder-hint { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.15); text-align: center; max-width: 300px; line-height: 1.7; }
+.doc-placeholder { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 60px; }
+.doc-placeholder-icon { font-size: 64px; opacity: 0.12; }
+.doc-placeholder-title { font-family: 'Orbitron',monospace; font-size: 12px; color: rgba(255,255,255,0.18); letter-spacing: 2px; }
+.doc-placeholder-hint { font-family: 'Share Tech Mono',monospace; font-size: 11px; color: rgba(255,255,255,0.12); text-align: center; max-width: 280px; line-height: 1.7; }
 
-/* Document banner */
-.doc-banner {
-  padding: 24px 32px 20px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  background: linear-gradient(180deg, rgba(231,76,60,0.04) 0%, transparent 100%);
-  flex-shrink: 0;
-}
-.doc-banner.docx { background: linear-gradient(180deg, rgba(59,130,246,0.05) 0%, transparent 100%); }
-.doc-banner-top { display: flex; align-items: flex-start; gap: 16px; }
-.doc-banner-icon {
-  width: 52px; height: 52px; border-radius: 12px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center; font-size: 26px;
-  background: rgba(231,76,60,0.12); border: 1px solid rgba(231,76,60,0.2);
-}
-.doc-banner-icon.docx { background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.2); }
-.doc-banner-text { flex: 1; }
-.doc-title {
-  font-family: 'Inter', 'Rajdhani', sans-serif; font-size: 20px; font-weight: 700;
-  color: #fff; line-height: 1.35; margin-bottom: 8px;
-}
-.doc-pills { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.doc-pill {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 3px 10px; border-radius: 20px;
-  font-family: 'Share Tech Mono', monospace; font-size: 10px;
-  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.45);
-}
-.doc-pill-dot { width: 5px; height: 5px; border-radius: 50%; }
+/* Viewer toolbar */
+.doc-toolbar { padding: 14px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(4,8,15,0.5); display: flex; align-items: center; gap: 14px; flex-shrink: 0; flex-wrap: wrap; }
+.doc-toolbar-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; background: rgba(231,76,60,0.1); border: 1px solid rgba(231,76,60,0.2); flex-shrink: 0; }
+.doc-toolbar-icon.docx { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.2); }
+.doc-toolbar-info { flex: 1; min-width: 0; }
+.doc-toolbar-title { font-family: 'Inter','Rajdhani',sans-serif; font-size: 14px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.doc-toolbar-meta { font-family: 'Share Tech Mono',monospace; font-size: 10px; color: rgba(255,255,255,0.35); margin-top: 2px; display: flex; flex-wrap: wrap; gap: 10px; }
+.doc-toolbar-meta span { display: flex; align-items: center; gap: 4px; }
+.doc-toolbar-pills { display: flex; gap: 6px; align-items: center; }
 
-/* Table of contents */
-.doc-toc {
-  margin: 16px 32px 0; padding: 12px 16px;
-  background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 8px; display: none;
-}
-.doc-toc.has-items { display: block; }
-.doc-toc-label { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 2px; color: rgba(255,255,255,0.3); margin-bottom: 8px; text-transform: uppercase; }
-.doc-toc-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
-.doc-toc-item { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.45); display: flex; align-items: center; gap: 8px; }
-.doc-toc-item::before { content: '—'; color: rgba(255,255,255,0.15); font-size: 8px; }
-.doc-toc-item a { color: rgba(255,255,255,0.45); text-decoration: none; transition: color 0.15s; }
-.doc-toc-item a:hover { color: #E74C3C; }
+/* Page navigation */
+.page-nav { display: flex; align-items: center; gap: 8px; }
+.page-nav-btn { width: 28px; height: 28px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.page-nav-btn:hover:not(:disabled) { background: rgba(255,255,255,0.1); color: #fff; }
+.page-nav-btn:disabled { opacity: 0.3; cursor: default; }
+.page-nav-indicator { font-family: 'Share Tech Mono',monospace; font-size: 10px; color: rgba(255,255,255,0.4); white-space: nowrap; }
 
-/* Document body */
-.doc-body { flex: 1; overflow-y: auto; padding: 32px 32px 48px; }
+/* Scroll area */
+.doc-scroll { flex: 1; overflow-y: auto; background: #1a1a2e; padding: 28px 24px; }
 
-/* ── Document typography (rendered HTML content) ── */
-.doc-article {
-  user-select: none; -webkit-user-select: none; -ms-user-select: none;
-  max-width: 860px;
-}
-.doc-article * { pointer-events: none; }
+/* ── PDF page rendering ── */
+.pdf-pages { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+.pdf-page-wrap { position: relative; border-radius: 4px; box-shadow: 0 4px 24px rgba(0,0,0,0.6), 0 1px 4px rgba(0,0,0,0.4); overflow: hidden; max-width: 100%; }
+.pdf-page-img { display: block; width: 100%; height: auto; max-width: 860px; pointer-events: none; user-select: none; -webkit-user-select: none; }
+.pdf-page-num { position: absolute; bottom: 8px; right: 10px; font-family: 'Share Tech Mono',monospace; font-size: 9px; color: rgba(255,255,255,0.3); background: rgba(0,0,0,0.4); padding: 2px 7px; border-radius: 10px; }
+.pdf-loading { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 60px; font-family: 'Share Tech Mono',monospace; font-size: 12px; color: rgba(255,255,255,0.35); }
 
-.doc-article h1 {
-  font-family: 'Inter', 'Rajdhani', sans-serif; font-size: 22px; font-weight: 700;
-  color: #fff; margin: 32px 0 14px; padding-bottom: 10px;
-  border-bottom: 2px solid rgba(231,76,60,0.3);
-  line-height: 1.3;
+/* ── DOCX rich HTML rendering ── */
+.docx-body {
+  max-width: 820px; margin: 0 auto;
+  background: #fff; border-radius: 4px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+  padding: 56px 72px; min-height: 400px;
+  user-select: none; -webkit-user-select: none; pointer-events: none;
+  color: #111; font-family: 'Inter', Georgia, serif;
 }
-.doc-article h1:first-child { margin-top: 0; }
-.doc-article h2 {
-  font-family: 'Inter', 'Rajdhani', sans-serif; font-size: 17px; font-weight: 700;
-  color: rgba(255,255,255,0.9); margin: 28px 0 12px;
-  display: flex; align-items: center; gap: 10px;
-}
-.doc-article h2::before {
-  content: ''; display: block; width: 3px; height: 18px; border-radius: 2px;
-  background: linear-gradient(180deg, #E74C3C, #f0813d); flex-shrink: 0;
-}
-.doc-article h3 {
-  font-family: 'Inter', 'Rajdhani', sans-serif; font-size: 14px; font-weight: 600;
-  color: rgba(255,255,255,0.75); margin: 20px 0 8px; letter-spacing: 0.3px;
-}
-.doc-article p {
-  font-family: 'Inter', 'Rajdhani', sans-serif; font-size: 14px;
-  color: rgba(255,255,255,0.65); line-height: 1.8; margin-bottom: 14px;
-}
-.doc-article ul, .doc-article ol {
-  margin: 8px 0 16px 0; padding-left: 0; list-style: none;
-}
-.doc-article li {
-  font-family: 'Inter', 'Rajdhani', sans-serif; font-size: 14px;
-  color: rgba(255,255,255,0.6); line-height: 1.75; margin-bottom: 6px;
-  display: flex; align-items: flex-start; gap: 10px;
-}
-.doc-article ul li::before {
-  content: ''; display: block; width: 6px; height: 6px; border-radius: 50%;
-  background: #E74C3C; margin-top: 8px; flex-shrink: 0;
-}
-.doc-article ol { counter-reset: list-counter; }
-.doc-article ol li::before {
-  content: counter(list-counter); counter-increment: list-counter;
-  display: block; width: 20px; height: 20px; border-radius: 50%;
-  background: rgba(231,76,60,0.15); border: 1px solid rgba(231,76,60,0.3);
-  color: #E74C3C; font-family: 'Orbitron', monospace; font-size: 8px; font-weight: 700;
-  text-align: center; line-height: 20px; flex-shrink: 0; margin-top: 2px;
-}
-.doc-article code {
-  font-family: 'Share Tech Mono', monospace; font-size: 12px;
-  background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.15);
-  color: #00D4FF; border-radius: 4px; padding: 1px 6px;
-}
-.doc-article pre {
-  background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 10px; padding: 18px 20px; margin: 14px 0;
-  overflow-x: auto;
-}
-.doc-article pre code {
-  background: none; border: none; color: rgba(255,255,255,0.75);
-  font-size: 12px; padding: 0; line-height: 1.7; white-space: pre;
-}
-.doc-article blockquote {
-  border-left: 3px solid rgba(231,76,60,0.5); margin: 16px 0;
-  padding: 12px 18px; background: rgba(231,76,60,0.04); border-radius: 0 8px 8px 0;
-  font-family: 'Share Tech Mono', monospace; font-size: 12px;
-  color: rgba(255,255,255,0.5); font-style: italic; line-height: 1.7;
-}
-.doc-article .doc-divider {
-  border: none; border-top: 1px solid rgba(255,255,255,0.06);
-  margin: 28px 0;
-}
-.doc-article .doc-callout {
-  background: rgba(59,130,246,0.07); border: 1px solid rgba(59,130,246,0.2);
-  border-radius: 10px; padding: 14px 18px; margin: 16px 0;
-  display: flex; gap: 12px; align-items: flex-start;
-}
-.doc-article .doc-callout-icon { font-size: 16px; flex-shrink: 0; }
-.doc-article .doc-callout-text { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.55); line-height: 1.7; }
-
-.doc-word-count {
-  font-family: 'Share Tech Mono', monospace; font-size: 9px;
-  color: rgba(255,255,255,0.2); text-align: right; margin-top: 32px;
-  padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.05);
-}
+.docx-body h1 { font-size: 22px; font-weight: 700; color: #111; margin: 0 0 16px; line-height: 1.3; }
+.docx-body h2 { font-size: 17px; font-weight: 700; color: #222; margin: 24px 0 10px; }
+.docx-body h3 { font-size: 14px; font-weight: 600; color: #333; margin: 18px 0 8px; }
+.docx-body p  { font-size: 13px; color: #333; line-height: 1.8; margin: 0 0 12px; }
+.docx-body ul, .docx-body ol { margin: 8px 0 14px 22px; }
+.docx-body li { font-size: 13px; color: #333; line-height: 1.7; margin-bottom: 4px; }
+.docx-body table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 12px; }
+.docx-body td, .docx-body th { border: 1px solid #ccc; padding: 7px 10px; color: #333; }
+.docx-body th { background: #f0f0f0; font-weight: 600; }
+.docx-body img { max-width: 100%; height: auto; margin: 12px 0; display: block; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+.docx-body strong { font-weight: 700; color: #111; }
+.docx-body em { font-style: italic; }
+.docx-body a { color: #1a56db; text-decoration: none; }
+.docx-body blockquote { border-left: 3px solid #ccc; margin: 12px 0 12px 0; padding: 8px 16px; color: #555; font-style: italic; }
+.docx-body code { font-family: 'Courier New',monospace; font-size: 11px; background: #f4f4f4; padding: 1px 5px; border-radius: 3px; color: #c7254e; }
 
 @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 </style>
@@ -312,11 +165,11 @@
       <div class="page-hero-icon">📚</div>
       <div>
         <h1 class="page-title">Resources</h1>
-        <p class="page-subtitle">Notes &amp; tutorials — read-only reference material</p>
+        <p class="page-subtitle">Notes &amp; tutorials — read-only document viewer</p>
       </div>
     </div>
     <button class="btn-upload-trigger" id="btn-upload-trigger" style="display:none;" onclick="toggleUpload()">
-      <span>+</span> Upload Resource
+      + Upload Document
     </button>
   </div>
 
@@ -328,20 +181,21 @@
     <div class="upload-grid">
       <div class="upload-field">
         <label class="upload-label">Title *</label>
-        <input class="upload-input" id="up-title" placeholder="e.g. Oracle 19c Installation Guide" autocomplete="off">
+        <input class="upload-input" id="up-title" placeholder="Document title" autocomplete="off">
       </div>
       <div class="upload-field">
         <label class="upload-label">Description (optional)</label>
-        <input class="upload-input" id="up-desc" placeholder="Brief summary of this document" autocomplete="off">
+        <input class="upload-input" id="up-desc" placeholder="Short summary" autocomplete="off">
       </div>
     </div>
-    <label class="upload-label" style="margin-bottom:8px;">File — PDF or Word (.docx) *</label>
+    <label class="upload-label" style="margin-bottom:8px;">File *</label>
     <div class="drop-zone" id="drop-zone" onclick="document.getElementById('up-file').click()">
       <input type="file" id="up-file" accept=".pdf,.docx" onchange="onFileSelected(this)">
-      <div class="drop-zone-text">Drop file here or <strong>click to browse</strong></div>
+      <div class="drop-zone-text">Drop a <strong>PDF</strong> or <strong>Word (.docx)</strong> file here, or <strong>click to browse</strong></div>
       <div class="drop-zone-file" id="up-file-name"></div>
     </div>
-    <div class="upload-progress" id="up-progress">⏳ Uploading and extracting content…</div>
+    <p class="upload-note">PDF pages will be rendered as images. Word documents will be converted to rich HTML — all images and formatting preserved.</p>
+    <div class="upload-progress" id="up-progress">⏳ Uploading and rendering pages… this may take a moment for large files.</div>
     <div class="upload-actions">
       <button class="btn-primary" onclick="doUpload()">Upload</button>
       <button class="btn-ghost" onclick="toggleUpload(false)">Cancel</button>
@@ -353,63 +207,61 @@
 
     <!-- Sidebar -->
     <div class="res-sidebar">
-      <div class="sidebar-section-label">
+      <div class="sidebar-label">
         <span>Documents</span>
         <span class="sidebar-count" id="sidebar-count">0</span>
       </div>
       <div id="res-list">
-        <div class="res-empty">
-          <div class="res-empty-icon">📂</div>
-          <div class="res-empty-text">Loading…</div>
-        </div>
+        <div class="res-empty"><div class="res-empty-icon">📂</div><div class="res-empty-text">Loading…</div></div>
       </div>
     </div>
 
-    <!-- Document viewer -->
+    <!-- Viewer -->
     <div class="doc-viewer" id="doc-viewer">
 
       <!-- Placeholder -->
       <div class="doc-placeholder" id="doc-placeholder">
-        <div class="doc-placeholder-art">📄</div>
-        <div class="doc-placeholder-title">Select a Document</div>
-        <div class="doc-placeholder-hint">Choose a resource from the list on the left to view its contents here.</div>
+        <div class="doc-placeholder-icon">📄</div>
+        <div class="doc-placeholder-title">No Document Selected</div>
+        <div class="doc-placeholder-hint">Pick a document from the list on the left — it will be displayed here exactly as it looks in the original file.</div>
       </div>
 
-      <!-- Loaded document -->
-      <div id="doc-loaded" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
-
-        <!-- Banner -->
-        <div class="doc-banner" id="doc-banner">
-          <div class="doc-banner-top">
-            <div class="doc-banner-icon" id="doc-icon">📄</div>
-            <div class="doc-banner-text">
-              <div class="doc-title" id="doc-title"></div>
-              <div class="doc-pills">
-                <span class="type-pill" id="doc-type-pill"></span>
-                <span class="doc-pill"><span class="doc-pill-dot" style="background:#2ECC71;"></span><span id="doc-uploader"></span></span>
-                <span class="doc-pill"><span class="doc-pill-dot" style="background:#3B82F6;"></span><span id="doc-date"></span></span>
-                <span class="doc-pill" id="doc-words-pill"></span>
-              </div>
+      <!-- Loaded view -->
+      <div id="doc-loaded" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+        <!-- Toolbar -->
+        <div class="doc-toolbar">
+          <div class="doc-toolbar-icon" id="tb-icon">📄</div>
+          <div class="doc-toolbar-info">
+            <div class="doc-toolbar-title" id="tb-title"></div>
+            <div class="doc-toolbar-meta">
+              <span id="tb-uploader"></span>
+              <span id="tb-date"></span>
+              <span id="tb-words"></span>
             </div>
           </div>
-          <!-- Table of contents -->
-          <div class="doc-toc" id="doc-toc">
-            <div class="doc-toc-label">Contents</div>
-            <ul class="doc-toc-list" id="doc-toc-list"></ul>
+          <div class="doc-toolbar-pills">
+            <span class="type-pill" id="tb-type"></span>
+          </div>
+          <!-- PDF page nav -->
+          <div class="page-nav" id="page-nav" style="display:none;">
+            <button class="page-nav-btn" id="btn-prev" onclick="goPage(-1)">&#8593;</button>
+            <span class="page-nav-indicator" id="page-indicator">1 / 1</span>
+            <button class="page-nav-btn" id="btn-next" onclick="goPage(1)">&#8595;</button>
           </div>
         </div>
 
-        <!-- Scrollable body -->
-        <div class="doc-body" id="doc-body">
-          <div class="doc-article" id="doc-article"
-               oncontextmenu="return false;"
-               ondragstart="return false;"
-               onselectstart="return false;"></div>
+        <!-- Scroll area -->
+        <div class="doc-scroll" id="doc-scroll">
+          <!-- PDF pages rendered here -->
+          <div class="pdf-pages" id="pdf-pages" style="display:none;"></div>
+          <!-- DOCX HTML rendered here -->
+          <div id="docx-wrap" style="display:none; max-width:820px; margin:0 auto;">
+            <div class="docx-body" id="docx-body" oncontextmenu="return false;" ondragstart="return false;" onselectstart="return false;"></div>
+          </div>
         </div>
-
       </div>
-    </div>
 
+    </div>
   </div>
 </main>
 
@@ -421,186 +273,19 @@ var IS_ADMIN = SESSION && (SESSION.role === 'admin' || SESSION.role === 'manager
 
 var RESOURCES = [];
 var ACTIVE_ID = null;
+var CURRENT_PAGE = 1;
+var TOTAL_PAGES = 1;
 
-if (IS_ADMIN) {
-  document.getElementById('btn-upload-trigger').style.display = '';
-}
+if (IS_ADMIN) document.getElementById('btn-upload-trigger').style.display = '';
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-function esc(s) {
-  return String(s || '')
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function showAlert(msg, type) {
   var el = document.getElementById('alert-msg');
-  el.textContent = msg;
-  el.className = 'alert-msg visible alert-' + (type || 'ok');
+  el.textContent = msg; el.className = 'alert-msg visible alert-' + (type||'ok');
   setTimeout(function(){ el.classList.remove('visible'); }, 5000);
 }
 
-// ── Text → structured HTML ───────────────────────────────────────────────────
-function parseTextToHtml(text) {
-  if (!text) return '<p style="color:rgba(255,255,255,0.3);">No content.</p>';
-  var lines = text.split('\n');
-  var html = '';
-  var tocItems = [];
-  var inCode = false;
-  var codeLines = [];
-  var inList = false;
-  var listType = '';
-  var paraBuffer = [];
-
-  function flushPara() {
-    if (paraBuffer.length) {
-      html += '<p>' + esc(paraBuffer.join(' ').trim()) + '</p>';
-      paraBuffer = [];
-    }
-  }
-  function flushList() {
-    if (inList) {
-      html += '</' + listType + '>';
-      inList = false; listType = '';
-    }
-  }
-  function flushCode() {
-    if (codeLines.length) {
-      html += '<pre><code>' + esc(codeLines.join('\n')) + '</code></pre>';
-      codeLines = [];
-    }
-  }
-
-  var headingCount = 0;
-
-  for (var i = 0; i < lines.length; i++) {
-    var line = lines[i];
-    var raw  = line.rstrip ? line.rstrip() : line.replace(/\s+$/, '');
-    var trimmed = raw.trim();
-
-    // Code fence (```)
-    if (trimmed === '```' || trimmed.startsWith('```')) {
-      if (inCode) {
-        flushCode();
-        inCode = false;
-      } else {
-        flushPara(); flushList();
-        inCode = true;
-      }
-      continue;
-    }
-    if (inCode) { codeLines.push(raw); continue; }
-
-    // Blank line
-    if (!trimmed) {
-      flushPara(); flushList(); flushCode();
-      continue;
-    }
-
-    // Horizontal rule (---, ===, ***)
-    if (/^[-=*]{3,}$/.test(trimmed)) {
-      flushPara(); flushList();
-      html += '<hr class="doc-divider">';
-      continue;
-    }
-
-    // Heading level 1 — ALL CAPS, 5–80 chars, no special chars
-    if (trimmed === trimmed.toUpperCase() && trimmed.length >= 5 && trimmed.length <= 80
-        && /^[A-Z0-9 \-:,&\/\.]+$/.test(trimmed) && !/^\d+[.)]\s/.test(trimmed)) {
-      flushPara(); flushList();
-      headingCount++;
-      var hid = 'h-' + headingCount;
-      tocItems.push({ id: hid, text: trimmed, level: 1 });
-      html += '<h1 id="' + hid + '">' + esc(trimmed) + '</h1>';
-      continue;
-    }
-
-    // Heading level 2 — starts with # or ##
-    if (/^#{1,2}\s+/.test(trimmed)) {
-      flushPara(); flushList();
-      var htxt = trimmed.replace(/^#{1,2}\s+/, '');
-      headingCount++;
-      var hid2 = 'h-' + headingCount;
-      tocItems.push({ id: hid2, text: htxt, level: 2 });
-      html += '<h2 id="' + hid2 + '">' + esc(htxt) + '</h2>';
-      continue;
-    }
-
-    // Heading level 3 — starts with ### or is short title-cased line ending with :
-    if (/^#{3}\s+/.test(trimmed)) {
-      flushPara(); flushList();
-      html += '<h3>' + esc(trimmed.replace(/^#{3}\s+/, '')) + '</h3>';
-      continue;
-    }
-
-    // Title-cased short line ending with colon → h3
-    if (trimmed.endsWith(':') && trimmed.length < 60 && !trimmed.startsWith('-')
-        && !/^\d/.test(trimmed) && trimmed.split(' ').length <= 8) {
-      flushPara(); flushList();
-      html += '<h3>' + esc(trimmed) + '</h3>';
-      continue;
-    }
-
-    // Blockquote (> text or "Note:" / "Warning:")
-    if (/^>\s+/.test(trimmed) || /^(Note|Warning|Tip|Important):/i.test(trimmed)) {
-      flushPara(); flushList();
-      var bqText = trimmed.replace(/^>\s+/, '');
-      html += '<blockquote>' + esc(bqText) + '</blockquote>';
-      continue;
-    }
-
-    // Callout (ℹ️ or NOTE: INFO: TIP:)
-    if (/^(INFO|TIP|HINT):/i.test(trimmed)) {
-      flushPara(); flushList();
-      html += '<div class="doc-callout"><div class="doc-callout-icon">💡</div><div class="doc-callout-text">' + esc(trimmed) + '</div></div>';
-      continue;
-    }
-
-    // Code line (starts with 4 spaces or a tab)
-    if (raw.startsWith('    ') || raw.startsWith('\t')) {
-      flushPara(); flushList();
-      codeLines.push(raw.replace(/^\t/, '    '));
-      continue;
-    } else {
-      flushCode();
-    }
-
-    // Unordered list (-, *, •, –)
-    var ulMatch = trimmed.match(/^[-*•–]\s+(.+)/);
-    if (ulMatch) {
-      flushPara();
-      if (!inList || listType !== 'ul') {
-        flushList();
-        html += '<ul>';
-        inList = true; listType = 'ul';
-      }
-      html += '<li><span>' + esc(ulMatch[1]) + '</span></li>';
-      continue;
-    }
-
-    // Ordered list (1. 2. 1) etc.)
-    var olMatch = trimmed.match(/^(\d+)[.)]\s+(.+)/);
-    if (olMatch) {
-      flushPara();
-      if (!inList || listType !== 'ol') {
-        flushList();
-        html += '<ol>';
-        inList = true; listType = 'ol';
-      }
-      html += '<li><span>' + esc(olMatch[2]) + '</span></li>';
-      continue;
-    }
-
-    // Default: paragraph text
-    flushList(); flushCode();
-    paraBuffer.push(trimmed);
-  }
-
-  // Flush any remaining buffers
-  flushPara(); flushList(); flushCode();
-
-  return { html: html, toc: tocItems };
-}
-
-// ── Sidebar rendering ─────────────────────────────────────────────────────────
+// ── Load sidebar ──────────────────────────────────────────────────────────────
 function loadResources() {
   fetch('/api/resources')
     .then(function(r){ return r.json(); })
@@ -609,134 +294,180 @@ function loadResources() {
       document.getElementById('sidebar-count').textContent = data.length;
       renderSidebar();
     })
-    .catch(function() {
-      document.getElementById('res-list').innerHTML = '<div class="res-empty"><div class="res-empty-text">Failed to load resources.</div></div>';
-    });
+    .catch(function() { document.getElementById('res-list').innerHTML = '<div class="res-empty"><div class="res-empty-text">Failed to load.</div></div>'; });
 }
 
 function renderSidebar() {
   var el = document.getElementById('res-list');
   if (!RESOURCES.length) {
-    el.innerHTML = '<div class="res-empty">' +
-      '<div class="res-empty-icon">📂</div>' +
-      '<div class="res-empty-text">' + (IS_ADMIN ? 'No resources yet.<br>Upload one above.' : 'No resources available yet.') + '</div>' +
-      '</div>';
+    el.innerHTML = '<div class="res-empty"><div class="res-empty-icon">📂</div><div class="res-empty-text">' +
+      (IS_ADMIN ? 'No documents yet.<br>Upload one above.' : 'No documents available yet.') + '</div></div>';
     return;
   }
   el.innerHTML = RESOURCES.map(function(r) {
     var active = r.id === ACTIVE_ID ? ' active' : '';
-    var dateStr = r.uploaded_at ? new Date(r.uploaded_at).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '';
-    var icon = r.filetype === 'pdf' ? '📕' : '📘';
-    var descHtml = r.description
-      ? '<div class="res-card-desc">' + esc(r.description.slice(0, 90)) + (r.description.length > 90 ? '…' : '') + '</div>'
-      : '';
-    var delBtn = IS_ADMIN
-      ? '<button class="btn-del-card" onclick="event.stopPropagation();deleteResource(' + r.id + ')">Delete</button>'
-      : '';
+    var isPdf  = r.filetype === 'pdf';
+    var icon   = isPdf ? '📕' : '📘';
+    var date   = r.uploaded_at ? new Date(r.uploaded_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+    var pages  = r.page_count > 0 ? r.page_count + ' page' + (r.page_count !== 1 ? 's' : '') : '';
+    var descHtml = r.description ? '<div class="res-card-desc">' + esc(r.description.slice(0,85)) + (r.description.length>85?'…':'') + '</div>' : '';
+    var delBtn = IS_ADMIN ? '<button class="btn-del-card" onclick="event.stopPropagation();deleteResource('+r.id+')">Delete</button>' : '';
     return [
-      '<div class="res-card' + active + '" onclick="openResource(' + r.id + ')">',
-      '  <div class="res-card-cover ' + r.filetype + '"></div>',
-      '  <div class="res-card-body">',
-      '    <div class="res-card-top">',
-      '      <div class="res-card-file-icon ' + r.filetype + '">' + icon + '</div>',
-      '      <div class="res-card-info">',
-      '        <div class="res-card-title">' + esc(r.title) + '</div>',
-      '        <div class="res-card-date">' + dateStr + '</div>',
-      '      </div>',
-      '    </div>',
+      '<div class="res-card'+active+'" onclick="openResource('+r.id+')">',
+      '<div class="res-card-stripe '+(isPdf?'':'docx')+'"></div>',
+      '<div class="res-card-body">',
+      '<div class="res-card-row">',
+      '<div class="res-card-icon '+(isPdf?'':'docx')+'">'+icon+'</div>',
+      '<div class="res-card-info">',
+      '<div class="res-card-title">'+esc(r.title)+'</div>',
+      '<div class="res-card-meta"><span class="type-dot '+(isPdf?'pdf':'docx')+'"></span><span>'+date+'</span></div>',
+      '</div></div>',
       descHtml,
-      '    <div class="res-card-footer">',
-      '      <span class="type-pill ' + r.filetype + '">' + r.filetype.toUpperCase() + '</span>',
+      '<div class="res-card-footer">',
+      '<span class="type-pill '+(isPdf?'pdf':'docx')+'">'+r.filetype.toUpperCase()+'</span>',
+      pages ? '<span class="pages-label">'+pages+'</span>' : '',
       delBtn,
-      '    </div>',
-      '  </div>',
-      '</div>'
+      '</div></div></div>'
     ].join('');
   }).join('');
 }
 
-// ── Document viewer ───────────────────────────────────────────────────────────
+// ── Open resource ─────────────────────────────────────────────────────────────
 function openResource(id) {
-  ACTIVE_ID = id;
+  ACTIVE_ID = id; CURRENT_PAGE = 1;
   renderSidebar();
 
   var placeholder = document.getElementById('doc-placeholder');
-  var loaded = document.getElementById('doc-loaded');
+  var loaded      = document.getElementById('doc-loaded');
   placeholder.style.display = 'flex';
   loaded.style.display = 'none';
-  document.getElementById('doc-article').innerHTML = '';
 
   fetch('/api/resources/' + id)
     .then(function(r){ return r.json(); })
     .then(function(data) {
+      TOTAL_PAGES = data.page_count || 1;
       var isPdf = data.filetype === 'pdf';
-      var icon = isPdf ? '📕' : '📘';
 
-      // Banner
-      var banner = document.getElementById('doc-banner');
-      banner.className = 'doc-banner' + (isPdf ? '' : ' docx');
-
-      var bannerIcon = document.getElementById('doc-icon');
-      bannerIcon.textContent = icon;
-      bannerIcon.className = 'doc-banner-icon' + (isPdf ? '' : ' docx');
-
-      document.getElementById('doc-title').textContent = data.title;
-
-      var typePill = document.getElementById('doc-type-pill');
+      // Toolbar
+      var tbIcon = document.getElementById('tb-icon');
+      tbIcon.textContent = isPdf ? '📕' : '📘';
+      tbIcon.className = 'doc-toolbar-icon' + (isPdf ? '' : ' docx');
+      document.getElementById('tb-title').textContent = data.title;
+      document.getElementById('tb-uploader').textContent = '↑ ' + data.uploaded_by;
+      document.getElementById('tb-date').textContent = data.uploaded_at
+        ? new Date(data.uploaded_at).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})
+        : '';
+      var words = (data.content_text||'').split(/\s+/).filter(Boolean).length;
+      document.getElementById('tb-words').textContent = words > 0 ? words.toLocaleString() + ' words' : '';
+      var typePill = document.getElementById('tb-type');
       typePill.textContent = data.filetype.toUpperCase();
       typePill.className = 'type-pill ' + data.filetype;
-
-      document.getElementById('doc-uploader').textContent = 'By ' + data.uploaded_by;
-      document.getElementById('doc-date').textContent = data.uploaded_at
-        ? new Date(data.uploaded_at).toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'})
-        : '';
-
-      // Word count
-      var words = (data.content_text || '').split(/\s+/).filter(Boolean).length;
-      var readMins = Math.max(1, Math.round(words / 200));
-      document.getElementById('doc-words-pill').textContent = words.toLocaleString() + ' words · ' + readMins + ' min read';
-
-      // Parse & render
-      var result = parseTextToHtml(data.content_text || '');
-      document.getElementById('doc-article').innerHTML = result.html +
-        '<div class="doc-word-count">' + words.toLocaleString() + ' words · ' + data.filename + '</div>';
-
-      // Table of contents
-      var toc = document.getElementById('doc-toc');
-      var tocList = document.getElementById('doc-toc-list');
-      if (result.toc && result.toc.length >= 2) {
-        tocList.innerHTML = result.toc.map(function(item) {
-          return '<li class="doc-toc-item"><a href="#' + item.id + '">' + esc(item.text) + '</a></li>';
-        }).join('');
-        toc.className = 'doc-toc has-items';
-      } else {
-        toc.className = 'doc-toc';
-      }
 
       placeholder.style.display = 'none';
       loaded.style.display = 'flex';
       loaded.style.flexDirection = 'column';
-      loaded.style.flex = '1';
-      loaded.style.overflow = 'hidden';
+
+      if (isPdf) {
+        renderPdf(data);
+      } else {
+        renderDocx(data);
+      }
     })
-    .catch(function() {
-      showAlert('Failed to load resource content.', 'err');
-    });
+    .catch(function() { showAlert('Failed to load document.', 'err'); });
+}
+
+// ── PDF renderer ──────────────────────────────────────────────────────────────
+function renderPdf(data) {
+  document.getElementById('page-nav').style.display  = data.page_count > 1 ? '' : 'none';
+  document.getElementById('pdf-pages').style.display = '';
+  document.getElementById('docx-wrap').style.display = 'none';
+
+  updatePageNav();
+  loadAllPdfPages(data.id, data.page_count);
+}
+
+function loadAllPdfPages(id, count) {
+  var container = document.getElementById('pdf-pages');
+  container.innerHTML = '<div class="pdf-loading">⏳ Loading pages…</div>';
+
+  var pages = [];
+  var loaded = 0;
+
+  if (count === 0) {
+    container.innerHTML = '<div class="pdf-loading" style="color:rgba(255,255,255,0.25);">No page images available for this document.</div>';
+    return;
+  }
+
+  // Build all img elements first (browser loads in parallel)
+  container.innerHTML = '';
+  for (var i = 1; i <= count; i++) {
+    (function(pageNum) {
+      var wrap = document.createElement('div');
+      wrap.className = 'pdf-page-wrap';
+      var img = document.createElement('img');
+      img.className = 'pdf-page-img';
+      img.alt = 'Page ' + pageNum;
+      img.id  = 'pdf-page-' + pageNum;
+      img.draggable = false;
+      img.oncontextmenu = function(){ return false; };
+      var numLabel = document.createElement('div');
+      numLabel.className = 'pdf-page-num';
+      numLabel.textContent = pageNum + ' / ' + count;
+      wrap.appendChild(img);
+      wrap.appendChild(numLabel);
+      container.appendChild(wrap);
+      // Load image
+      img.src = '/api/resources/' + id + '/pages/' + pageNum;
+    })(i);
+  }
+}
+
+function updatePageNav() {
+  document.getElementById('page-indicator').textContent = CURRENT_PAGE + ' / ' + TOTAL_PAGES;
+  document.getElementById('btn-prev').disabled = CURRENT_PAGE <= 1;
+  document.getElementById('btn-next').disabled = CURRENT_PAGE >= TOTAL_PAGES;
+}
+
+function goPage(dir) {
+  var next = CURRENT_PAGE + dir;
+  if (next < 1 || next > TOTAL_PAGES) return;
+  CURRENT_PAGE = next;
+  updatePageNav();
+  var el = document.getElementById('pdf-page-' + CURRENT_PAGE);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── DOCX renderer ─────────────────────────────────────────────────────────────
+function renderDocx(data) {
+  document.getElementById('page-nav').style.display  = 'none';
+  document.getElementById('pdf-pages').style.display = 'none';
+  document.getElementById('docx-wrap').style.display = '';
+
+  var body = document.getElementById('docx-body');
+  if (data.docx_html && data.docx_html.trim()) {
+    body.innerHTML = data.docx_html;
+  } else {
+    // Fallback: render plain text nicely
+    var paras = (data.content_text || '').split('\n').filter(function(l){ return l.trim(); });
+    body.innerHTML = paras.map(function(p){ return '<p>' + esc(p) + '</p>'; }).join('');
+  }
+
+  // Neutralise all links (read-only)
+  body.querySelectorAll('a').forEach(function(a){ a.removeAttribute('href'); a.style.cursor = 'default'; });
 }
 
 // ── Delete ────────────────────────────────────────────────────────────────────
 function deleteResource(id) {
-  if (!confirm('Delete this resource? This cannot be undone.')) return;
-  fetch('/api/resources/' + id, { method: 'DELETE' })
-    .then(function() {
-      if (ACTIVE_ID === id) {
-        ACTIVE_ID = null;
-        document.getElementById('doc-placeholder').style.display = 'flex';
-        document.getElementById('doc-loaded').style.display = 'none';
-      }
-      showAlert('Resource deleted.', 'ok');
-      loadResources();
-    });
+  if (!confirm('Delete this document? This cannot be undone.')) return;
+  fetch('/api/resources/' + id, { method: 'DELETE' }).then(function() {
+    if (ACTIVE_ID === id) {
+      ACTIVE_ID = null;
+      document.getElementById('doc-placeholder').style.display = 'flex';
+      document.getElementById('doc-loaded').style.display = 'none';
+    }
+    showAlert('Document deleted.', 'ok');
+    loadResources();
+  });
 }
 
 // ── Upload ────────────────────────────────────────────────────────────────────
@@ -744,31 +475,16 @@ function toggleUpload(open) {
   var panel = document.getElementById('upload-panel');
   var isOpen = typeof open === 'boolean' ? open : !panel.classList.contains('open');
   panel.classList.toggle('open', isOpen);
-  if (!isOpen) resetUploadForm();
-}
-function resetUploadForm() {
-  document.getElementById('up-title').value = '';
-  document.getElementById('up-desc').value = '';
-  document.getElementById('up-file').value = '';
-  document.getElementById('up-file-name').style.display = 'none';
-  document.getElementById('up-progress').classList.remove('visible');
+  if (!isOpen) { document.getElementById('up-title').value=''; document.getElementById('up-desc').value=''; document.getElementById('up-file').value=''; document.getElementById('up-file-name').style.display='none'; document.getElementById('up-progress').classList.remove('visible'); }
 }
 function onFileSelected(input) {
-  var nameEl = document.getElementById('up-file-name');
-  if (input.files && input.files[0]) {
-    nameEl.textContent = '✓ ' + input.files[0].name;
-    nameEl.style.display = 'block';
-  }
+  var n = document.getElementById('up-file-name');
+  if (input.files && input.files[0]) { n.textContent = '✓ ' + input.files[0].name; n.style.display = 'block'; }
 }
-
 var dz = document.getElementById('drop-zone');
 dz.addEventListener('dragover', function(e){ e.preventDefault(); dz.classList.add('dragover'); });
 dz.addEventListener('dragleave', function(){ dz.classList.remove('dragover'); });
-dz.addEventListener('drop', function(e){
-  e.preventDefault(); dz.classList.remove('dragover');
-  var fi = document.getElementById('up-file');
-  if (e.dataTransfer.files.length) { fi.files = e.dataTransfer.files; onFileSelected(fi); }
-});
+dz.addEventListener('drop', function(e){ e.preventDefault(); dz.classList.remove('dragover'); var fi=document.getElementById('up-file'); if(e.dataTransfer.files.length){ fi.files=e.dataTransfer.files; onFileSelected(fi); } });
 
 function doUpload() {
   var title = document.getElementById('up-title').value.trim();
@@ -776,39 +492,24 @@ function doUpload() {
   var fi    = document.getElementById('up-file');
   if (!title) { showAlert('Please enter a title.', 'err'); return; }
   if (!fi.files || !fi.files[0]) { showAlert('Please select a file.', 'err'); return; }
-
-  document.getElementById('up-progress').classList.add('visible');
-
+  var prog = document.getElementById('up-progress');
+  prog.classList.add('visible');
   var fd = new FormData();
-  fd.append('file', fi.files[0]);
-  fd.append('title', title);
-  fd.append('description', desc);
-  fd.append('uploaded_by', SESSION.username);
-
-  fetch('/api/resources', { method: 'POST', body: fd })
-    .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, data: d }; }); })
+  fd.append('file', fi.files[0]); fd.append('title', title);
+  fd.append('description', desc); fd.append('uploaded_by', SESSION.username);
+  fetch('/api/resources', { method:'POST', body:fd })
+    .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,data:d}; }); })
     .then(function(res) {
-      document.getElementById('up-progress').classList.remove('visible');
-      if (res.ok) {
-        showAlert('Resource uploaded successfully.', 'ok');
-        toggleUpload(false);
-        loadResources();
-      } else {
-        showAlert(res.data.error || 'Upload failed.', 'err');
-      }
+      prog.classList.remove('visible');
+      if (res.ok) { showAlert('Document uploaded successfully.', 'ok'); toggleUpload(false); loadResources(); }
+      else { showAlert(res.data.error || 'Upload failed.', 'err'); }
     })
-    .catch(function() {
-      document.getElementById('up-progress').classList.remove('visible');
-      showAlert('Network error. Please try again.', 'err');
-    });
+    .catch(function(){ prog.classList.remove('visible'); showAlert('Network error.', 'err'); });
 }
 
-// Block copy shortcuts globally on the page (content is non-selectable anyway)
+// Block copy/print shortcuts
 document.addEventListener('keydown', function(e) {
-  if ((e.ctrlKey || e.metaKey) && ['c','a','p','s'].indexOf(e.key) >= 0) {
-    var art = document.getElementById('doc-article');
-    if (art) e.preventDefault();
-  }
+  if ((e.ctrlKey||e.metaKey) && ['c','a','p','s'].indexOf(e.key) >= 0) e.preventDefault();
 });
 
 document.addEventListener('DOMContentLoaded', loadResources);
