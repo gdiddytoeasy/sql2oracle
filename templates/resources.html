@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resources — sql2oracle</title>
+<link rel="stylesheet" href="/static/style.css?v=20260407">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/static/nav.js?v=20260407"></script>
+<style>
+/* ── Resources page styles ── */
+.res-main { max-width: 1200px; margin: 0 auto; padding: 32px; }
+
+.res-layout { display: grid; grid-template-columns: 300px 1fr; gap: 24px; min-height: 70vh; }
+@media (max-width: 900px) { .res-layout { grid-template-columns: 1fr; } }
+
+/* Sidebar */
+.res-sidebar { display: flex; flex-direction: column; gap: 12px; }
+.res-sidebar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.res-sidebar-title { font-family: 'Orbitron', monospace; font-size: 9px; letter-spacing: 3px; color: rgba(255,255,255,0.35); text-transform: uppercase; }
+
+.res-list { display: flex; flex-direction: column; gap: 8px; }
+.res-item { background: rgba(7,13,24,0.75); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 14px 16px; cursor: pointer; transition: all 0.2s; }
+.res-item:hover { border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.03); }
+.res-item.active { border-color: rgba(231,76,60,0.4); background: rgba(231,76,60,0.06); }
+.res-item-title { font-family: 'Orbitron', monospace; font-size: 10px; font-weight: 700; color: #fff; margin-bottom: 4px; line-height: 1.4; }
+.res-item-meta { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: rgba(255,255,255,0.3); display: flex; align-items: center; gap: 8px; }
+.res-type-badge { padding: 1px 7px; border-radius: 10px; font-size: 8px; letter-spacing: 1px; text-transform: uppercase; font-family: 'Orbitron', monospace; }
+.res-type-pdf  { background: rgba(231,76,60,0.12); color: #E74C3C; border: 1px solid rgba(231,76,60,0.25); }
+.res-type-docx { background: rgba(59,130,246,0.12); color: #3B82F6; border: 1px solid rgba(59,130,246,0.25); }
+.res-item-desc { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 6px; line-height: 1.5; }
+
+/* Empty states */
+.res-empty { text-align: center; padding: 60px 20px; }
+.res-empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
+.res-empty-text { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: rgba(255,255,255,0.3); }
+
+/* Viewer panel */
+.res-viewer { background: rgba(7,13,24,0.75); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
+.res-viewer-placeholder { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 60px; }
+.res-viewer-placeholder-icon { font-size: 56px; opacity: 0.25; }
+.res-viewer-placeholder-text { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: rgba(255,255,255,0.25); text-align: center; }
+
+.res-viewer-header { padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.07); display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-shrink: 0; }
+.res-viewer-title { font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 700; color: #fff; line-height: 1.4; }
+.res-viewer-submeta { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 4px; }
+
+.res-content-wrap { flex: 1; overflow-y: auto; padding: 28px 32px; }
+
+/* Read-only content — anti-copy styles */
+.res-content {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  line-height: 1.85;
+  color: rgba(255,255,255,0.75);
+  white-space: pre-wrap;
+  word-break: break-word;
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  pointer-events: none;
+}
+
+/* Admin upload form */
+.upload-panel { background: rgba(14,30,60,0.5); border: 1px solid rgba(59,130,246,0.2); border-radius: 12px; padding: 22px; margin-bottom: 16px; display: none; }
+.upload-panel.open { display: block; animation: page-enter 0.3s ease; }
+.upload-label { display: block; font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 2px; color: rgba(255,255,255,0.3); margin-bottom: 6px; }
+.upload-input, .upload-textarea { width: 100%; padding: 9px 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; color: #D1D9E6; font-family: 'Share Tech Mono', monospace; font-size: 12px; outline: none; box-sizing: border-box; transition: border-color 0.2s; }
+.upload-input:focus, .upload-textarea:focus { border-color: rgba(59,130,246,0.4); }
+.upload-textarea { min-height: 60px; resize: vertical; }
+.upload-file-area { border: 2px dashed rgba(255,255,255,0.1); border-radius: 10px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s; background: rgba(255,255,255,0.02); }
+.upload-file-area:hover, .upload-file-area.dragover { border-color: rgba(231,76,60,0.4); background: rgba(231,76,60,0.04); }
+.upload-file-area input { display: none; }
+.upload-file-label { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.4); }
+.upload-file-label strong { color: #E74C3C; }
+.upload-file-selected { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #2ECC71; margin-top: 8px; }
+.upload-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.upload-field { margin-bottom: 12px; }
+.btn-upload { padding: 9px 22px; background: linear-gradient(135deg, #E74C3C, #C0392B); border: none; border-radius: 8px; color: #fff; font-family: 'Orbitron', monospace; font-size: 9px; letter-spacing: 2px; cursor: pointer; font-weight: 700; }
+.btn-cancel { padding: 9px 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: rgba(255,255,255,0.4); font-family: 'Orbitron', monospace; font-size: 9px; letter-spacing: 2px; cursor: pointer; }
+.upload-progress { display: none; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 10px; }
+.upload-progress.visible { display: block; }
+
+.btn-add-res { display: flex; align-items: center; gap: 8px; padding: 7px 15px; border-radius: 8px; background: linear-gradient(135deg, #E74C3C, #C0392B); border: none; color: #fff; cursor: pointer; font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 4px 12px rgba(231,76,60,0.3); transition: all 0.2s; }
+.btn-add-res:hover { transform: translateY(-1px); }
+
+.btn-del-res { padding: 4px 10px; background: rgba(231,76,60,0.08); border: 1px solid rgba(231,76,60,0.2); border-radius: 6px; color: #E74C3C; font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1px; cursor: pointer; margin-top: 8px; }
+
+.alert-msg { padding: 10px 14px; border-radius: 8px; font-family: 'Share Tech Mono', monospace; font-size: 11px; display: none; margin-bottom: 12px; }
+.alert-msg.visible { display: block; }
+.alert-ok  { background: rgba(46,204,113,0.08); border: 1px solid rgba(46,204,113,0.25); color: #2ECC71; }
+.alert-err { background: rgba(231,76,60,0.08); border: 1px solid rgba(231,76,60,0.25); color: #E74C3C; }
+
+@keyframes page-enter { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+<header id="main-nav"></header>
+
+<main class="res-main">
+  <div style="margin-bottom: 24px;">
+    <h1 style="font-family:'Orbitron',monospace;font-size:18px;font-weight:900;color:#fff;margin:0 0 6px;">Resources</h1>
+    <p style="font-family:'Share Tech Mono',monospace;font-size:12px;color:rgba(255,255,255,0.35);margin:0;">Notes and tutorials — read-only reference material</p>
+  </div>
+
+  <div id="alert-msg" class="alert-msg"></div>
+
+  <!-- Admin upload panel -->
+  <div id="upload-panel" class="upload-panel">
+    <div style="font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.5);margin-bottom:16px;text-transform:uppercase;">Upload New Resource</div>
+    <div class="upload-row">
+      <div class="upload-field">
+        <label class="upload-label">Title *</label>
+        <input class="upload-input" id="up-title" placeholder="Resource title" autocomplete="off">
+      </div>
+      <div class="upload-field">
+        <label class="upload-label">Description (optional)</label>
+        <input class="upload-input" id="up-desc" placeholder="Short description" autocomplete="off">
+      </div>
+    </div>
+    <div class="upload-field">
+      <label class="upload-label">File (PDF or Word .docx) *</label>
+      <div class="upload-file-area" id="drop-zone" onclick="document.getElementById('up-file').click()">
+        <input type="file" id="up-file" accept=".pdf,.docx" onchange="onFileSelected(this)">
+        <div class="upload-file-label">Drop file here or <strong>click to browse</strong></div>
+        <div class="upload-file-selected" id="up-file-name" style="display:none;"></div>
+      </div>
+    </div>
+    <div class="upload-progress" id="up-progress">⏳ Uploading and extracting text…</div>
+    <div style="display:flex;gap:10px;margin-top:14px;">
+      <button class="btn-upload" onclick="doUpload()">Upload</button>
+      <button class="btn-cancel" onclick="toggleUpload(false)">Cancel</button>
+    </div>
+  </div>
+
+  <div class="res-layout">
+    <!-- Sidebar: list of resources -->
+    <div class="res-sidebar">
+      <div class="res-sidebar-header">
+        <span class="res-sidebar-title">Available Resources</span>
+        <button class="btn-add-res" id="btn-add-res" style="display:none;" onclick="toggleUpload()">+ Upload</button>
+      </div>
+      <div class="res-list" id="res-list">
+        <div class="res-empty">
+          <div class="res-empty-icon">📂</div>
+          <div class="res-empty-text">Loading…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Viewer -->
+    <div class="res-viewer" id="res-viewer">
+      <div class="res-viewer-placeholder" id="viewer-placeholder">
+        <div class="res-viewer-placeholder-icon">📖</div>
+        <div class="res-viewer-placeholder-text">Select a resource from the list to read it</div>
+      </div>
+      <div id="viewer-content" style="display:none;flex:1;display:none;flex-direction:column;overflow:hidden;">
+        <div class="res-viewer-header">
+          <div>
+            <div class="res-viewer-title" id="viewer-title"></div>
+            <div class="res-viewer-submeta" id="viewer-meta"></div>
+          </div>
+          <span class="res-type-badge" id="viewer-type-badge"></span>
+        </div>
+        <div class="res-content-wrap">
+          <div class="res-content" id="viewer-text" oncontextmenu="return false;" ondragstart="return false;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+var SESSION = null;
+try { SESSION = JSON.parse(sessionStorage.getItem('ora_auth_session_v2')); } catch(e) {}
+if (!SESSION) { window.location.replace('/'); }
+var IS_ADMIN = SESSION && (SESSION.role === 'admin' || SESSION.role === 'manager');
+
+var RESOURCES = [];
+var ACTIVE_ID = null;
+
+if (IS_ADMIN) {
+  document.getElementById('btn-add-res').style.display = '';
+}
+
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showAlert(msg, type) {
+  var el = document.getElementById('alert-msg');
+  el.textContent = msg;
+  el.className = 'alert-msg visible alert-' + (type || 'ok');
+  setTimeout(function(){ el.classList.remove('visible'); }, 4000);
+}
+
+// ── Load resource list ──
+function loadResources() {
+  fetch('/api/resources')
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      RESOURCES = data;
+      renderList();
+    })
+    .catch(function() {
+      document.getElementById('res-list').innerHTML = '<div class="res-empty"><div class="res-empty-text">Failed to load resources.</div></div>';
+    });
+}
+
+function renderList() {
+  var list = document.getElementById('res-list');
+  if (!RESOURCES.length) {
+    list.innerHTML = '<div class="res-empty"><div class="res-empty-icon">📂</div><div class="res-empty-text">' + (IS_ADMIN ? 'No resources yet. Upload one above.' : 'No resources available yet.') + '</div></div>';
+    return;
+  }
+  list.innerHTML = RESOURCES.map(function(r) {
+    var active = r.id === ACTIVE_ID ? ' active' : '';
+    var dateStr = r.uploaded_at ? r.uploaded_at.split('T')[0] : '';
+    var descHtml = r.description ? '<div class="res-item-desc">' + esc(r.description.slice(0,80)) + (r.description.length > 80 ? '…' : '') + '</div>' : '';
+    var delBtn = IS_ADMIN ? '<div><button class="btn-del-res" onclick="event.stopPropagation();deleteResource(' + r.id + ')">Delete</button></div>' : '';
+    return [
+      '<div class="res-item' + active + '" onclick="openResource(' + r.id + ')">',
+      '<div class="res-item-title">' + esc(r.title) + '</div>',
+      '<div class="res-item-meta">',
+      '<span class="res-type-badge res-type-' + r.filetype + '">' + r.filetype.toUpperCase() + '</span>',
+      '<span>' + dateStr + '</span>',
+      '</div>',
+      descHtml,
+      delBtn,
+      '</div>'
+    ].join('');
+  }).join('');
+}
+
+// ── Open a resource in the viewer ──
+function openResource(id) {
+  ACTIVE_ID = id;
+  renderList();
+
+  var placeholder = document.getElementById('viewer-placeholder');
+  var content = document.getElementById('viewer-content');
+  placeholder.style.display = 'flex';
+  content.style.display = 'none';
+
+  fetch('/api/resources/' + id)
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      document.getElementById('viewer-title').textContent = data.title;
+      document.getElementById('viewer-meta').textContent = 'Uploaded by ' + data.uploaded_by + (data.uploaded_at ? ' · ' + data.uploaded_at.split('T')[0] : '');
+      var badge = document.getElementById('viewer-type-badge');
+      badge.textContent = data.filetype.toUpperCase();
+      badge.className = 'res-type-badge res-type-' + data.filetype;
+      document.getElementById('viewer-text').textContent = data.content_text;
+      placeholder.style.display = 'none';
+      content.style.display = 'flex';
+      content.style.flexDirection = 'column';
+      content.style.overflow = 'hidden';
+      content.style.flex = '1';
+    })
+    .catch(function() {
+      showAlert('Failed to load resource content.', 'err');
+    });
+}
+
+// ── Delete resource (admin) ──
+function deleteResource(id) {
+  if (!confirm('Delete this resource? This cannot be undone.')) return;
+  fetch('/api/resources/' + id, { method: 'DELETE' })
+    .then(function() {
+      if (ACTIVE_ID === id) {
+        ACTIVE_ID = null;
+        document.getElementById('viewer-placeholder').style.display = 'flex';
+        document.getElementById('viewer-content').style.display = 'none';
+      }
+      showAlert('Resource deleted.', 'ok');
+      loadResources();
+    });
+}
+
+// ── Upload panel ──
+function toggleUpload(open) {
+  var panel = document.getElementById('upload-panel');
+  var isOpen = typeof open === 'boolean' ? open : !panel.classList.contains('open');
+  panel.classList.toggle('open', isOpen);
+  if (!isOpen) resetUploadForm();
+}
+
+function resetUploadForm() {
+  document.getElementById('up-title').value = '';
+  document.getElementById('up-desc').value = '';
+  document.getElementById('up-file').value = '';
+  document.getElementById('up-file-name').style.display = 'none';
+  document.getElementById('up-progress').classList.remove('visible');
+}
+
+function onFileSelected(input) {
+  var nameEl = document.getElementById('up-file-name');
+  if (input.files && input.files[0]) {
+    nameEl.textContent = '✓ ' + input.files[0].name;
+    nameEl.style.display = 'block';
+  }
+}
+
+// Drag & drop
+var dz = document.getElementById('drop-zone');
+dz.addEventListener('dragover', function(e){ e.preventDefault(); dz.classList.add('dragover'); });
+dz.addEventListener('dragleave', function(){ dz.classList.remove('dragover'); });
+dz.addEventListener('drop', function(e){
+  e.preventDefault();
+  dz.classList.remove('dragover');
+  var fi = document.getElementById('up-file');
+  fi.files = e.dataTransfer.files;
+  onFileSelected(fi);
+});
+
+function doUpload() {
+  var title = document.getElementById('up-title').value.trim();
+  var desc  = document.getElementById('up-desc').value.trim();
+  var fileInput = document.getElementById('up-file');
+
+  if (!title) { showAlert('Please enter a title.', 'err'); return; }
+  if (!fileInput.files || !fileInput.files[0]) { showAlert('Please select a file.', 'err'); return; }
+
+  var prog = document.getElementById('up-progress');
+  prog.classList.add('visible');
+
+  var fd = new FormData();
+  fd.append('file', fileInput.files[0]);
+  fd.append('title', title);
+  fd.append('description', desc);
+  fd.append('uploaded_by', SESSION.username);
+
+  fetch('/api/resources', { method: 'POST', body: fd })
+    .then(function(r){ return r.json().then(function(d){ return {ok: r.ok, data: d}; }); })
+    .then(function(res) {
+      prog.classList.remove('visible');
+      if (res.ok) {
+        showAlert('Resource uploaded successfully.', 'ok');
+        toggleUpload(false);
+        loadResources();
+      } else {
+        showAlert(res.data.error || 'Upload failed.', 'err');
+      }
+    })
+    .catch(function() {
+      prog.classList.remove('visible');
+      showAlert('Network error. Please try again.', 'err');
+    });
+}
+
+// Disable right-click and keyboard copy in the viewer
+document.addEventListener('keydown', function(e) {
+  var viewer = document.getElementById('viewer-content');
+  if (viewer && viewer.contains(e.target)) {
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'a' || e.key === 'p')) {
+      e.preventDefault();
+    }
+  }
+});
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', function() {
+  loadResources();
+});
+</script>
+</body>
+</html>

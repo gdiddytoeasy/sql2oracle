@@ -18,6 +18,7 @@
       { href: '/architecture', label: 'Architecture',  key: 'architecture' },
       { href: '/sql',          label: 'SQL Converter', key: 'sql_converter' },
       { href: '/projects',     label: 'Projects',      key: 'projects' },
+      { href: '/resources',    label: 'Resources',     key: 'resources' },
     ];
 
     var linksHtml = links.filter(function (l) {
@@ -65,7 +66,7 @@
   // Always wait for DOM to be ready before injecting the nav bar
   function initNav() {
     if (isAdmin) {
-      buildNav(['architecture', 'sql_converter', 'projects']);
+      buildNav(['architecture', 'sql_converter', 'projects', 'resources']);
     } else {
       fetch('/api/tab-unlocks?username=' + encodeURIComponent(session.username))
         .then(function (r) { return r.ok ? r.json() : ['architecture']; })

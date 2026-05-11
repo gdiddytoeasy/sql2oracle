@@ -5,3 +5,5 @@ psycopg2-binary
 requests
 beautifulsoup4
 lxml
+python-docx
+PyMuPDF

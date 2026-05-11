@@ -7,6 +7,8 @@ import sqlglot
 import sqlglot.errors
 import requests as req
 from bs4 import BeautifulSoup
+import docx
+import fitz  # PyMuPDF
 
 app = Flask(__name__)
 
@@ -132,6 +134,19 @@ def _init_db():
             answer_json  JSONB,
             completed_at TIMESTAMPTZ,
             PRIMARY KEY (username, exercise_id)
+        )
+    """)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS resources (
+            id           SERIAL PRIMARY KEY,
+            title        TEXT NOT NULL,
+            description  TEXT,
+            filename     TEXT NOT NULL,
+            filetype     TEXT NOT NULL CHECK (filetype IN ('pdf','docx')),
+            content_text TEXT NOT NULL DEFAULT '',
+            uploaded_by  TEXT NOT NULL REFERENCES users(username),
+            uploaded_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            sort_order   INTEGER NOT NULL DEFAULT 0
         )
     """)
     cur.close()
@@ -727,6 +742,104 @@ def get_lab_progress():
     cur.close()
     conn.close()
     return jsonify(rows)
+
+
+# ── Resources API ─────────────────────────────────────────────────────────────
+
+@app.route("/resources")
+def resources_page():
+    return no_cache(render_template("resources.html"))
+
+
+@app.route("/api/resources", methods=["GET"])
+def get_resources():
+    conn = _get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute("SELECT id, title, description, filename, filetype, uploaded_by, uploaded_at, sort_order FROM resources ORDER BY sort_order, uploaded_at DESC")
+    rows = [dict(r) for r in cur.fetchall()]
+    cur.close()
+    conn.close()
+    return jsonify(rows)
+
+
+@app.route("/api/resources/<int:resource_id>", methods=["GET"])
+def get_resource_content(resource_id):
+    conn = _get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute("SELECT * FROM resources WHERE id=%s", (resource_id,))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    if not row:
+        return jsonify({"error": "Not found"}), 404
+    return jsonify(dict(row))
+
+
+@app.route("/api/resources", methods=["POST"])
+def upload_resource():
+    """Admin-only: upload a Word or PDF file and extract its text."""
+    if "file" not in request.files:
+        return jsonify({"error": "file required"}), 400
+    f = request.files["file"]
+    title = request.form.get("title", "").strip()
+    description = request.form.get("description", "").strip()
+    uploaded_by = request.form.get("uploaded_by", "admin").strip()
+    sort_order = int(request.form.get("sort_order", 0))
+
+    if not title:
+        return jsonify({"error": "title required"}), 400
+
+    filename = f.filename or ""
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+    if ext not in ("pdf", "docx"):
+        return jsonify({"error": "Only PDF and DOCX files are supported"}), 400
+
+    file_bytes = f.read()
+
+    # Extract text from the uploaded file
+    content_text = ""
+    try:
+        if ext == "docx":
+            import io
+            doc = docx.Document(io.BytesIO(file_bytes))
+            paragraphs = []
+            for para in doc.paragraphs:
+                if para.text.strip():
+                    paragraphs.append(para.text)
+            content_text = "\n".join(paragraphs)
+        elif ext == "pdf":
+            pdf = fitz.open(stream=file_bytes, filetype="pdf")
+            pages = []
+            for page in pdf:
+                pages.append(page.get_text())
+            content_text = "\n".join(pages)
+            pdf.close()
+    except Exception as e:
+        return jsonify({"error": f"Failed to parse file: {str(e)}"}), 400
+
+    if not content_text.strip():
+        return jsonify({"error": "No readable text found in the file"}), 400
+
+    conn = _get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute("""
+        INSERT INTO resources (title, description, filename, filetype, content_text, uploaded_by, sort_order)
+        VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id, title, description, filename, filetype, uploaded_by, uploaded_at, sort_order
+    """, (title, description, filename, ext, content_text, uploaded_by, sort_order))
+    row = dict(cur.fetchone())
+    cur.close()
+    conn.close()
+    return jsonify(row), 201
+
+
+@app.route("/api/resources/<int:resource_id>", methods=["DELETE"])
+def delete_resource(resource_id):
+    conn = _get_db()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM resources WHERE id=%s", (resource_id,))
+    cur.close()
+    conn.close()
+    return jsonify({"ok": True})
 
 
 if __name__ == "__main__":
